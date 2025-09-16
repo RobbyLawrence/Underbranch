@@ -41,7 +41,7 @@ app.use(
     }),
 );
 app.use(express.json());
-app.use("/helloplus/rlawren9", express.static(path.join(__dirname))); // Serve static files under /helloplus path
+app.use("/helloplus/rlawren9", express.static(path.join(__dirname))); // Serve static files under the path
 
 // Initialize database
 async function initializeDatabase() {
@@ -150,13 +150,13 @@ async function saveUserToDatabase(userPayload) {
 
 // Routes
 
-// Serve the sign-in page at /helloplus
+// Serve the sign-in page at /helloplus/rlawren9
 app.get("/helloplus/rlawren9", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Google authentication endpoint
-app.post("/helloplus/api/auth/google", async (req, res) => {
+app.post("/helloplus/rlawren9/api/auth/google", async (req, res) => {
     try {
         const { credential } = req.body;
 
