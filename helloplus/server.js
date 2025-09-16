@@ -34,6 +34,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/helloplus', express.static(path.join(__dirname))); // Serve static files under /helloplus path
+app.use('/frontend', express.static(path.join(__dirname, '../frontend'))); // Serve frontend files
 
 // Initialize database
 async function initializeDatabase() {
