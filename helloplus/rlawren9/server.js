@@ -151,11 +151,10 @@ async function saveUserToDatabase(userPayload) {
 // Routes
 
 // Serve the sign-in page at /helloplus
-app.get("/helloplus", (req, res) => {
+app.get("/helloplus/rlawren9", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Redirect root to your main website (optional)
 app.get("/", (req, res) => {
     res.redirect("https://underbranch.org");
 });
