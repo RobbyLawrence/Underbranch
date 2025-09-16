@@ -4,4 +4,4 @@ This directory serves as the root directory for a test project that allows the u
 The frontend code can be found in `public/index.html`, and the server code is in `server.js`.
 
 Setup:
-Run `npm install` after cloning the repository (project requires node v14 at minimum). This will download and install all dependencies. Then, run `npm run dev` to launch the server on `localhost:3000`.
+Run `npm install` after cloning the repository (project requires node v14 at minimum). This will download and install all dependencies. Then, run `npm run dev` to launch the server on `localhost:3001`.
