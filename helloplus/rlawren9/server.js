@@ -155,10 +155,6 @@ app.get("/helloplus/rlawren9", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get("/", (req, res) => {
-    res.redirect("https://underbranch.org");
-});
-
 // Google authentication endpoint
 app.post("/helloplus/api/auth/google", async (req, res) => {
     try {
