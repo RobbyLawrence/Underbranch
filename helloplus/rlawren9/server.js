@@ -1,40 +1,47 @@
 // server.js - Backend server for Google authentication and database logging
-const express = require('express');
-const { OAuth2Client } = require('google-auth-library');
-const mysql = require('mysql2/promise');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+const express = require("express");
+const { OAuth2Client } = require("google-auth-library");
+const mysql = require("mysql2/promise");
+const cors = require("cors");
+const path = require("path");
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Use 3001 to avoid conflicts
 
 // Configuration
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '679589263803-d9nhrtmnor1m4l3a96revqfb4q09oe5v.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID =
+    process.env.GOOGLE_CLIENT_ID ||
+    "679589263803-d9nhrtmnor1m4l3a96revqfb4q09oe5v.apps.googleusercontent.com";
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Database configuration
 const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'password',
-    database: process.env.DB_NAME || 'auth_test',
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "password",
+    database: process.env.DB_NAME || "auth_test",
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 };
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
 // Middleware
-app.use(cors({
-    origin: ['http://localhost:3001', 'https://underbranch.org', 'http://underbranch.org'],
-    credentials: true
-}));
+app.use(
+    cors({
+        origin: [
+            "http://localhost:3001",
+            "https://underbranch.org",
+            "http://underbranch.org",
+        ],
+        credentials: true,
+    }),
+);
 app.use(express.json());
-app.use('/helloplus', express.static(path.join(__dirname))); // Serve static files under /helloplus path
-app.use('/frontend', express.static(path.join(__dirname, '../frontend'))); // Serve frontend files
+app.use("/helloplus/rlawren9", express.static(path.join(__dirname))); // Serve static files under /helloplus path
 
 // Initialize database
 async function initializeDatabase() {
@@ -43,11 +50,13 @@ async function initializeDatabase() {
         const tempConnection = await mysql.createConnection({
             host: dbConfig.host,
             user: dbConfig.user,
-            password: dbConfig.password
+            password: dbConfig.password,
         });
 
         // Create database if it doesn't exist
-        await tempConnection.execute(`CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`);
+        await tempConnection.execute(
+            `CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`,
+        );
         await tempConnection.end();
 
         // Now connect to the specific database and create table
@@ -70,11 +79,11 @@ async function initializeDatabase() {
         `;
 
         await connection.execute(createTableQuery);
-        console.log('Database and table initialized successfully');
+        console.log("Database and table initialized successfully");
 
         connection.release();
     } catch (error) {
-        console.error('Database initialization error:', error);
+        console.error("Database initialization error:", error);
         throw error;
     }
 }
@@ -90,7 +99,7 @@ async function verifyGoogleToken(token) {
         const payload = ticket.getPayload();
         return payload;
     } catch (error) {
-        throw new Error('Invalid Google token');
+        throw new Error("Invalid Google token");
     }
 }
 
@@ -101,15 +110,15 @@ async function saveUserToDatabase(userPayload) {
 
         // Check if user already exists
         const [existingUsers] = await connection.execute(
-            'SELECT * FROM users WHERE google_id = ?',
-            [userPayload.sub]
+            "SELECT * FROM users WHERE google_id = ?",
+            [userPayload.sub],
         );
 
         if (existingUsers.length > 0) {
             // Update existing user's last login and increment login count
             await connection.execute(
-                'UPDATE users SET last_login = CURRENT_TIMESTAMP, login_count = login_count + 1 WHERE google_id = ?',
-                [userPayload.sub]
+                "UPDATE users SET last_login = CURRENT_TIMESTAMP, login_count = login_count + 1 WHERE google_id = ?",
+                [userPayload.sub],
             );
 
             console.log(`Updated existing user: ${userPayload.email}`);
@@ -126,7 +135,7 @@ async function saveUserToDatabase(userPayload) {
                 userPayload.sub,
                 userPayload.email,
                 userPayload.name,
-                userPayload.picture
+                userPayload.picture,
             ]);
 
             console.log(`New user saved: ${userPayload.email}`);
@@ -134,30 +143,30 @@ async function saveUserToDatabase(userPayload) {
             return { isNewUser: true, userId: result.insertId };
         }
     } catch (error) {
-        console.error('Database save error:', error);
-        throw new Error('Failed to save user to database');
+        console.error("Database save error:", error);
+        throw new Error("Failed to save user to database");
     }
 }
 
 // Routes
 
 // Serve the sign-in page at /helloplus
-app.get('/helloplus', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+app.get("/helloplus", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Redirect root to your main website (optional)
-app.get('/', (req, res) => {
-    res.redirect('https://underbranch.org');
+app.get("/", (req, res) => {
+    res.redirect("https://underbranch.org");
 });
 
 // Google authentication endpoint
-app.post('/helloplus/api/auth/google', async (req, res) => {
+app.post("/helloplus/api/auth/google", async (req, res) => {
     try {
         const { credential } = req.body;
 
         if (!credential) {
-            return res.status(400).json({ error: 'No credential provided' });
+            return res.status(400).json({ error: "No credential provided" });
         }
 
         // Verify the Google token
@@ -169,87 +178,88 @@ app.post('/helloplus/api/auth/google', async (req, res) => {
         // Send response
         res.json({
             success: true,
-            message: saveResult.isNewUser ? 'New user created' : 'User logged in',
+            message: saveResult.isNewUser
+                ? "New user created"
+                : "User logged in",
             user: {
                 id: userPayload.sub,
                 email: userPayload.email,
                 name: userPayload.name,
                 picture: userPayload.picture,
-                isNewUser: saveResult.isNewUser
-            }
+                isNewUser: saveResult.isNewUser,
+            },
         });
-
     } catch (error) {
-        console.error('Authentication error:', error);
+        console.error("Authentication error:", error);
         res.status(401).json({ error: error.message });
     }
 });
 
 // Get all users (for testing purposes)
-app.get('/helloplus/api/users', async (req, res) => {
+app.get("/helloplus/api/users", async (req, res) => {
     try {
         const connection = await pool.getConnection();
         const [users] = await connection.execute(
-            'SELECT id, google_id, email, name, first_login, last_login, login_count FROM users ORDER BY created_at DESC'
+            "SELECT id, google_id, email, name, first_login, last_login, login_count FROM users ORDER BY created_at DESC",
         );
         connection.release();
 
         res.json({ users });
     } catch (error) {
-        console.error('Get users error:', error);
-        res.status(500).json({ error: 'Failed to fetch users' });
+        console.error("Get users error:", error);
+        res.status(500).json({ error: "Failed to fetch users" });
     }
 });
 
 // Get user by ID
-app.get('/helloplus/api/users/:id', async (req, res) => {
+app.get("/helloplus/api/users/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const connection = await pool.getConnection();
 
         const [users] = await connection.execute(
-            'SELECT * FROM users WHERE google_id = ? OR id = ?',
-            [id, id]
+            "SELECT * FROM users WHERE google_id = ? OR id = ?",
+            [id, id],
         );
 
         connection.release();
 
         if (users.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: "User not found" });
         }
 
         res.json({ user: users[0] });
     } catch (error) {
-        console.error('Get user error:', error);
-        res.status(500).json({ error: 'Failed to fetch user' });
+        console.error("Get user error:", error);
+        res.status(500).json({ error: "Failed to fetch user" });
     }
 });
 
 // Health check endpoint
-app.get('/helloplus/api/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get("/helloplus/api/health", (req, res) => {
+    res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-    console.error('Unhandled error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Unhandled error:", error);
+    res.status(500).json({ error: "Internal server error" });
 });
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
+    res.status(404).json({ error: "Endpoint not found" });
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, shutting down gracefully');
+process.on("SIGTERM", async () => {
+    console.log("SIGTERM received, shutting down gracefully");
     await pool.end();
     process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-    console.log('SIGINT received, shutting down gracefully');
+process.on("SIGINT", async () => {
+    console.log("SIGINT received, shutting down gracefully");
     await pool.end();
     process.exit(0);
 });
@@ -266,7 +276,7 @@ async function startServer() {
             console.log(`API Users: http://localhost:${PORT}/api/users`);
         });
     } catch (error) {
-        console.error('Failed to start server:', error);
+        console.error("Failed to start server:", error);
         process.exit(1);
     }
 }
