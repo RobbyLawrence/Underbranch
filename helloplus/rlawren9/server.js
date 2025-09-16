@@ -195,7 +195,7 @@ app.post("/helloplus/api/auth/google", async (req, res) => {
 });
 
 // Get all users (for testing purposes)
-app.get("/helloplus/api/users", async (req, res) => {
+app.get("/helloplus/rlawren9/api/users", async (req, res) => {
     try {
         const connection = await pool.getConnection();
         const [users] = await connection.execute(
@@ -211,7 +211,7 @@ app.get("/helloplus/api/users", async (req, res) => {
 });
 
 // Get user by ID
-app.get("/helloplus/api/users/:id", async (req, res) => {
+app.get("/helloplus/rlawren9/api/users/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const connection = await pool.getConnection();
@@ -235,7 +235,7 @@ app.get("/helloplus/api/users/:id", async (req, res) => {
 });
 
 // Health check endpoint
-app.get("/helloplus/api/health", (req, res) => {
+app.get("/helloplus/rlawren9/api/health", (req, res) => {
     res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
