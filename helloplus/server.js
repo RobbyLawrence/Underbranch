@@ -33,7 +33,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-app.use('/helloplus', express.static('public')); // Serve static files under /helloplus path
+app.use('/helloplus', express.static(path.join(__dirname))); // Serve static files under /helloplus path
 
 // Initialize database
 async function initializeDatabase() {
