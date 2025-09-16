@@ -47,4 +47,4 @@ const Toolbar = ({ viewMode, onViewModeChange, latexCode }) => {
     );
 };
 
-window.Toolbar = Toolbar;
+export default Toolbar;

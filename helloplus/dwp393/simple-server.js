@@ -8,6 +8,8 @@ const PORT = 3001;
 // Serve static files
 app.use(express.static(path.join(__dirname, '..')));
 app.use('/dwp393', express.static(__dirname));
+app.use('/dist', express.static(path.join(__dirname, '../public/dist')));
+app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Serve the editor page
 app.get('/', (req, res) => {

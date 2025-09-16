@@ -129,4 +129,4 @@ const PreviewPane = ({ latexCode }) => {
     );
 };
 
-window.PreviewPane = PreviewPane;
+export default PreviewPane;

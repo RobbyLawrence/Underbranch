@@ -65,4 +65,4 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     );
 };
 
-window.App = App;
+export default App;

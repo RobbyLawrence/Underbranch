@@ -88,4 +88,4 @@ const LaTeXEditor = ({ value, onChange }) => {
     });
 };
 
-window.LaTeXEditor = LaTeXEditor;
+export default LaTeXEditor;
