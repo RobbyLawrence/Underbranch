@@ -8,7 +8,7 @@ This small Node.js project demonstrates a basic server example and minimal proje
 
   
 
-How to run
+How to run:
 
   
 
@@ -16,11 +16,11 @@ How to run
 
 2. Start the server: node server.js
 
-3. Open at (http://localhost:3000/)
+3. Open at http://localhost:3000/
 
   
 
-How this fits the group project
+How this fits the group project:
 
   
 
