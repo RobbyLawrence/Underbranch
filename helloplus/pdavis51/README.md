@@ -12,9 +12,9 @@ How to run:
 
   
 
-1. Install dependencies: npm install
+1. Install dependencies: ```npm install```
 
-2. Start the server: node server.js
+2. Start the server: ```node server.js```
 
 3. Open at http://localhost:3000/
 
