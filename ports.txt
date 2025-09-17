@@ -1,0 +1,6 @@
+This file will track what ports are being used on the web server.
+
+Each entry should list the port and use.
+
+80, 443 - nginx
+3001 - node server for sign-in
