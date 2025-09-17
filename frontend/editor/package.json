@@ -2,7 +2,7 @@
   "name": "underbranch-editor",
   "version": "1.0.0",
   "description": "LaTeX Editor for underbranch.org",
-  "main": "editor.html",
+  "main": "index.html",
   "scripts": {
     "build": "webpack",
     "dev": "webpack --watch"

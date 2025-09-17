@@ -13,11 +13,11 @@ app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Serve the editor page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'editor.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/editor', (req, res) => {
-    res.sendFile(path.join(__dirname, 'editor.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
