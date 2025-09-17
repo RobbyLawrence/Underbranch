@@ -1,6 +1,6 @@
 
 ### Overview
-The **editor.html** program is a html page that with react scripts make up the LaTeX editor and compiler interface built with Monaco Editor.
+The **index.html** program is a html page that with react scripts make up the LaTeX editor and compiler interface built with Monaco Editor.
 
 ### How to Run
 2. Start the development server: `node simple-server.js`
