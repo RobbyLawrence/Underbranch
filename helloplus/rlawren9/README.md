@@ -7,3 +7,5 @@ This directory serves as the root directory for a test project that allows the u
 The frontend code can be found in `public/index.html`, and the server code is in `server.js`.
 
 Currently, this server is being hosted on the team web server and viewers can test the authentication by going to `underbranch.org/helloplus/rlawren9`. Most of this code is going to used for the login, which is why I chose this as my HelloPlus project.
+
+If you'd like to verify that your profile was added to the MySQL database, feel free to email us at `admin@underbranch.org`. I'll confirm that your email was added to the database upon request.
