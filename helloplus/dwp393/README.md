@@ -59,6 +59,12 @@ Underbranch/
   - Clean, centered UI design
   - JavaScript popup functionality
   - Button that triggers "have you ever heard of the ADL??" alert
+- **editor.html** - Advanced LaTeX editor and compiler interface featuring:
+  - Monaco Editor for syntax-highlighted LaTeX editing
+  - Real-time preview pane with compiled LaTeX output
+  - React-based component architecture
+  - Split-view, editor-only, and preview-only display modes
+  - Sample LaTeX document with mathematical equations and formatting examples
 
 ## Technology Stack
 - **Frontend**: HTML, CSS, JavaScript
@@ -67,12 +73,38 @@ Underbranch/
 - **Database**: MySQL2
 - **Development**: Nodemon for auto-restart
 
+## LaTeX Editor Component
+
+### Overview
+The **editor.html** program is a standalone LaTeX editor and compiler interface built with React and Monaco Editor. It serves as the core editing experience for the Underbranch collaborative LaTeX platform.
+
+### How to Run
+1. Navigate to the dwp393 directory: `cd /dwp393/`
+2. Start the development server: `node simple-server.js`
+3. Access the editor at: `http://localhost:3001/editor`
+
+### Features
+- **Monaco Editor Integration**: Professional code editor with LaTeX syntax highlighting
+- **Real-time Preview**: Live compilation and rendering of LaTeX documents
+- **Multiple View Modes**: Switch between editor-only, preview-only, and split-screen views
+- **Sample Content**: Includes a complete LaTeX document template with mathematical equations
+- **Responsive Design**: Clean, modern interface optimized for document editing
+
+### Project Integration
+The editor will be integrated into the main Underbranch platform to provide:
+- Individual user workspaces for LaTeX document creation
+- Collaborative editing capabilities (future sprint)
+- Document version control and sharing
+- Integration with the Google authentication system
+- MySQL-backed document storage and user management
+
 ## Current Development Phase
 The project appears to be in Sprint 1 preparation phase, focusing on:
 1. Basic web interface setup
 2. Google authentication integration
 3. MySQL database connectivity for user tracking
 4. Individual user workspace functionality (dwp393 directory represents a user workspace)
+5. LaTeX editor component development and testing
 
 ## Recent Development Activity
 - MySQL integration with Google Sign-In
