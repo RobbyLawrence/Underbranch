@@ -1,8 +1,10 @@
 
+
+
 Matthew Ferrari - dwp393
 
 ### Overview
-The **editor.html** program is a html page that with react scripts make up the LaTeX editor and compiler interface built with Monaco Editor.
+The **index.html** program is a html page that with react scripts make up the LaTeX editor and compiler interface built with Monaco Editor.
 The src dir is components of the page that are used in editor.html
 
 ### How to Run
