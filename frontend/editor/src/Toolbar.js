@@ -20,20 +20,26 @@ const Toolbar = ({ viewMode, onViewModeChange, latexCode }) => {
         }
     };
 
+    // Debug helpers - log button clicks
+    const handleViewClick = (mode) => {
+        console.log('[Toolbar] button click ->', mode);
+        onViewModeChange(mode);
+    };
+
     return React.createElement('div', { className: 'toolbar' },
         React.createElement('h1', null, 'LaTeX Editor'),
         React.createElement('div', { className: 'toolbar-buttons' },
             React.createElement('button', {
                 className: `btn ${viewMode === 'editor' ? 'btn-primary' : 'btn-secondary'}`,
-                onClick: () => onViewModeChange('editor')
+                onClick: () => handleViewClick('editor')
             }, 'Editor'),
             React.createElement('button', {
                 className: `btn ${viewMode === 'split' ? 'btn-primary' : 'btn-secondary'}`,
-                onClick: () => onViewModeChange('split')
+                onClick: () => handleViewClick('split')
             }, 'Split'),
             React.createElement('button', {
                 className: `btn ${viewMode === 'preview' ? 'btn-primary' : 'btn-secondary'}`,
-                onClick: () => onViewModeChange('preview')
+                onClick: () => handleViewClick('preview')
             }, 'Preview'),
             React.createElement('button', {
                 className: 'btn btn-secondary',

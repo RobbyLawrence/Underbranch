@@ -1,8 +1,9 @@
 const { useEffect, useRef } = React;
 
-const LaTeXEditor = ({ value, onChange }) => {
+const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
+    const layoutTimeout = useRef(null);
 
     useEffect(() => {
         // Initialize Monaco Editor
@@ -81,6 +82,31 @@ const LaTeXEditor = ({ value, onChange }) => {
             monacoRef.current.setValue(value);
         }
     }, [value]);
+
+    // When the editor becomes visible ensure Monaco recalculates layout.
+    useEffect(() => {
+        if (!monacoRef.current) return;
+
+        if (isVisible) {
+            // Debounce a bit in case of rapid toggles
+            if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
+            layoutTimeout.current = setTimeout(() => {
+                try {
+                    monacoRef.current.layout();
+                    console.log('[LaTeXEditor] called monaco.layout() because isVisible=true');
+                } catch (e) {
+                    console.warn('monaco.layout failed', e);
+                }
+            }, 50);
+        }
+
+        return () => {
+            if (layoutTimeout.current) {
+                clearTimeout(layoutTimeout.current);
+                layoutTimeout.current = null;
+            }
+        };
+    }, [isVisible]);
 
     return React.createElement('div', {
         ref: editorRef,
