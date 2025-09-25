@@ -76,7 +76,7 @@ app.options("*", cors(corsOptions));
 
 // Standard middleware
 app.use(express.json());
-app.use("/helloplus/rlawren9", express.static(path.join(__dirname))); // Serve static files under the path
+app.use("/signin", express.static(path.join(__dirname))); // Serve static files under the path
 
 // --------------------
 // rest of your code remains the same
@@ -190,13 +190,13 @@ async function saveUserToDatabase(userPayload) {
 
 // Routes
 
-// Serve the sign-in page at /helloplus/rlawren9
-app.get("/helloplus/rlawren9", (req, res) => {
+// Serve the sign-in page at /signin
+app.get("/signin", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Google authentication endpoint
-app.post("/helloplus/rlawren9/api/auth/google", async (req, res) => {
+app.post("/signin/api/auth/google", async (req, res) => {
     try {
         const { credential } = req.body;
 
@@ -231,7 +231,7 @@ app.post("/helloplus/rlawren9/api/auth/google", async (req, res) => {
 });
 
 // Get all users (for testing purposes)
-app.get("/helloplus/rlawren9/api/users", async (req, res) => {
+app.get("/signin/api/users", async (req, res) => {
     try {
         const connection = await pool.getConnection();
         const [users] = await connection.execute(
@@ -247,7 +247,7 @@ app.get("/helloplus/rlawren9/api/users", async (req, res) => {
 });
 
 // Get user by ID
-app.get("/helloplus/rlawren9/api/users/:id", async (req, res) => {
+app.get("/signin/api/users/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const connection = await pool.getConnection();
@@ -271,7 +271,7 @@ app.get("/helloplus/rlawren9/api/users/:id", async (req, res) => {
 });
 
 // Health check endpoint
-app.get("/helloplus/rlawren9/api/health", (req, res) => {
+app.get("signin/api/health", (req, res) => {
     res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
@@ -308,11 +308,9 @@ async function startServer() {
             console.log(`Server running on port ${PORT}`);
             console.log(`Frontend: http://localhost:${PORT}`);
             console.log(
-                `API Health: http://localhost:${PORT}/helloplus/rlawren9/api/health`,
+                `API Health: http://localhost:${PORT}/signin/api/health`,
             );
-            console.log(
-                `API Users: http://localhost:${PORT}/helloplus/rlawren9/api/users`,
-            );
+            console.log(`API Users: http://localhost:${PORT}/signin/api/users`);
         });
     } catch (error) {
         console.error("Failed to start server:", error);
