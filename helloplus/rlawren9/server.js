@@ -29,19 +29,59 @@ const dbConfig = {
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
 
-// Middleware
-app.use(
-    cors({
-        origin: [
-            "http://localhost:3001",
-            "https://underbranch.org",
-            "http://underbranch.org",
-        ],
-        credentials: true,
-    }),
-);
+// --------------------
+// CORS: robust whitelist function + preflight handling
+// --------------------
+const WHITELIST = new Set([
+    "http://localhost:3001", // dev (your server if you serve front on same port)
+    "http://localhost:3000", // common dev port
+    "http://localhost:8080",
+    "https://underbranch.org", // production front-end origin
+    "http://underbranch.org",
+]);
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        // origin === undefined when request made from non-browser clients (curl) or file:// pages.
+        // Allow undefined origin for testing (optional) — you can tighten this in production.
+        if (!origin) {
+            console.log(
+                "CORS: no origin (allowing for testing/non-browser client)",
+            );
+            return callback(null, true);
+        }
+
+        // Debug log to see incoming origin in server logs
+        console.log("CORS: request origin:", origin);
+
+        if (WHITELIST.has(origin)) {
+            return callback(null, true);
+        }
+        // Not allowed
+        return callback(
+            new Error("CORS policy: Origin not allowed: " + origin),
+            false,
+        );
+    },
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    optionsSuccessStatus: 200,
+};
+
+// Apply CORS for all routes
+app.use(cors(corsOptions));
+// Explicitly handle preflight for all routes (safe)
+app.options("*", cors(corsOptions));
+
+// Standard middleware
 app.use(express.json());
 app.use("/helloplus/rlawren9", express.static(path.join(__dirname))); // Serve static files under the path
+
+// --------------------
+// rest of your code remains the same
+// (initializeDatabase, verifyGoogleToken, saveUserToDatabase, routes, error handlers...)
+// --------------------
 
 // Initialize database
 async function initializeDatabase() {
@@ -267,8 +307,12 @@ async function startServer() {
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
             console.log(`Frontend: http://localhost:${PORT}`);
-            console.log(`API Health: http://localhost:${PORT}/api/health`);
-            console.log(`API Users: http://localhost:${PORT}/api/users`);
+            console.log(
+                `API Health: http://localhost:${PORT}/helloplus/rlawren9/api/health`,
+            );
+            console.log(
+                `API Users: http://localhost:${PORT}/helloplus/rlawren9/api/users`,
+            );
         });
     } catch (error) {
         console.error("Failed to start server:", error);
