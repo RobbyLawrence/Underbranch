@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Underbranch — Collaborative Text</title>
+    <link rel="stylesheet" href="/collab/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Collaborative Text Box</h1>
+        <div id="presence" class="presence"></div>
+      </header>
+
+      <main>
+        <div class="editor-wrap">
+          <textarea id="editor" placeholder="Start typing..."></textarea>
+          <div id="cursors" class="cursors"></div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/collab/client.js"></script>
+  </body>
+</html>
