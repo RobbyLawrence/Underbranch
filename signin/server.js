@@ -1,5 +1,4 @@
 // server.js - Updated to support email/password signup/login + Google OAuth
-// Run: npm install express google-auth-library mysql2 cors dotenv express-session bcryptjs
 
 const express = require("express");
 const { OAuth2Client } = require("google-auth-library");
@@ -36,7 +35,6 @@ const pool = mysql.createPool(dbConfig);
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev_change_me";
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
 
-// If you're behind nginx configured as a reverse proxy, enable trust proxy when running in production
 if (process.env.TRUST_PROXY === "1" || process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
 }
@@ -65,7 +63,6 @@ const WHITELIST = new Set([
     "http://localhost:8080",
     "https://underbranch.org",
     "http://underbranch.org",
-    // add https://underbranch.com if that's your production domain
     "https://underbranch.com",
 ]);
 
