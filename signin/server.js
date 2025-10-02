@@ -272,7 +272,7 @@ async function verifyGoogleToken(token) {
 
 // Serve sign-in page
 app.get("/signin", (req, res) => {
-    res.sendFile(path.join(__dirname, "newindex.html"));
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // Health
