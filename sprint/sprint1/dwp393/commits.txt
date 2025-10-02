@@ -1,0 +1,554 @@
+========================================
+File: frontend/editor/src/App.js
+========================================
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   1) // Pull React hooks off the global React object. This file assumes React is
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   2) // available globally (e.g. via a <script> tag or bundler that provides it).
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   3) const { useState, useEffect } = React;
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   4) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   5) // Main application component. This is a small, non-JSX React component that
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   6) // uses React.createElement to build the UI. It wires together three pieces:
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   7) // - Toolbar: lets the user switch view modes and perform actions
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   8) // - LaTeXEditor: an editor component for editing LaTeX source
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   9) // - PreviewPane: renders the LaTeX source as HTML or a preview
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  10) const App = () => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  11)     // latexCode holds the current LaTeX source the user is editing. We
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  12)     // initialize it with a small sample document so the preview shows
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  13)     // something on first load.
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  14)     const [latexCode, setLatexCode] = useState(`\\documentclass{article}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  15) \\usepackage[utf8]{inputenc}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  16) \\title{My LaTeX Document}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  17) \\author{Author Name}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  18) \\date{\\today}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  19) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  20) \\begin{document}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  21) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  22) \\maketitle
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  23) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  24) \\section{Introduction}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  25) This is a sample LaTeX document. You can edit this text in the editor.
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  26) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  27) \\section{Mathematical Equations}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  28) Here's a mathematical equation:
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  29) \\begin{equation}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  30) E = mc^2
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  31) \\end{equation}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  32) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  33) And an inline equation: $\\alpha + \\beta = \\gamma$
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  34) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  35) \\subsection{More Examples}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  36) \\begin{itemize}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  37) \\item First item
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  38) \\item Second item
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  39) \\item Third item
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  40) \\end{itemize}
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  41) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  42) \\end{document}`);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  43) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  44)     // viewMode controls which panes are visible. Possible values:
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  45)     // - 'editor'  -> only the editor is shown
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  46)     // - 'preview' -> only the preview is shown
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  47)     // - 'split'   -> both are shown side-by-side
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  48)     const [viewMode, setViewMode] = useState('split'); // 'editor', 'preview', 'split'
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  49) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  50)     // handleCodeChange is passed to the editor component. It receives the
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  51)     // new text value and updates the latexCode state. We guard against
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  52)     // undefined/null by falling back to an empty string.
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  53)     const handleCodeChange = (value) => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  54)         setLatexCode(value || '');
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  55)     };
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  56) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  57)     // Debug: log viewMode transitions so we can trace state changes while
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  58)     // reproducing the issue in the browser console.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  59)     useEffect(() => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  60)         console.log('[App] viewMode changed ->', viewMode);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  61)         // Also update the document title so the current mode is visible
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  62)         // in the browser tab (easy to spot without opening devtools).
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  63)         try {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  64)             document.title = `LaTeX Editor — ${viewMode}`;
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  65)         } catch (e) {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  66)             // ignore (server side or non-browser env)
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  67)         }
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  68)         // Trigger a resize event to nudge layout systems (Monaco, CSS)
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  69)         // to recompute sizes when the view mode changes.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  70)         try {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  71)             window.dispatchEvent(new Event('resize'));
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  72)         } catch (e) {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  73)             // ignore in non-browser environments
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  74)         }
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  75)     }, [viewMode]);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  76) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  77)     // The UI layout is built with React.createElement calls instead of JSX.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  78)     // To avoid layout glitches when switching modes we render both panes
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  79)     // consistently and toggle their visibility/size using explicit CSS
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  80)     // class names: 'split', 'full', or 'hidden'. This prevents frequent
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  81)     // unmount/remount of the editor which can cause Monaco/DOM layout issues.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  82)     const editorClass = viewMode === 'split' ? 'split' : (viewMode === 'editor' ? 'full' : 'hidden');
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  83)     const previewClass = viewMode === 'split' ? 'split' : (viewMode === 'preview' ? 'full' : 'hidden');
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  84) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  85)     const editorVisible = viewMode === 'split' || viewMode === 'editor';
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  86)     const previewVisible = viewMode === 'split' || viewMode === 'preview';
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  87) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  88)     return React.createElement('div', { className: 'app' },
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  89)         React.createElement(Toolbar, {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  90)             viewMode: viewMode,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  91)             onViewModeChange: setViewMode,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  92)             latexCode: latexCode
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  93)         }),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  94) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  95)         React.createElement('div', { className: `editor-container mode-${viewMode}` },
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  96)             // Editor pane is always present but may be hidden via the
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  97)             // 'hidden' class. This keeps Monaco mounted and stable.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  98)             React.createElement('div', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  99)                 className: `editor-pane ${editorClass}`
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 100)             },
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 101)                 React.createElement(LaTeXEditor, {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 102)                     value: latexCode,
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 103)                     onChange: handleCodeChange,
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 104)                     isVisible: editorVisible
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 105)                 })
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 106)             ),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 107) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 108)             // Preview pane is always present as well; it will be hidden
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 109)             // when not in 'preview' or 'split' modes.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 110)             React.createElement('div', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 111)                 className: `preview-pane ${previewClass}`
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 112)             },
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 113)                 React.createElement(PreviewPane, {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 114)                     latexCode: latexCode
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 115)                 })
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 116)             )
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 117)         )
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 118)     );
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 119) };
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 120) 
+b88b40b4 (<dwp393@vols.utk.edu>   2025-10-02 121) export default App;
+
+========================================
+File: frontend/editor/src/LaTeXEditor.js
+========================================
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   1) const { useEffect, useRef } = React;
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   2) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   3) const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   4)     const editorRef = useRef(null);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   5)     const monacoRef = useRef(null);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01   6)     const layoutTimeout = useRef(null);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   7) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   8)     useEffect(() => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16   9)         // Initialize Monaco Editor
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  10)         if (window.require && !monacoRef.current) {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  11)             window.require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.44.0/min/vs' } });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  12) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  13)             window.require(['vs/editor/editor.main'], () => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  14)                 if (editorRef.current && !monacoRef.current) {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  15)                     // Configure LaTeX language (basic syntax highlighting)
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  16)                     monaco.languages.register({ id: 'latex' });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  17) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  18)                     monaco.languages.setMonarchTokensProvider('latex', {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  19)                         tokenizer: {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  20)                             root: [
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  21)                                 [/\\[a-zA-Z@]+/, 'keyword'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  22)                                 [/\\begin\{[^}]+\}/, 'keyword'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  23)                                 [/\\end\{[^}]+\}/, 'keyword'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  24)                                 [/\$.*?\$/, 'string'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  25)                                 [/\\\(.*?\\\)/, 'string'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  26)                                 [/\\\[.*?\\\]/, 'string'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  27)                                 [/%.*$/, 'comment'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  28)                                 [/\{/, 'bracket'],
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  29)                                 [/\}/, 'bracket']
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  30)                             ]
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  31)                         }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  32)                     });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16  33) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  34)                     // Register completion provider for common LaTeX environments
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  35)                     monaco.languages.registerCompletionItemProvider('latex', {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  36)                         triggerCharacters: ['{'],
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  37)                         provideCompletionItems: (model, position) => {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  38)                             const lineContent = model.getLineContent(position.lineNumber);
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  39)                             const textBeforeCursor = lineContent.substring(0, position.column - 1);
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  40) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  41)                             // Check if we just typed \begin{
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  42)                             if (textBeforeCursor.match(/\\begin\{$/)) {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  43)                                 const environments = [
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  44)                                     'document', 'equation', 'align', 'itemize', 'enumerate',
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  45)                                     'figure', 'table', 'center', 'abstract', 'theorem',
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  46)                                     'proof', 'definition', 'lemma', 'corollary', 'example',
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  47)                                     'remark', 'verbatim', 'quote', 'tabular', 'array'
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  48)                                 ];
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  49) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  50)                                 return {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  51)                                     suggestions: environments.map(env => ({
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  52)                                         label: env,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  53)                                         kind: monaco.languages.CompletionItemKind.Snippet,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  54)                                         insertText: `${env}}\n\t$0\n\\end{${env}}`,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  55)                                         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  56)                                         documentation: `Insert ${env} environment`,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  57)                                         range: {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  58)                                             startLineNumber: position.lineNumber,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  59)                                             startColumn: position.column,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  60)                                             endLineNumber: position.lineNumber,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  61)                                             endColumn: position.column
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  62)                                         }
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  63)                                     }))
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  64)                                 };
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  65)                             }
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  66) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  67)                             return { suggestions: [] };
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  68)                         }
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  69)                     });
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  70) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  71)                     // Register completion provider for auto-closing \begin{...} with \end{...}
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  72)                     monaco.languages.registerCompletionItemProvider('latex', {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  73)                         triggerCharacters: ['}'],
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  74)                         provideCompletionItems: (model, position) => {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  75)                             const lineContent = model.getLineContent(position.lineNumber);
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  76)                             const textBeforeCursor = lineContent.substring(0, position.column - 1);
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  77) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  78)                             // Check if we just typed \begin{environmentName}
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  79)                             const beginMatch = textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  80) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  81)                             if (beginMatch) {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  82)                                 const environmentName = beginMatch[1];
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  83)                                 return {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  84)                                     suggestions: [{
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  85)                                         label: `Auto-close \\end{${environmentName}}`,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  86)                                         kind: monaco.languages.CompletionItemKind.Snippet,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  87)                                         insertText: `\n\t$0\n\\end{${environmentName}}`,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  88)                                         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  89)                                         documentation: `Auto-close with \\end{${environmentName}}`,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  90)                                         range: {
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  91)                                             startLineNumber: position.lineNumber,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  92)                                             startColumn: position.column,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  93)                                             endLineNumber: position.lineNumber,
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  94)                                             endColumn: position.column
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  95)                                         }
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  96)                                     }]
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  97)                                 };
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  98)                             }
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02  99) 
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02 100)                             return { suggestions: [] };
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02 101)                         }
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02 102)                     });
+c1ccf398 (<dwp393@vols.utk.edu>   2025-10-02 103) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 104)                     // Create the editor
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 105)                     monacoRef.current = monaco.editor.create(editorRef.current, {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 106)                         value: value,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 107)                         language: 'latex',
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 108)                         theme: 'vs-light',
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 109)                         fontSize: 14,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 110)                         lineNumbers: 'on',
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 111)                         roundedSelection: false,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 112)                         scrollBeyondLastLine: false,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 113)                         automaticLayout: true,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 114)                         minimap: { enabled: false },
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 115)                         wordWrap: 'on',
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 116)                         lineHeight: 20,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 117)                         padding: { top: 10, bottom: 10 }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 118)                     });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 119) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 120)                     // Listen for content changes
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 121)                     monacoRef.current.onDidChangeModelContent(() => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 122)                         const currentValue = monacoRef.current.getValue();
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 123)                         if (onChange) {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 124)                             onChange(currentValue);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 125)                         }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 126)                     });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 127)                 }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 128)             });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 129)         }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 130) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 131)         // Listen for clear editor event
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 132)         const handleClearEditor = () => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 133)             if (monacoRef.current) {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 134)                 monacoRef.current.setValue('');
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 135)             }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 136)         };
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 137) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 138)         window.addEventListener('clearEditor', handleClearEditor);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 139) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 140)         return () => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 141)             window.removeEventListener('clearEditor', handleClearEditor);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 142)             if (monacoRef.current) {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 143)                 monacoRef.current.dispose();
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 144)                 monacoRef.current = null;
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 145)             }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 146)         };
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 147)     }, []);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 148) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 149)     // Update editor value when prop changes
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 150)     useEffect(() => {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 151)         if (monacoRef.current && monacoRef.current.getValue() !== value) {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 152)             monacoRef.current.setValue(value);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 153)         }
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 154)     }, [value]);
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 155) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 156)     // When the editor becomes visible ensure Monaco recalculates layout.
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 157)     useEffect(() => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 158)         if (!monacoRef.current) return;
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 159) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 160)         if (isVisible) {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 161)             // Debounce a bit in case of rapid toggles
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 162)             if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 163)             layoutTimeout.current = setTimeout(() => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 164)                 try {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 165)                     monacoRef.current.layout();
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 166)                     console.log('[LaTeXEditor] called monaco.layout() because isVisible=true');
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 167)                 } catch (e) {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 168)                     console.warn('monaco.layout failed', e);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 169)                 }
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 170)             }, 50);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 171)         }
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 172) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 173)         return () => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 174)             if (layoutTimeout.current) {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 175)                 clearTimeout(layoutTimeout.current);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 176)                 layoutTimeout.current = null;
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 177)             }
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 178)         };
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 179)     }, [isVisible]);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 180) 
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 181)     return React.createElement('div', {
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 182)         ref: editorRef,
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 183)         id: 'monaco-editor'
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 184)     });
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 185) };
+b045b9ad (<dwp393@vols.utk.edu>   2025-09-16 186) 
+b88b40b4 (<dwp393@vols.utk.edu>   2025-10-02 187) export default LaTeXEditor;
+
+========================================
+File: frontend/editor/src/PreviewPane.js
+========================================
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   1) const PreviewPane = ({ latexCode }) => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   2)     const { useState, useEffect } = React;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   3)     const [processedContent, setProcessedContent] = useState('');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   4)     const [isLoading, setIsLoading] = useState(false);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   5) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   6)     // Simple LaTeX to HTML converter for basic preview
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   7)     const processLaTeX = (latex) => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   8)         setIsLoading(true);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16   9) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  10)         // Basic LaTeX processing - this is a simplified version
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  11)         let html = latex;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  12) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  13)         // Document structure
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  14)         html = html.replace(/\\documentclass\{[^}]+\}/, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  15)         html = html.replace(/\\usepackage(?:\[[^\]]*\])?\{[^}]+\}/g, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  16)         html = html.replace(/\\title\{([^}]+)\}/, '<h1 class="title">$1</h1>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  17)         html = html.replace(/\\author\{([^}]+)\}/, '<p class="author">By: $1</p>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  18)         html = html.replace(/\\date\{([^}]+)\}/, '<p class="date">$1</p>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  19)         html = html.replace(/\\maketitle/, '<div class="titlepage"></div>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  20) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  21)         // Sections
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  22)         html = html.replace(/\\section\{([^}]+)\}/g, '<h2>$1</h2>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  23)         html = html.replace(/\\subsection\{([^}]+)\}/g, '<h3>$1</h3>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  24)         html = html.replace(/\\subsubsection\{([^}]+)\}/g, '<h4>$1</h4>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  25) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  26)         // Math environments
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  27)         html = html.replace(/\\begin\{equation\}([\s\S]*?)\\end\{equation\}/g, '<div class="equation">$$1$</div>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  28)         html = html.replace(/\$([^$]+)\$/g, '<span class="math">$1</span>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  29) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  30)         // Lists
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  31)         html = html.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  32)             const items = content.replace(/\\item\s+/g, '<li>').split('<li>').filter(item => item.trim());
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  33)             return '<ul>' + items.map(item => '<li>' + item.trim() + '</li>').join('') + '</ul>';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  34)         });
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  35) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  36)         html = html.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  37)             const items = content.replace(/\\item\s+/g, '<li>').split('<li>').filter(item => item.trim());
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  38)             return '<ol>' + items.map(item => '<li>' + item.trim() + '</li>').join('') + '</ol>';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  39)         });
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  40) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  41)         // Text formatting
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  42)         html = html.replace(/\\textbf\{([^}]+)\}/g, '<strong>$1</strong>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  43)         html = html.replace(/\\textit\{([^}]+)\}/g, '<em>$1</em>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  44)         html = html.replace(/\\emph\{([^}]+)\}/g, '<em>$1</em>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  45) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  46)         // Clean up LaTeX commands and environments
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  47)         html = html.replace(/\\begin\{document\}/, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  48)         html = html.replace(/\\end\{document\}/, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  49)         html = html.replace(/\\[a-zA-Z]+(?:\[[^\]]*\])?\{[^}]*\}/g, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  50)         html = html.replace(/\\[a-zA-Z]+/g, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  51) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  52)         // Convert line breaks
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  53)         html = html.replace(/\n\s*\n/g, '</p><p>');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  54)         html = '<p>' + html + '</p>';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  55)         html = html.replace(/<p>\s*<\/p>/g, '');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  56) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  57)         setProcessedContent(html);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  58)         setIsLoading(false);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  59)     };
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  60) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  61)     useEffect(() => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  62)         const timeoutId = setTimeout(() => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  63)             processLaTeX(latexCode);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  64)         }, 500); // Debounce processing
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  65) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  66)         return () => clearTimeout(timeoutId);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  67)     }, [latexCode]);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  68) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  69)     if (isLoading) {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  70)         return React.createElement('div', { className: 'loading' }, 'Processing LaTeX...');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  71)     }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  72) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  73)     return React.createElement('div', { className: 'preview-content' },
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  74)         React.createElement('div', {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  75)             dangerouslySetInnerHTML: { __html: processedContent }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  76)         }),
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  77)         React.createElement('style', null, `
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  78)             .preview-content h1.title {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  79)                 text-align: center;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  80)                 margin-bottom: 10px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  81)                 font-size: 24px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  82)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  83)             .preview-content .author, .preview-content .date {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  84)                 text-align: center;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  85)                 margin: 5px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  86)                 color: #666;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  87)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  88)             .preview-content h2 {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  89)                 margin: 20px 0 10px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  90)                 color: #333;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  91)                 border-bottom: 1px solid #ddd;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  92)                 padding-bottom: 5px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  93)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  94)             .preview-content h3 {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  95)                 margin: 15px 0 8px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  96)                 color: #444;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  97)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  98)             .preview-content h4 {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  99)                 margin: 12px 0 6px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 100)                 color: #555;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 101)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 102)             .preview-content p {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 103)                 margin: 10px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 104)                 line-height: 1.6;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 105)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 106)             .preview-content .equation {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 107)                 text-align: center;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 108)                 margin: 20px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 109)                 padding: 10px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 110)                 background: #f8f9fa;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 111)                 border-left: 4px solid #007bff;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 112)                 font-family: 'Times New Roman', serif;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 113)                 font-style: italic;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 114)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 115)             .preview-content .math {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 116)                 font-family: 'Times New Roman', serif;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 117)                 font-style: italic;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 118)                 background: #f0f0f0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 119)                 padding: 2px 4px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 120)                 border-radius: 3px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 121)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 122)             .preview-content ul, .preview-content ol {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 123)                 margin: 10px 0 10px 20px;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 124)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 125)             .preview-content li {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 126)                 margin: 5px 0;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 127)             }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 128)         `)
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 129)     );
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 130) };
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 131) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 132) export default PreviewPane;
+
+========================================
+File: frontend/editor/src/Toolbar.js
+========================================
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  1) const Toolbar = ({ viewMode, onViewModeChange, latexCode }) => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  2)     const handleDownload = () => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  3)         const blob = new Blob([latexCode], { type: 'text/plain' });
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  4)         const url = URL.createObjectURL(blob);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  5)         const a = document.createElement('a');
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  6)         a.href = url;
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  7)         a.download = 'document.tex';
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  8)         document.body.appendChild(a);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01  9)         a.click();
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 10)         document.body.removeChild(a);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 11)         URL.revokeObjectURL(url);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 12)     };
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 13) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 14)     const handleClear = () => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 15)         if (confirm('Are you sure you want to clear the editor?')) {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 16)             onViewModeChange('editor');
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 17)             // This will be handled by the parent component
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 18)             const event = new CustomEvent('clearEditor');
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 19)             window.dispatchEvent(event);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 20)         }
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 21)     };
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 22) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 23)     // Debug helpers - log button clicks
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 24)     const handleViewClick = (mode) => {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 25)         console.log('[Toolbar] button click ->', mode);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 26)         onViewModeChange(mode);
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 27)     };
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 28) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 29)     return React.createElement('div', { className: 'toolbar' },
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 30)         React.createElement('h1', null, 'LaTeX Editor'),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 31)         React.createElement('div', { className: 'toolbar-buttons' },
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 32)             React.createElement('button', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 33)                 className: `btn ${viewMode === 'editor' ? 'btn-primary' : 'btn-secondary'}`,
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 34)                 onClick: () => handleViewClick('editor')
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 35)             }, 'Editor'),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 36)             React.createElement('button', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 37)                 className: `btn ${viewMode === 'split' ? 'btn-primary' : 'btn-secondary'}`,
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 38)                 onClick: () => handleViewClick('split')
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 39)             }, 'Split'),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 40)             React.createElement('button', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 41)                 className: `btn ${viewMode === 'preview' ? 'btn-primary' : 'btn-secondary'}`,
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 42)                 onClick: () => handleViewClick('preview')
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 43)             }, 'Preview'),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 44)             React.createElement('button', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 45)                 className: 'btn btn-secondary',
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 46)                 onClick: handleDownload
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 47)             }, 'Download'),
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 48)             React.createElement('button', {
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 49)                 className: 'btn btn-secondary',
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 50)                 onClick: handleClear
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 51)             }, 'Clear')
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 52)         )
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 53)     );
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 54) };
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 55) 
+^8b16a41 (<abrow326@vols.utk.edu> 2025-10-01 56) export default Toolbar;
+
+========================================
+File: frontend/editor/src/index.js
+========================================
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  1) import Toolbar from './Toolbar.js';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  2) import LaTeXEditor from './LaTeXEditor.js';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  3) import PreviewPane from './PreviewPane.js';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  4) import App from './App.js';
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  5) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  6) // Make components available globally for backward compatibility
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  7) window.Toolbar = Toolbar;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  8) window.LaTeXEditor = LaTeXEditor;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16  9) window.PreviewPane = PreviewPane;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 10) window.App = App;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 11) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 12) // Function to initialize the app
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 13) const initializeApp = () => {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 14)     try {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 15)         // Wait for React to be available
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 16)         if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 17)             const root = ReactDOM.createRoot(document.getElementById('root'));
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 18)             root.render(React.createElement(App));
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 19)         } else {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 20)             console.error('React or ReactDOM not loaded');
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 21)         }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 22)     } catch (error) {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 23)         console.error('Error loading app:', error);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 24)         document.getElementById('root').innerHTML = `
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 25)             <div style="padding: 20px; text-align: center; color: red;">
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 26)                 <h2>Error Loading Editor</h2>
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 27)                 <p>There was an error loading the LaTeX editor. Please check the console for details.</p>
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 28)             </div>
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 29)         `;
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 30)     }
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 31) };
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 32) 
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 33) // Initialize when DOM is ready
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 34) if (document.readyState === 'loading') {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 35)     document.addEventListener('DOMContentLoaded', initializeApp);
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 36) } else {
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 37)     initializeApp();
+b045b9ad (<dwp393@vols.utk.edu> 2025-09-16 38) }
+
