@@ -31,6 +31,76 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                         }
                     });
 
+                    // Register completion provider for common LaTeX environments
+                    monaco.languages.registerCompletionItemProvider('latex', {
+                        triggerCharacters: ['{'],
+                        provideCompletionItems: (model, position) => {
+                            const lineContent = model.getLineContent(position.lineNumber);
+                            const textBeforeCursor = lineContent.substring(0, position.column - 1);
+
+                            // Check if we just typed \begin{
+                            if (textBeforeCursor.match(/\\begin\{$/)) {
+                                const environments = [
+                                    'document', 'equation', 'align', 'itemize', 'enumerate',
+                                    'figure', 'table', 'center', 'abstract', 'theorem',
+                                    'proof', 'definition', 'lemma', 'corollary', 'example',
+                                    'remark', 'verbatim', 'quote', 'tabular', 'array'
+                                ];
+
+                                return {
+                                    suggestions: environments.map(env => ({
+                                        label: env,
+                                        kind: monaco.languages.CompletionItemKind.Snippet,
+                                        insertText: `${env}}\n\t$0\n\\end{${env}}`,
+                                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                                        documentation: `Insert ${env} environment`,
+                                        range: {
+                                            startLineNumber: position.lineNumber,
+                                            startColumn: position.column,
+                                            endLineNumber: position.lineNumber,
+                                            endColumn: position.column
+                                        }
+                                    }))
+                                };
+                            }
+
+                            return { suggestions: [] };
+                        }
+                    });
+
+                    // Register completion provider for auto-closing \begin{...} with \end{...}
+                    monaco.languages.registerCompletionItemProvider('latex', {
+                        triggerCharacters: ['}'],
+                        provideCompletionItems: (model, position) => {
+                            const lineContent = model.getLineContent(position.lineNumber);
+                            const textBeforeCursor = lineContent.substring(0, position.column - 1);
+
+                            // Check if we just typed \begin{environmentName}
+                            const beginMatch = textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
+
+                            if (beginMatch) {
+                                const environmentName = beginMatch[1];
+                                return {
+                                    suggestions: [{
+                                        label: `Auto-close \\end{${environmentName}}`,
+                                        kind: monaco.languages.CompletionItemKind.Snippet,
+                                        insertText: `\n\t$0\n\\end{${environmentName}}`,
+                                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                                        documentation: `Auto-close with \\end{${environmentName}}`,
+                                        range: {
+                                            startLineNumber: position.lineNumber,
+                                            startColumn: position.column,
+                                            endLineNumber: position.lineNumber,
+                                            endColumn: position.column
+                                        }
+                                    }]
+                                };
+                            }
+
+                            return { suggestions: [] };
+                        }
+                    });
+
                     // Create the editor
                     monacoRef.current = monaco.editor.create(editorRef.current, {
                         value: value,
