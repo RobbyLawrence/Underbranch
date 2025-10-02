@@ -434,7 +434,9 @@
                                 </button>
                             </div>
                             <div class="forgot-password">
-                                <a href="#">Forgot password?</a>
+                                <button id="forgotPassword">
+                                    Forgot Password?
+                                </button>
                             </div>
                         </div>
 
@@ -1005,6 +1007,13 @@
                     "error",
                 );
             });
+            document
+                .getElementById("forgotPassword")
+                .addEventListener("click", () => {
+                    alert(
+                        "This feature is not implemented yet. Please check back later, or contact admin@underbranch.org!",
+                    );
+                });
         </script>
     </body>
 </html>
