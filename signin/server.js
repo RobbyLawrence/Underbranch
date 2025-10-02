@@ -33,7 +33,7 @@ const pool = mysql.createPool(dbConfig);
 // CORS: robust whitelist function + preflight handling
 // --------------------
 const WHITELIST = new Set([
-    "http://localhost:3001", // dev (your server if you serve front on same port)
+    "http://localhost:3001", // dev
     "http://localhost:3000", // common dev port
     "http://localhost:8080",
     "https://underbranch.org", // production front-end origin
@@ -78,10 +78,7 @@ app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use("/signin", express.static(path.join(__dirname))); // Serve static files under the path
 
-// --------------------
-// rest of your code remains the same
-// (initializeDatabase, verifyGoogleToken, saveUserToDatabase, routes, error handlers...)
-// --------------------
+// (initializeDatabase, verifyGoogleToken, saveUserToDatabase, routes, error handlers)
 
 // Initialize database
 async function initializeDatabase() {
