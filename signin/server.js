@@ -63,7 +63,6 @@ const WHITELIST = new Set([
     "http://localhost:8080",
     "https://underbranch.org",
     "http://underbranch.org",
-    "https://underbranch.com",
 ]);
 
 const corsOptions = {
