@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>User Search</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 2em;
+            }
+            input {
+                padding: 0.5em;
+                width: 300px;
+            }
+            table {
+                border-collapse: collapse;
+                margin-top: 1em;
+                width: 100%;
+            }
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 0.5em;
+                text-align: left;
+            }
+            th {
+                background: #f4f4f4;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>User Search</h1>
+        <input
+            type="text"
+            id="searchBox"
+            placeholder="Search by name, email, or ID..."
+        />
+        <button onclick="searchUsers()">Search</button>
+
+        <table id="resultsTable" style="display: none">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Google ID</th>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>First Login</th>
+                    <th>Last Login</th>
+                    <th>Login Count</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+
+        <script>
+            let users = [];
+
+            // Load all users when the page opens
+            async function loadUsers() {
+                try {
+                    const res = await fetch("../api/users");
+                    const data = await res.json();
+                    users = data.users;
+                } catch (err) {
+                    alert("Error fetching users: " + err);
+                }
+            }
+
+            function searchUsers() {
+                const query = document
+                    .getElementById("searchBox")
+                    .value.toLowerCase();
+                const results = users.filter(
+                    (u) =>
+                        u.id.toString().includes(query) ||
+                        u.name.toLowerCase().includes(query) ||
+                        u.email.toLowerCase().includes(query),
+                );
+
+                const resultsTable = document.getElementById("resultsTable");
+                const resultsBody = document.getElementById("resultsBody");
+                resultsBody.innerHTML = "";
+
+                if (results.length > 0) {
+                    results.forEach((u) => {
+                        const row = `<tr>
+            <td>${u.id}</td>
+            <td>${u.google_id}</td>
+            <td>${u.email}</td>
+            <td>${u.name}</td>
+            <td>${new Date(u.first_login).toLocaleString()}</td>
+            <td>${new Date(u.last_login).toLocaleString()}</td>
+            <td>${u.login_count}</td>
+          </tr>`;
+                        resultsBody.innerHTML += row;
+                    });
+                    resultsTable.style.display = "table";
+                } else {
+                    resultsTable.style.display = "none";
+                    alert("No users found.");
+                }
+            }
+
+            loadUsers();
+        </script>
+    </body>
+</html>
