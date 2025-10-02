@@ -43,6 +43,23 @@
             margin-left: auto;
         }
 
+        /* viewmode-indicator removed for production look */
+
+        /* Explicit split rules to ensure panes share space equally and
+           avoid overlap (helps when Monaco or other editors don't
+           immediately reflow). */
+        .editor-pane.split {
+            display: block;
+            flex: 1 1 50%;
+            min-width: 0; /* allow shrinking */
+        }
+
+        .preview-pane.split {
+            display: block;
+            flex: 1 1 50%;
+            min-width: 0;
+        }
+
         .btn {
             padding: 8px 12px;
             border: none;
@@ -97,6 +114,12 @@
             flex: 1;
         }
 
+        /* When a pane is hidden we remove it from layout but keep it in
+           the DOM so components (like Monaco) remain mounted. */
+        .hidden {
+            display: none !important;
+        }
+
         #monaco-editor {
             height: 100%;
             width: 100%;
@@ -129,7 +152,7 @@
     <!-- Monaco Editor -->
     <script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
 
-    <!-- Our bundled JavaScript -->
-    <script src="/frontend/dist/bundle.js"></script>
+    <!-- Our bundled JavaScript (use the editor build output) -->
+    <script src="/frontend/editor/public/dist/bundle.js"></script>
 </body>
 </html>
