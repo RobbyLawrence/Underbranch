@@ -33,6 +33,6 @@ The main issue I encountered while trying to fix the view mode switching was fin
 * Underbranch/Dockerfile
 
 ### Use of AI and/or 3rd party software
-* AI was very useful in this sprint because it helped me spot the bug with the view mode. I used Co-Pilot, which was able to look through all the files and identify the issue. The change it proposed did not work, but since it pointed me right to the bug, it didn't take long get it working correctly.
+AI was very useful in this sprint because it helped me spot the bug with the view mode. I used Co-Pilot, which was able to look through all the files and identify the issue. The change it proposed did not work, but since it pointed me right to the bug, it didn't take long get it working correctly.
 ### What you accomplished
 For this sprint, it was my responsibility to fix the display error with the "Editor" and "Split" options on the editor. I was able to spot and fix the bug as well as add a development testing server, to prevent pushing/pulling every time you want to check your progress. I also ended up getting Docker to run through ssh on the XPS (website server).
