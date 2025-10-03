@@ -11,7 +11,7 @@
 
 ### What you did not do
 * We met all of our sprint goals, but I will include some features we hope to get done by sprint 2.
-* Set up Docker container that will run TexLive for accurate compilation. 
+* Set up Docker container with TexLive for accurate compilation. 
 * Add "Compile" option to the editor.
 * Connect sign-in page to underbranch.org
 ### What problems you encountered
@@ -20,8 +20,8 @@ The main issue I encountered while trying to fix the view mode switching was fin
 ### Issues you worked on
 * We did not use the Issues function on Github for this sprint, but we will make sure to use it on the next.
 * [View Mode Error #8](https://github.com/RobbyLawrence/Underbranch/issues/8)
-*  [View Mode Error #14](https://github.com/RobbyLawrence/Underbranch/issues/14)
-* [View Mode Error #15](https://github.com/RobbyLawrence/Underbranch/issues/15)
+* [Development Server #14](https://github.com/RobbyLawrence/Underbranch/issues/14)
+* [Docker Setup #15](https://github.com/RobbyLawrence/Underbranch/issues/15)
 
 ### Files you worked on
 * Underbranch/frontend/editor/dev-server.js
