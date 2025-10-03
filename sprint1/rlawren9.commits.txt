@@ -1,3 +1,0 @@
-Note: Issue with git blame is causing several files in the signin directory to appear such that Aaron created them. I wrote all files in Underbranch/signin/. For example, I modified  signin/index.html at b55b790, which occurred before 8b16a41, and yet it still says that Aaron created the file there. Not sure what happened there.
-
-Running git blame on each file says Aaron created them. However, it says that he has a separate account that ISN'T a collaborator on the repository that made the commits, despite him never touching the files nor having a separate account.
