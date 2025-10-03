@@ -1,1 +1,230 @@
-
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   1) require('dotenv').config();
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   2) const path = require('path');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   3) const express = require('express');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   4) const compression = require('compression');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   5) const cors = require('cors');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   6) const http = require('http');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   7) const { Server } = require('socket.io');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   8)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   9) const app = express();
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  10) const PORT = process.env.PORT || 3001;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  11)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  12) // Middleware
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  13) app.use(compression());
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  14) app.use(cors());
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  15) app.use(express.json());
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  16)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  17) // Serve collaborative demo from production-server/public at /collab
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  18) const collabPublic = path.join(__dirname, 'public');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  19) app.use('/collab', express.static(collabPublic));
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  20) app.get('/collab', (req, res) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  21)   res.sendFile(path.join(collabPublic, 'index.html'));
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  22) });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  23)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  24) // Serve built frontend (existing) if present
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  25) // Webpack writes frontend bundle to frontend/editor/public/dist/bundle.js
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  26) const frontendDist = path.join(__dirname, '..', 'frontend', 'editor', 'public', 'dist');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  27) if (require('fs').existsSync(frontendDist)) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  28)   app.use(express.static(frontendDist));
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  29)   // fallback to the editor index if a non-api route is requested
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  30)   app.get('*', (req, res, next) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  31)     const indexFile = path.join(__dirname, '..', 'frontend', 'editor', 'index.html');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  32)     res.sendFile(indexFile, (err) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  33)       if (err) next(err);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  34)     });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  35)   });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  36) }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  37)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  38) const server = http.createServer(app);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  39)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  40) // Socket.IO for collaborative editing with presence and cursor positions
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  41) const io = new Server(server, {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  42)   cors: {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  43)     origin: '*',
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  44)     methods: ['GET', 'POST'],
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  45)   },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  46) });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  47)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  48) // In-memory stores (not durable)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  49) const docs = new Map(); // room -> content string
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  50) const usersByRoom = new Map(); // room -> Map(socketId -> {id,name,color})
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  51)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  52) function randomColor() {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  53)   // pastel palette
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  54)   const hues = [200, 220, 260, 30, 10, 140, 340, 60];
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  55)   const h = hues[Math.floor(Math.random() * hues.length)];      
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  56)   return `hsl(${h} 70% 60%)`;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  57) }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  58)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  59) io.on('connection', (socket) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  60)   console.log('socket connected', socket.id);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  61) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  62)   socket.on('join', (room = 'default', userInfo = {}) => {      
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  63)     socket.join(room);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  64)     socket.room = room;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  65)     socket.user = {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  66)       id: socket.id,
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  67)       name: userInfo.name || `User-${socket.id.slice(0, 4)}`,   
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  68)       color: userInfo.color || randomColor(),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  69)     };
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  70)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  71)     if (!usersByRoom.has(room)) usersByRoom.set(room, new Map());
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  72)     usersByRoom.get(room).set(socket.id, socket.user);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  73)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  74)     // send current doc state
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  75)     const state = docs.get(room) || '';
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  76)     socket.emit('doc', state);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  77)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  78)     // broadcast updated presence list to room
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  79)     const users = Array.from(usersByRoom.get(room).values());   
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  80)     io.to(room).emit('presence', users);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  81)   });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  82)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  83)   socket.on('content', ({ room = socket.room, content }) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  84)     if (!room) return;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  85)     docs.set(room, content);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  86)     socket.to(room).emit('content', content);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  87)   });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  88)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  89)   socket.on('cursor', ({ room = socket.room, rect }) => {       
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  90)     if (!room) return;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  91)     // rect should be {x,y,height,width} relative to viewport   
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  92)     const payload = { id: socket.id, user: socket.user, rect }; 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  93)     socket.to(room).emit('cursor', payload);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  94)   });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  95)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  96)   socket.on('disconnect', () => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  97)     console.log('socket disconnected', socket.id);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  98)     const room = socket.room;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  99)     if (room && usersByRoom.has(room)) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 100)       usersByRoom.get(room).delete(socket.id);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 101)       const users = Array.from(usersByRoom.get(room).values()); 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 102)       io.to(room).emit('presence', users);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 103)       io.to(room).emit('leave', socket.id);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 104)     }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 105)   });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 106) });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 107)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 108) server.listen(PORT, () => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 109)   console.log(`Underbranch production server listening on port ${PORT}`);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 110)   console.log(`Serving frontend from: ${frontendDist}`);        
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 111) });
+PS C:\Users\aaron\Desktop\Underbranch-main> git blame production-server/package.json
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  1) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  2)   "name": "underbranch-production-server",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  3)   "version": "1.0.0",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  4)   "description": "Minimal production server to serve built frontend and provide Socket.IO collaboration",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  5)   "main": "server.js",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  6)   "scripts": {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  7)     "start": "node server.js",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  8)     "dev": "nodemon server.js",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  9)     "build-frontend": "cd ../frontend/editor && npm install && npm run build",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 10)     "setup-auth": "cd ../signin && npm install",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 11)     "full-setup": "npm run build-frontend && npm run setup-auth && npm install",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 12)     "start-with-setup": "npm run full-setup && npm start"        
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 13)   },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 14)   "dependencies": {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 15)     "compression": "^1.7.4",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 16)     "cors": "^2.8.5",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 17)     "dotenv": "^16.3.1",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 18)     "express": "^4.18.2",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 19)     "npm": "^11.6.0",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 20)     "socket.io": "^4.7.2",
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 21)     "start": "^5.1.0"
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 22)   },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 23)   "devDependencies": {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 24)     "nodemon": "^3.0.2"
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 25)   }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 26) }
+PS C:\Users\aaron\Desktop\Underbranch-main> git blame production-server/README.md
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  1) # Underbranch minimal production server
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  2)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  3) This folder contains a minimal Express + Socket.IO server to serve the built frontend and provide a simple collaborative editing socket room.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  4)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  5) How it works
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  6) - Serves static files from `../frontend/editor/public/dist` (webpack output path)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  7) - Provides a small Socket.IO interface:
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  8)   - `join` (room) — join a document room, server responds with current `doc` state
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  9)   - `update` ({room, content}) — broadcast content to other clients in the room
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 10)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 11) ## Complete Setup Instructions
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 12)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 13) ### Prerequisites
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 14) - Node.js installed (check with `node --version`)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 15)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 16) ### Step-by-Step Setup
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 17)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 18) **1. Build the frontend editor:**
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 19) ```powershell
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 20) cd ../frontend/editor
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 21) npm install
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 22) npm run build
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 23) ```
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 24)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 25) **2. Set up the authentication server:**
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 26) ```powershell
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 27) cd ../signin
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 28) npm install
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 29) ```
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 30)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 31) **3. Set up and start the production server:**
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 32) ```powershell
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 33) cd ../production-server
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 34) npm install
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 35) npm start
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 36) ```
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 37)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 38) **4. Start the auth server (in a separate terminal):**
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 39) ```powershell
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 40) cd signin
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 41) npm start
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 42) ```
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 43)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 44) ### Quick Commands Summary
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 45) From the root directory (`Underbranch-main`):
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 46)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 47) ```powershell
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 48) # Terminal 1 - Build frontend and start production server        
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 49) cd frontend\editor && npm install && npm run build && cd ..\..\production-server && npm install && npm start
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 50)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 51) # Terminal 2 - Start authentication server
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 52) cd signin && npm install && npm start
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 53) ```
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 54)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 55) ### Access Points
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 56) - Main Application: http://localhost:3001
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 57) - Auth Server: Check the signin terminal for port information    
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 58)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 59) Default production server port: 3001 (set `PORT` env var to change)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 60)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 61) Notes
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 62) - This server stores documents in memory (process memory). For production you should add persistence (database or Redis) if you want durable collaboration sessions.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 63) - In front of this server you can add Nginx for TLS termination and better static-file performance.
+PS C:\Users\aaron\Desktop\Underbranch-main> git blame production-server/public/index.html
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  1) <!doctype html>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  2) <html lang="en">
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  3)   <head>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  4)     <meta charset="utf-8" />
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  5)     <meta name="viewport" content="width=device-width,initial-scale=1" />
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  6)     <title>Underbranch — Collaborative Text</title>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  7)     <link rel="stylesheet" href="/collab/style.css" />
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  8)   </head>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  9)   <body>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 10)     <div id="app">
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 11)       <header>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 12)         <h1>Collaborative Text Box</h1>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 13)         <div id="presence" class="presence"></div>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 14)       </header>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 15)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 16)       <main>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 17)         <div class="editor-wrap">
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 18)           <textarea id="editor" placeholder="Start typing..."></textarea>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 19)           <div id="cursors" class="cursors"></div>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 20)         </div>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 21)       </main>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 22)     </div>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 23)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 24)     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 25)     <script src="/collab/client.js"></script>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 26)   </body>
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 27) </html>
