@@ -1,8 +1,8 @@
 # Sprint 1
 
-Name: Paul Davis
-Github ID: pau1davis
-Group: Underbranch
+- Name: Paul Davis
+- Github ID: pau1davis
+- Group: Underbranch
 
 ### What you planned to do
 * Fix view mode switching. (Display error) [Issue #8](https://github.com/RobbyLawrence/Underbranch/issues/8)
