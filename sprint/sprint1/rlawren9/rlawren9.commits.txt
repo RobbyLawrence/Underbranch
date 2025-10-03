@@ -1,0 +1,748 @@
+Note: Issue with git blame is causing several files in the signin directory to appear such that Aaron created them. I wrote all files in Underbranch/signin/. For example, I modified  signin/index.html at b55b790, which occurred before 8b16a41, and yet it still says that Aaron created the file there. Not sure what happened there.
+
+Running git blame on each file says Aaron created them. However, it says that he has a separate account that ISN'T a collaborator on the repository that made the commits, despite him never touching the files nor having a separate account.
+
+I went back to the commits I made before this abornormality and took the git blame from these commits.
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   1) <!doctype html>
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400   2) <html lang="en">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   3)     <head>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   4)         <meta charset="UTF-8" />
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   5)         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   6)         <title>Sign In - Underbranch</title>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   7)         <style>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   8)             * {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400   9)                 margin: 0;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  10)                 padding: 0;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  11)                 box-sizing: border-box;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  12)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  13)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  14)             body {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  15)                 font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  16)                 min-height: 100vh;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  17)                 display: flex;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  18)                 justify-content: center;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  19)                 align-items: center;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  20)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  21)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  22)             .container {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  23)                 background: white;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  24)                 padding: 2rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  25)                 border-radius: 16px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  26)                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  27)                 text-align: center;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  28)                 min-width: 400px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  29)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  30)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  31)             h1 {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  32)                 color: #333;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  33)                 margin-bottom: 2rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  34)                 font-size: 2rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  35)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  36)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  37)             .auth-section {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  38)                 margin: 2rem 0;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  39)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  40)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  41)             #signInButton {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  42)                 background: #4285f4;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  43)                 color: white;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  44)                 border: none;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  45)                 padding: 12px 24px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  46)                 border-radius: 8px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  47)                 font-size: 16px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  48)                 cursor: pointer;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  49)                 display: flex;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  50)                 align-items: center;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  51)                 justify-content: center;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  52)                 gap: 10px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  53)                 margin: 0 auto;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  54)                 transition: background-color 0.3s;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  55)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  56)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  57)             #signInButton:hover {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  58)                 background: #3367d6;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  59)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  60)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  61)             #signInButton:disabled {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  62)                 background: #ccc;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  63)                 cursor: not-allowed;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  64)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  65)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  66)             .user-info {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  67)                 background: #f8f9fa;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  68)                 padding: 1.5rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  69)                 border-radius: 8px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  70)                 margin-top: 1rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  71)                 text-align: left;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  72)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  73)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  74)             .user-info h3 {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  75)                 color: #333;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  76)                 margin-bottom: 1rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  77)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  78)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  79)             .info-row {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  80)                 display: flex;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  81)                 justify-content: space-between;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  82)                 margin-bottom: 0.5rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  83)                 padding: 0.5rem 0;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  84)                 border-bottom: 1px solid #e9ecef;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  85)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  86)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  87)             .info-row:last-child {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  88)                 border-bottom: none;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  89)                 margin-bottom: 0;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  90)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  91)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  92)             .label {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  93)                 font-weight: 600;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  94)                 color: #495057;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  95)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400  96)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  97)             .value {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  98)                 color: #6c757d;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400  99)                 word-break: break-all;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 100)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 101)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 102)             .status {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 103)                 padding: 1rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 104)                 border-radius: 8px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 105)                 margin-top: 1rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 106)                 font-weight: 500;
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 107)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 108)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 109)             .status.success {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 110)                 background: #d4edda;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 111)                 color: #155724;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 112)                 border: 1px solid #c3e6cb;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 113)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 114)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 115)             .status.error {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 116)                 background: #f8d7da;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 117)                 color: #721c24;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 118)                 border: 1px solid #f5c6cb;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 119)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 120)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 121)             .status.loading {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 122)                 background: #d1ecf1;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 123)                 color: #0c5460;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 124)                 border: 1px solid #bee5eb;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 125)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 126)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 127)             #signOutButton {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 128)                 background: #dc3545;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 129)                 color: white;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 130)                 border: none;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 131)                 padding: 8px 16px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 132)                 border-radius: 6px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 133)                 font-size: 14px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 134)                 cursor: pointer;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 135)                 margin-top: 1rem;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 136)                 transition: background-color 0.3s;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 137)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 138)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 139)             #signOutButton:hover {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 140)                 background: #c82333;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 141)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 142)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 143)             .hidden {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 144)                 display: none;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 145)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 146)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 147)             .google-icon {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 148)                 width: 20px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 149)                 height: 20px;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 150)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 151)         </style>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 152)     </head>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 153)     <body>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 154)         <div class="container">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 155)             <h1>Sign In to Underbranch</h1>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 156)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 157)             <div class="auth-section">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 158)                 <button id="signInButton">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 159)                     <svg class="google-icon" viewBox="0 0 24 24">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 160)                         <path
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 161)                             fill="currentColor"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 162)                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 163)                         />
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 164)                         <path
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 165)                             fill="currentColor"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 166)                             d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 167)                         />
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 168)                         <path
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 169)                             fill="currentColor"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 170)                             d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 171)                         />
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 172)                         <path
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 173)                             fill="currentColor"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 174)                             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 175)                         />
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 176)                     </svg>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 177)                     Sign in with Google
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 178)                 </button>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 179)             </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 180)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 181)             <div id="userInfo" class="hidden">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 182)                 <div class="user-info">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 183)                     <h3>User Information</h3>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 184)                     <div class="info-row">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 185)                         <span class="label">Name:</span>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 186)                         <span class="value" id="userName"></span>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 187)                     </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 188)                     <div class="info-row">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 189)                         <span class="label">Email:</span>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 190)                         <span class="value" id="userEmail"></span>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 191)                     </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 192)                     <div class="info-row">
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 193)                         <span class="label">ID:</span>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 194)                         <span class="value" id="userId"></span>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 195)                     </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 196)                 </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 197)                 <button id="signOutButton">Sign Out</button>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 198)             </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 199)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 200)             <div id="status"></div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 201)         </div>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 202)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 203)         <!-- Google Sign-In API -->
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 204)         <script
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 205)             src="https://accounts.google.com/gsi/client"
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 206)             async
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 207)             defer
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 208)         ></script>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 209)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 210)         <script>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 211)             // Configuration - Replace with your actual Google Client ID
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 212)             const GOOGLE_CLIENT_ID =
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 213)                 "679589263803-d9nhrtmnor1m4l3a96revqfb4q09oe5v.apps.googleusercontent.com";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 215)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 216)             let currentUser = null;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 217)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 218)             // Initialize Google Sign-In when the page loads
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 219)             window.onload = function () {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 220)                 google.accounts.id.initialize({
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 221)                     client_id: GOOGLE_CLIENT_ID,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 222)                     callback: handleCredentialResponse,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 223)                     auto_select: false,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 224)                     cancel_on_tap_outside: true,
+45757161 helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:47:24 -0400 225)                 });
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 226)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 227)                 // Render the sign-in button
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 228)                 google.accounts.id.renderButton(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 229)                     document.getElementById("signInButton"),
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 230)                     {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 231)                         theme: "filled_blue",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 232)                         size: "large",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 233)                         text: "signin_with",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 234)                         shape: "rectangular",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 235)                         width: 250,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 236)                     },
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 237)                 );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 238)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 239)                 // Setup sign out button
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 240)                 document
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 241)                     .getElementById("signOutButton")
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 242)                     .addEventListener("click", signOut);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 243)             };
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 244)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 245)             // Handle the credential response from Google
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 246)             async function handleCredentialResponse(response) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 247)                 try {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 248)                     showStatus("Authenticating with Google...", "loading");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 249)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 250)                     // Decode the JWT token to get user info
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 251)                     const userInfo = parseJwt(response.credential);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 252)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 253)                     // Display user information
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 254)                     displayUserInfo(userInfo);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 255)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 256)                     // Send the token to your backend for verification and database storage
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 257)                     await sendToBackend(response.credential, userInfo);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 258)                 } catch (error) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 259)                     console.error("Authentication error:", error);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 260)                     showStatus(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 261)                         "Authentication failed: " + error.message,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 262)                         "error",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 263)                     );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 264)                 }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 265)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 266)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 267)             // Parse JWT token (for display purposes only - backend should verify)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 268)             function parseJwt(token) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 269)                 const base64Url = token.split(".")[1];
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 270)                 const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 271)                 const jsonPayload = decodeURIComponent(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 272)                     atob(base64)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 273)                         .split("")
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 274)                         .map(function (c) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 275)                             return (
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 276)                                 "%" +
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 277)                                 ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 278)                             );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 279)                         })
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 280)                         .join(""),
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 281)                 );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 282)                 return JSON.parse(jsonPayload);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 283)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 284)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 285)             // Display user information on the page
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 286)             function displayUserInfo(userInfo) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 287)                 currentUser = userInfo;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 288)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 289)                 document.getElementById("userName").textContent =
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 290)                     userInfo.name || "N/A";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 291)                 document.getElementById("userEmail").textContent =
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 292)                     userInfo.email || "N/A";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 293)                 document.getElementById("userId").textContent =
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 294)                     userInfo.sub || "N/A";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 295)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 296)                 document.getElementById("signInButton").style.display = "none";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 297)                 document.getElementById("userInfo").classList.remove("hidden");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 298)             }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 299)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 300)             // Send authentication data to backend
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 301)             async function sendToBackend(credential, userInfo) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 302)                 try {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 303)                     showStatus("Saving to database...", "loading");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 304)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 305)                     const response = await fetch(API_ENDPOINT, {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 306)                         method: "POST",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 307)                         headers: {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 308)                             "Content-Type": "application/json",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 309)                         },
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 310)                         body: JSON.stringify({
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 311)                             credential: credential,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 312)                             userInfo: userInfo,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 313)                         }),
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 314)                     });
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 315)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 316)                     const result = await response.json();
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 317)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 318)                     if (response.ok) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 319)                         showStatus(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 320)                             "Successfully authenticated and saved to database!",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 321)                             "success",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 322)                         );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 323)                     } else {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 324)                         throw new Error(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 325)                             result.error || "Server error occurred",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 326)                         );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 327)                     }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 328)                 } catch (error) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 329)                     console.error("Backend error:", error);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 330)                     showStatus(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 331)                         "Failed to save to database: " + error.message,
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 332)                         "error",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 333)                     );
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 334)                 }
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 335)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 336)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 337)             // Sign out function
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 338)             function signOut() {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 339)                 google.accounts.id.disableAutoSelect();
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 340)                 currentUser = null;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 341)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 342)                 document.getElementById("signInButton").style.display = "flex";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 343)                 document.getElementById("userInfo").classList.add("hidden");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 344)                 document.getElementById("status").innerHTML = "";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 345)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 346)                 showStatus("Signed out successfully", "success");
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 347)                 setTimeout(() => {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 348)                     document.getElementById("status").innerHTML = "";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 349)                 }, 2000);
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 350)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 351)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 352)             // Show status messages
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 353)             function showStatus(message, type) {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 354)                 const statusDiv = document.getElementById("status");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 355)                 statusDiv.textContent = message;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 356)                 statusDiv.className = `status ${type}`;
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 357)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 358)                 if (type === "success") {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 359)                     setTimeout(() => {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 360)                         statusDiv.innerHTML = "";
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 361)                     }, 3000);
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 362)                 }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 363)             }
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 364)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 365)             // Handle network errors
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 366)             window.addEventListener("online", function () {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 367)                 showStatus("Connection restored", "success");
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 368)             });
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 369)
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 370)             window.addEventListener("offline", function () {
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 371)                 showStatus(
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 372)                     "Connection lost - please check your internet",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 373)                     "error",
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 374)                 );
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 375)             });
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 376)         </script>
+85f73336 helloplus/rlawren9/index.html (Robby Lawrence     2025-09-16 19:47:08 -0400 377)     </body>
+2ccf7d8f helloplus/public/index.html   (Robby Lawrence     2025-09-16 12:31:57 -0400 378) </html>
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400   1) // server.js - Backend server for Google authentication and database logging
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400   2) const express = require("express");
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400   3) const { OAuth2Client } = require("google-auth-library");
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400   4) const mysql = require("mysql2/promise");
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400   5) const cors = require("cors");
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400   6) const path = require("path");
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400   7) require("dotenv").config();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400   8)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400   9) const app = express();
+45757161 helloplus/server.js          (Robby Lawrence     2025-09-16 12:47:24 -0400  10) const PORT = process.env.PORT || 3001; // Use 3001 to avoid conflicts
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  11)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  12) // Configuration
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  13) const GOOGLE_CLIENT_ID =
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  14)     process.env.GOOGLE_CLIENT_ID ||
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  15)     "679589263803-d9nhrtmnor1m4l3a96revqfb4q09oe5v.apps.googleusercontent.com";
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  16) const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  17)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  18) // Database configuration
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  19) const dbConfig = {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  20)     host: process.env.DB_HOST || "localhost",
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  21)     user: process.env.DB_USER || "root",
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  22)     password: process.env.DB_PASSWORD || "password",
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  23)     database: process.env.DB_NAME || "auth_test",
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  24)     waitForConnections: true,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  25)     connectionLimit: 10,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  26)     queueLimit: 0,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  27) };
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  28)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  29) // Create connection pool
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  30) const pool = mysql.createPool(dbConfig);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  31)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  78) app.use(express.json());
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  80)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  83) // Initialize database
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  84) async function initializeDatabase() {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  85)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  86)         // First connection without database to create it
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  87)         const tempConnection = await mysql.createConnection({
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  88)             host: dbConfig.host,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  89)             user: dbConfig.user,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  90)             password: dbConfig.password,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  91)         });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  92)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  93)         // Create database if it doesn't exist
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  94)         await tempConnection.execute(
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  95)             `CREATE DATABASE IF NOT EXISTS ${dbConfig.database}`,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400  96)         );
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  97)         await tempConnection.end();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  98)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400  99)         // Now connect to the specific database and create table
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 100)         const connection = await pool.getConnection();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 101)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 102)         // Create users table if it doesn't exist
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 103)         const createTableQuery = `
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 104)             CREATE TABLE IF NOT EXISTS users (
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 105)                 id INT AUTO_INCREMENT PRIMARY KEY,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 106)                 google_id VARCHAR(255) UNIQUE NOT NULL,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 107)                 email VARCHAR(255) NOT NULL,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 108)                 name VARCHAR(255),
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 109)                 picture_url TEXT,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 110)                 first_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 111)                 last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 112)                 login_count INT DEFAULT 1,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 113)                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 114)                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 115)             )
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 116)         `;
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 117)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 118)         await connection.execute(createTableQuery);
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 119)         console.log("Database and table initialized successfully");
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 120)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 121)         connection.release();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 122)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 123)         console.error("Database initialization error:", error);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 124)         throw error;
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 125)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 126) }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 127)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 128) // Verify Google token
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 129) async function verifyGoogleToken(token) {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 130)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 131)         const ticket = await client.verifyIdToken({
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 132)             idToken: token,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 133)             audience: GOOGLE_CLIENT_ID,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 134)         });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 135)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 136)         const payload = ticket.getPayload();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 137)         return payload;
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 138)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 139)         throw new Error("Invalid Google token");
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 140)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 141) }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 142)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 143) // Save user to database
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 144) async function saveUserToDatabase(userPayload) {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 145)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 146)         const connection = await pool.getConnection();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 147)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 148)         // Check if user already exists
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 149)         const [existingUsers] = await connection.execute(
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 150)             "SELECT * FROM users WHERE google_id = ?",
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 151)             [userPayload.sub],
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 152)         );
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 153)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 154)         if (existingUsers.length > 0) {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 155)             // Update existing user's last login and increment login count
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 156)             await connection.execute(
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 157)                 "UPDATE users SET last_login = CURRENT_TIMESTAMP, login_count = login_count + 1 WHERE google_id = ?",
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 158)                 [userPayload.sub],
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 159)             );
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 160)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 161)             console.log(`Updated existing user: ${userPayload.email}`);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 162)             connection.release();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 163)             return { isNewUser: false, user: existingUsers[0] };
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 164)         } else {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 165)             // Insert new user
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 166)             const insertQuery = `
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 167)                 INSERT INTO users (google_id, email, name, picture_url)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 168)                 VALUES (?, ?, ?, ?)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 169)             `;
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 170)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 171)             const [result] = await connection.execute(insertQuery, [
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 172)                 userPayload.sub,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 173)                 userPayload.email,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 174)                 userPayload.name,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 175)                 userPayload.picture,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 176)             ]);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 177)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 178)             console.log(`New user saved: ${userPayload.email}`);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 179)             connection.release();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 180)             return { isNewUser: true, userId: result.insertId };
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 181)         }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 182)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 183)         console.error("Database save error:", error);
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 184)         throw new Error("Failed to save user to database");
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 185)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 186) }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 187)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 188) // Routes
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 189)
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 192)     res.sendFile(path.join(__dirname, "index.html"));
+45757161 helloplus/server.js          (Robby Lawrence     2025-09-16 12:47:24 -0400 193) });
+45757161 helloplus/server.js          (Robby Lawrence     2025-09-16 12:47:24 -0400 194)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 195) // Google authentication endpoint
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 197)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 198)         const { credential } = req.body;
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 199)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 200)         if (!credential) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 201)             return res.status(400).json({ error: "No credential provided" });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 202)         }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 203)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 204)         // Verify the Google token
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 205)         const userPayload = await verifyGoogleToken(credential);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 206)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 207)         // Save user to database
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 208)         const saveResult = await saveUserToDatabase(userPayload);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 209)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 210)         // Send response
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 211)         res.json({
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 212)             success: true,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 213)             message: saveResult.isNewUser
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 214)                 ? "New user created"
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 215)                 : "User logged in",
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 216)             user: {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 217)                 id: userPayload.sub,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 218)                 email: userPayload.email,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 219)                 name: userPayload.name,
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 220)                 picture: userPayload.picture,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 221)                 isNewUser: saveResult.isNewUser,
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 222)             },
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 223)         });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 224)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 225)         console.error("Authentication error:", error);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 226)         res.status(401).json({ error: error.message });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 227)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 228) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 229)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 230) // Get all users (for testing purposes)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 232)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 233)         const connection = await pool.getConnection();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 234)         const [users] = await connection.execute(
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 235)             "SELECT id, google_id, email, name, first_login, last_login, login_count FROM users ORDER BY created_at DESC",
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 236)         );
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 237)         connection.release();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 238)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 239)         res.json({ users });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 240)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 241)         console.error("Get users error:", error);
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 242)         res.status(500).json({ error: "Failed to fetch users" });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 243)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 244) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 245)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 246) // Get user by ID
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 248)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 249)         const { id } = req.params;
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 250)         const connection = await pool.getConnection();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 251)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 252)         const [users] = await connection.execute(
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 253)             "SELECT * FROM users WHERE google_id = ? OR id = ?",
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 254)             [id, id],
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 255)         );
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 256)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 257)         connection.release();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 258)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 259)         if (users.length === 0) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 260)             return res.status(404).json({ error: "User not found" });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 261)         }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 262)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 263)         res.json({ user: users[0] });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 264)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 265)         console.error("Get user error:", error);
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 266)         res.status(500).json({ error: "Failed to fetch user" });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 267)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 268) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 269)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 270) // Health check endpoint
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 272)     res.json({ status: "OK", timestamp: new Date().toISOString() });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 273) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 274)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 275) // Error handling middleware
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 276) app.use((error, req, res, next) => {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 277)     console.error("Unhandled error:", error);
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 278)     res.status(500).json({ error: "Internal server error" });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 279) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 280)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 281) // 404 handler
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 282) app.use((req, res) => {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 283)     res.status(404).json({ error: "Endpoint not found" });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 284) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 285)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 286) // Graceful shutdown
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 287) process.on("SIGTERM", async () => {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 288)     console.log("SIGTERM received, shutting down gracefully");
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 289)     await pool.end();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 290)     process.exit(0);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 291) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 292)
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 293) process.on("SIGINT", async () => {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 294)     console.log("SIGINT received, shutting down gracefully");
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 295)     await pool.end();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 296)     process.exit(0);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 297) });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 298)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 299) // Start server
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 300) async function startServer() {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 301)     try {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 302)         await initializeDatabase();
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 303)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 304)         app.listen(PORT, () => {
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 305)             console.log(`Server running on port ${PORT}`);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 306)             console.log(`Frontend: http://localhost:${PORT}`);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 311)         });
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 312)     } catch (error) {
+d5917553 helloplus/rlawren9/server.js (Robby Lawrence     2025-09-16 18:57:24 -0400 313)         console.error("Failed to start server:", error);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 314)         process.exit(1);
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 315)     }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 316) }
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 317)
+2ccf7d8f helloplus/server.js          (Robby Lawrence     2025-09-16 12:31:57 -0400 318) startServer();
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   1) <!doctype html>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   2) <html lang="en">
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   3)     <head>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   4)         <meta charset="UTF-8" />
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   5)         <title>User Search</title>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   6)         <style>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   7)             body {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   8)                 font-family: Arial, sans-serif;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000   9)                 margin: 2em;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  10)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  11)             input {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  12)                 padding: 0.5em;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  13)                 width: 300px;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  14)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  15)             table {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  16)                 border-collapse: collapse;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  17)                 margin-top: 1em;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  18)                 width: 100%;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  19)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  20)             th,
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  21)             td {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  22)                 border: 1px solid #ccc;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  23)                 padding: 0.5em;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  24)                 text-align: left;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  25)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  26)             th {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  27)                 background: #f4f4f4;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  28)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  29)         </style>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  30)     </head>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  31)     <body>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  32)         <h1>User Search</h1>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  33)         <input
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  34)             type="text"
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  35)             id="searchBox"
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  36)             placeholder="Search by name, email, or ID..."
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  37)         />
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  38)         <button onclick="searchUsers()">Search</button>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  39)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  40)         <table id="resultsTable" style="display: none">
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  41)             <thead>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  42)                 <tr>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  43)                     <th>ID</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  44)                     <th>Google ID</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  45)                     <th>Email</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  46)                     <th>Name</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  47)                     <th>First Login</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  48)                     <th>Last Login</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  49)                     <th>Login Count</th>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  50)                 </tr>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  51)             </thead>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  52)             <tbody id="resultsBody"></tbody>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  53)         </table>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  54)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  55)         <script>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  56)             let users = [];
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  57)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  58)             // Load all users when the page opens
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  59)             async function loadUsers() {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  60)                 try {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  61)                     const res = await fetch("../api/users");
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  62)                     const data = await res.json();
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  63)                     users = data.users;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  64)                 } catch (err) {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  65)                     alert("Error fetching users: " + err);
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  66)                 }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  67)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  68)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  69)             function searchUsers() {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  70)                 const query = document
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  71)                     .getElementById("searchBox")
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  72)                     .value.toLowerCase();
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  73)                 const results = users.filter(
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  74)                     (u) =>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  75)                         u.id.toString().includes(query) ||
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  76)                         u.name.toLowerCase().includes(query) ||
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  77)                         u.email.toLowerCase().includes(query),
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  78)                 );
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  79)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  80)                 const resultsTable = document.getElementById("resultsTable");
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  81)                 const resultsBody = document.getElementById("resultsBody");
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  82)                 resultsBody.innerHTML = "";
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  83)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  84)                 if (results.length > 0) {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  85)                     results.forEach((u) => {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  86)                         const row = `<tr>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  87)             <td>${u.id}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  88)             <td>${u.google_id}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  89)             <td>${u.email}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  90)             <td>${u.name}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  91)             <td>${new Date(u.first_login).toLocaleString()}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  92)             <td>${new Date(u.last_login).toLocaleString()}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  93)             <td>${u.login_count}</td>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  94)           </tr>`;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  95)                         resultsBody.innerHTML += row;
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  96)                     });
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  97)                     resultsTable.style.display = "table";
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  98)                 } else {
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000  99)                     resultsTable.style.display = "none";
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 100)                     alert("No users found.");
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 101)                 }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 102)             }
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 103)
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 104)             loadUsers();
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 105)         </script>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 106)     </body>
+468120d8 helloplus/rlawren9/users/index.html (Underbranch Server 2025-09-25 03:40:34 +0000 107) </html>
