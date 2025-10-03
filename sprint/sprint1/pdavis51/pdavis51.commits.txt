@@ -1,0 +1,551 @@
+All of the source code I've written has been edited since I wrote it, so 
+git blame doesn't show any of my work on the source code.
+
+frontend/editor/src/App.js 
+
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   1) // Pull React hooks off the global React object. This file assumes React is
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   2) // available globally (e.g. via a <script> tag or bundler that provides it).
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   3) const { useState, useEffect } = React;
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   4) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   5) // Main application component. This is a small, non-JSX React component that
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   6) // uses React.createElement to build the UI. It wires together three pieces:
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   7) // - Toolbar: lets the user switch view modes and perform actions
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   8) // - LaTeXEditor: an editor component for editing LaTeX source
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   9) // - PreviewPane: renders the LaTeX source as HTML or a preview
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  10) const App = () => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  11)     // latexCode holds the current LaTeX source the user is editing. We
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  12)     // initialize it with a small sample document so the preview shows
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  13)     // something on first load.
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  14)     const [latexCode, setLatexCode] = useState(`\\documentclass{article}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  15) \\usepackage[utf8]{inputenc}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  16) \\title{My LaTeX Document}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  17) \\author{Author Name}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  18) \\date{\\today}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  19) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  20) \\begin{document}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  21) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  22) \\maketitle
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  23) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  24) \\section{Introduction}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  25) This is a sample LaTeX document. You can edit this text in the editor.
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  26) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  27) \\section{Mathematical Equations}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  28) Here's a mathematical equation:
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  29) \\begin{equation}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  30) E = mc^2
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  31) \\end{equation}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  32) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  33) And an inline equation: $\\alpha + \\beta = \\gamma$
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  34) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  35) \\subsection{More Examples}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  36) \\begin{itemize}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  37) \\item First item
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  38) \\item Second item
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  39) \\item Third item
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  40) \\end{itemize}
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  41) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  42) \\end{document}`);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  43) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  44)     // viewMode controls which panes are visible. Possible values:
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  45)     // - 'editor'  -> only the editor is shown
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  46)     // - 'preview' -> only the preview is shown
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  47)     // - 'split'   -> both are shown side-by-side
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  48)     const [viewMode, setViewMode] = useState('split'); // 'editor', 'preview', 'split'
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  49) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  50)     // handleCodeChange is passed to the editor component. It receives the
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  51)     // new text value and updates the latexCode state. We guard against
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  52)     // undefined/null by falling back to an empty string.
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  53)     const handleCodeChange = (value) => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  54)         setLatexCode(value || '');
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  55)     };
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  56) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  57)     // Debug: log viewMode transitions so we can trace state changes while
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  58)     // reproducing the issue in the browser console.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  59)     useEffect(() => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  60)         console.log('[App] viewMode changed ->', viewMode);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  61)         // Also update the document title so the current mode is visible
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  62)         // in the browser tab (easy to spot without opening devtools).
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  63)         try {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  64)             document.title = `LaTeX Editor — ${viewMode}`;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  65)         } catch (e) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  66)             // ignore (server side or non-browser env)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  67)         }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  68)         // Trigger a resize event to nudge layout systems (Monaco, CSS)
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  69)         // to recompute sizes when the view mode changes.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  70)         try {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  71)             window.dispatchEvent(new Event('resize'));
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  72)         } catch (e) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  73)             // ignore in non-browser environments
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  74)         }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  75)     }, [viewMode]);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  76) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  77)     // The UI layout is built with React.createElement calls instead of JSX.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  78)     // To avoid layout glitches when switching modes we render both panes
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  79)     // consistently and toggle their visibility/size using explicit CSS
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  80)     // class names: 'split', 'full', or 'hidden'. This prevents frequent
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  81)     // unmount/remount of the editor which can cause Monaco/DOM layout issues.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  82)     const editorClass = viewMode === 'split' ? 'split' : (viewMode === 'editor' ? 'full' : 'hidden');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  83)     const previewClass = viewMode === 'split' ? 'split' : (viewMode === 'preview' ? 'full' : 'hidden');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  84) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  85)     const editorVisible = viewMode === 'split' || viewMode === 'editor';
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  86)     const previewVisible = viewMode === 'split' || viewMode === 'preview';
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  87) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  88)     return React.createElement('div', { className: 'app' },
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  89)         React.createElement(Toolbar, {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  90)             viewMode: viewMode,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  91)             onViewModeChange: setViewMode,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  92)             latexCode: latexCode
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  93)         }),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  94) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  95)         React.createElement('div', { className: `editor-container mode-${viewMode}` },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  96)             // Editor pane is always present but may be hidden via the
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  97)             // 'hidden' class. This keeps Monaco mounted and stable.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  98)             React.createElement('div', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  99)                 className: `editor-pane ${editorClass}`
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 100)             },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 101)                 React.createElement(LaTeXEditor, {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 102)                     value: latexCode,
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 103)                     onChange: handleCodeChange,
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 104)                     isVisible: editorVisible
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 105)                 })
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 106)             ),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 107) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 108)             // Preview pane is always present as well; it will be hidden
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 109)             // when not in 'preview' or 'split' modes.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 110)             React.createElement('div', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 111)                 className: `preview-pane ${previewClass}`
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 112)             },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 113)                 React.createElement(PreviewPane, {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 114)                     latexCode: latexCode
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 115)                 })
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 116)             )
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 117)         )
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 118)     );
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 119) };
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 120) 
+b88b40b4 (Ferrari     2025-10-02 08:27:52 -0400 121) export default App;
+
+git blame frontend/editor/src/index.js 
+
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  1) import Toolbar from './Toolbar.js';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  2) import LaTeXEditor from './LaTeXEditor.js';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  3) import PreviewPane from './PreviewPane.js';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  4) import App from './App.js';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  5) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  6) // Make components available globally for backward compatibility
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  7) window.Toolbar = Toolbar;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  8) window.LaTeXEditor = LaTeXEditor;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  9) window.PreviewPane = PreviewPane;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 10) window.App = App;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 11) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 12) // Function to initialize the app
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 13) const initializeApp = () => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 14)     try {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 15)         // Wait for React to be available
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 16)         if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 17)             const root = ReactDOM.createRoot(document.getElementById('root'));
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 18)             root.render(React.createElement(App));
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 19)         } else {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 20)             console.error('React or ReactDOM not loaded');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 21)         }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 22)     } catch (error) {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 23)         console.error('Error loading app:', error);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 24)         document.getElementById('root').innerHTML = `
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 25)             <div style="padding: 20px; text-align: center; color: red;">
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 26)                 <h2>Error Loading Editor</h2>
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 27)                 <p>There was an error loading the LaTeX editor. Please check the console for details.</p>
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 28)             </div>
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 29)         `;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 30)     }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 31) };
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 32) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 33) // Initialize when DOM is ready
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 34) if (document.readyState === 'loading') {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 35)     document.addEventListener('DOMContentLoaded', initializeApp);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 36) } else {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 37)     initializeApp();
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 38) }
+
+frontend/editor/src/LaTeXEditor.js 
+
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   1) const { useEffect, useRef } = React;
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   2) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   3) const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   4)     const editorRef = useRef(null);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   5)     const monacoRef = useRef(null);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400   6)     const layoutTimeout = useRef(null);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   7) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   8)     useEffect(() => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400   9)         // Initialize Monaco Editor
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  10)         if (window.require && !monacoRef.current) {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  11)             window.require.config({ paths: { vs: 'https://unpkg.com/monaco-editor@0.44.0/min/vs' } });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  12) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  13)             window.require(['vs/editor/editor.main'], () => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  14)                 if (editorRef.current && !monacoRef.current) {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  15)                     // Configure LaTeX language (basic syntax highlighting)
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  16)                     monaco.languages.register({ id: 'latex' });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  17) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  18)                     monaco.languages.setMonarchTokensProvider('latex', {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  19)                         tokenizer: {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  20)                             root: [
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  21)                                 [/\\[a-zA-Z@]+/, 'keyword'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  22)                                 [/\\begin\{[^}]+\}/, 'keyword'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  23)                                 [/\\end\{[^}]+\}/, 'keyword'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  24)                                 [/\$.*?\$/, 'string'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  25)                                 [/\\\(.*?\\\)/, 'string'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  26)                                 [/\\\[.*?\\\]/, 'string'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  27)                                 [/%.*$/, 'comment'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  28)                                 [/\{/, 'bracket'],
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  29)                                 [/\}/, 'bracket']
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  30)                             ]
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  31)                         }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  32)                     });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400  33) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  34)                     // Register completion provider for common LaTeX environments
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  35)                     monaco.languages.registerCompletionItemProvider('latex', {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  36)                         triggerCharacters: ['{'],
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  37)                         provideCompletionItems: (model, position) => {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  38)                             const lineContent = model.getLineContent(position.lineNumber);
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  39)                             const textBeforeCursor = lineContent.substring(0, position.column - 1);
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  40) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  41)                             // Check if we just typed \begin{
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  42)                             if (textBeforeCursor.match(/\\begin\{$/)) {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  43)                                 const environments = [
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  44)                                     'document', 'equation', 'align', 'itemize', 'enumerate',
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  45)                                     'figure', 'table', 'center', 'abstract', 'theorem',
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  46)                                     'proof', 'definition', 'lemma', 'corollary', 'example',
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  47)                                     'remark', 'verbatim', 'quote', 'tabular', 'array'
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  48)                                 ];
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  49) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  50)                                 return {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  51)                                     suggestions: environments.map(env => ({
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  52)                                         label: env,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  53)                                         kind: monaco.languages.CompletionItemKind.Snippet,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  54)                                         insertText: `${env}}\n\t$0\n\\end{${env}}`,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  55)                                         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  56)                                         documentation: `Insert ${env} environment`,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  57)                                         range: {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  58)                                             startLineNumber: position.lineNumber,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  59)                                             startColumn: position.column,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  60)                                             endLineNumber: position.lineNumber,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  61)                                             endColumn: position.column
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  62)                                         }
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  63)                                     }))
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  64)                                 };
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  65)                             }
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  66) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  67)                             return { suggestions: [] };
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  68)                         }
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  69)                     });
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  70) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  71)                     // Register completion provider for auto-closing \begin{...} with \end{...}
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  72)                     monaco.languages.registerCompletionItemProvider('latex', {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  73)                         triggerCharacters: ['}'],
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  74)                         provideCompletionItems: (model, position) => {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  75)                             const lineContent = model.getLineContent(position.lineNumber);
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  76)                             const textBeforeCursor = lineContent.substring(0, position.column - 1);
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  77) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  78)                             // Check if we just typed \begin{environmentName}
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  79)                             const beginMatch = textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  80) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  81)                             if (beginMatch) {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  82)                                 const environmentName = beginMatch[1];
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  83)                                 return {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  84)                                     suggestions: [{
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  85)                                         label: `Auto-close \\end{${environmentName}}`,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  86)                                         kind: monaco.languages.CompletionItemKind.Snippet,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  87)                                         insertText: `\n\t$0\n\\end{${environmentName}}`,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  88)                                         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  89)                                         documentation: `Auto-close with \\end{${environmentName}}`,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  90)                                         range: {
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  91)                                             startLineNumber: position.lineNumber,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  92)                                             startColumn: position.column,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  93)                                             endLineNumber: position.lineNumber,
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  94)                                             endColumn: position.column
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  95)                                         }
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  96)                                     }]
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  97)                                 };
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  98)                             }
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400  99) 
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400 100)                             return { suggestions: [] };
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400 101)                         }
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400 102)                     });
+c1ccf398 (Ferrari     2025-10-02 16:02:43 -0400 103) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 104)                     // Create the editor
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 105)                     monacoRef.current = monaco.editor.create(editorRef.current, {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 106)                         value: value,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 107)                         language: 'latex',
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 108)                         theme: 'vs-light',
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 109)                         fontSize: 14,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 110)                         lineNumbers: 'on',
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 111)                         roundedSelection: false,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 112)                         scrollBeyondLastLine: false,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 113)                         automaticLayout: true,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 114)                         minimap: { enabled: false },
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 115)                         wordWrap: 'on',
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 116)                         lineHeight: 20,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 117)                         padding: { top: 10, bottom: 10 }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 118)                     });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 119) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 120)                     // Listen for content changes
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 121)                     monacoRef.current.onDidChangeModelContent(() => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 122)                         const currentValue = monacoRef.current.getValue();
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 123)                         if (onChange) {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 124)                             onChange(currentValue);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 125)                         }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 126)                     });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 127)                 }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 128)             });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 129)         }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 130) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 131)         // Listen for clear editor event
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 132)         const handleClearEditor = () => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 133)             if (monacoRef.current) {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 134)                 monacoRef.current.setValue('');
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 135)             }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 136)         };
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 137) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 138)         window.addEventListener('clearEditor', handleClearEditor);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 139) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 140)         return () => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 141)             window.removeEventListener('clearEditor', handleClearEditor);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 142)             if (monacoRef.current) {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 143)                 monacoRef.current.dispose();
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 144)                 monacoRef.current = null;
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 145)             }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 146)         };
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 147)     }, []);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 148) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 149)     // Update editor value when prop changes
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 150)     useEffect(() => {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 151)         if (monacoRef.current && monacoRef.current.getValue() !== value) {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 152)             monacoRef.current.setValue(value);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 153)         }
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 154)     }, [value]);
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 155) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 156)     // When the editor becomes visible ensure Monaco recalculates layout.
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 157)     useEffect(() => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 158)         if (!monacoRef.current) return;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 159) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 160)         if (isVisible) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 161)             // Debounce a bit in case of rapid toggles
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 162)             if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 163)             layoutTimeout.current = setTimeout(() => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 164)                 try {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 165)                     monacoRef.current.layout();
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 166)                     console.log('[LaTeXEditor] called monaco.layout() because isVisible=true');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 167)                 } catch (e) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 168)                     console.warn('monaco.layout failed', e);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 169)                 }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 170)             }, 50);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 171)         }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 172) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 173)         return () => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 174)             if (layoutTimeout.current) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 175)                 clearTimeout(layoutTimeout.current);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 176)                 layoutTimeout.current = null;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 177)             }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 178)         };
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 179)     }, [isVisible]);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 180) 
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 181)     return React.createElement('div', {
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 182)         ref: editorRef,
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 183)         id: 'monaco-editor'
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 184)     });
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 185) };
+b045b9ad (Ferrari     2025-09-16 18:03:02 -0400 186) 
+b88b40b4 (Ferrari     2025-10-02 08:27:52 -0400 187) export default LaTeXEditor;
+
+frontend/editor/src/PreviewPane.js 
+
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   1) const PreviewPane = ({ latexCode }) => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   2)     const { useState, useEffect } = React;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   3)     const [processedContent, setProcessedContent] = useState('');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   4)     const [isLoading, setIsLoading] = useState(false);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   5) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   6)     // Simple LaTeX to HTML converter for basic preview
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   7)     const processLaTeX = (latex) => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   8)         setIsLoading(true);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400   9) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  10)         // Basic LaTeX processing - this is a simplified version
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  11)         let html = latex;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  12) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  13)         // Document structure
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  14)         html = html.replace(/\\documentclass\{[^}]+\}/, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  15)         html = html.replace(/\\usepackage(?:\[[^\]]*\])?\{[^}]+\}/g, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  16)         html = html.replace(/\\title\{([^}]+)\}/, '<h1 class="title">$1</h1>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  17)         html = html.replace(/\\author\{([^}]+)\}/, '<p class="author">By: $1</p>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  18)         html = html.replace(/\\date\{([^}]+)\}/, '<p class="date">$1</p>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  19)         html = html.replace(/\\maketitle/, '<div class="titlepage"></div>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  20) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  21)         // Sections
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  22)         html = html.replace(/\\section\{([^}]+)\}/g, '<h2>$1</h2>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  23)         html = html.replace(/\\subsection\{([^}]+)\}/g, '<h3>$1</h3>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  24)         html = html.replace(/\\subsubsection\{([^}]+)\}/g, '<h4>$1</h4>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  25) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  26)         // Math environments
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  27)         html = html.replace(/\\begin\{equation\}([\s\S]*?)\\end\{equation\}/g, '<div class="equation">$$1$</div>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  28)         html = html.replace(/\$([^$]+)\$/g, '<span class="math">$1</span>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  29) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  30)         // Lists
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  31)         html = html.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  32)             const items = content.replace(/\\item\s+/g, '<li>').split('<li>').filter(item => item.trim());
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  33)             return '<ul>' + items.map(item => '<li>' + item.trim() + '</li>').join('') + '</ul>';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  34)         });
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  35) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  36)         html = html.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  37)             const items = content.replace(/\\item\s+/g, '<li>').split('<li>').filter(item => item.trim());
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  38)             return '<ol>' + items.map(item => '<li>' + item.trim() + '</li>').join('') + '</ol>';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  39)         });
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  40) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  41)         // Text formatting
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  42)         html = html.replace(/\\textbf\{([^}]+)\}/g, '<strong>$1</strong>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  43)         html = html.replace(/\\textit\{([^}]+)\}/g, '<em>$1</em>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  44)         html = html.replace(/\\emph\{([^}]+)\}/g, '<em>$1</em>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  45) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  46)         // Clean up LaTeX commands and environments
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  47)         html = html.replace(/\\begin\{document\}/, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  48)         html = html.replace(/\\end\{document\}/, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  49)         html = html.replace(/\\[a-zA-Z]+(?:\[[^\]]*\])?\{[^}]*\}/g, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  50)         html = html.replace(/\\[a-zA-Z]+/g, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  51) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  52)         // Convert line breaks
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  53)         html = html.replace(/\n\s*\n/g, '</p><p>');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  54)         html = '<p>' + html + '</p>';
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  55)         html = html.replace(/<p>\s*<\/p>/g, '');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  56) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  57)         setProcessedContent(html);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  58)         setIsLoading(false);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  59)     };
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  60) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  61)     useEffect(() => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  62)         const timeoutId = setTimeout(() => {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  63)             processLaTeX(latexCode);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  64)         }, 500); // Debounce processing
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  65) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  66)         return () => clearTimeout(timeoutId);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  67)     }, [latexCode]);
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  68) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  69)     if (isLoading) {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  70)         return React.createElement('div', { className: 'loading' }, 'Processing LaTeX...');
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  71)     }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  72) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  73)     return React.createElement('div', { className: 'preview-content' },
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  74)         React.createElement('div', {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  75)             dangerouslySetInnerHTML: { __html: processedContent }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  76)         }),
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  77)         React.createElement('style', null, `
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  78)             .preview-content h1.title {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  79)                 text-align: center;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  80)                 margin-bottom: 10px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  81)                 font-size: 24px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  82)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  83)             .preview-content .author, .preview-content .date {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  84)                 text-align: center;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  85)                 margin: 5px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  86)                 color: #666;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  87)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  88)             .preview-content h2 {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  89)                 margin: 20px 0 10px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  90)                 color: #333;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  91)                 border-bottom: 1px solid #ddd;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  92)                 padding-bottom: 5px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  93)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  94)             .preview-content h3 {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  95)                 margin: 15px 0 8px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  96)                 color: #444;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  97)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  98)             .preview-content h4 {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400  99)                 margin: 12px 0 6px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 100)                 color: #555;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 101)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 102)             .preview-content p {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 103)                 margin: 10px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 104)                 line-height: 1.6;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 105)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 106)             .preview-content .equation {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 107)                 text-align: center;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 108)                 margin: 20px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 109)                 padding: 10px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 110)                 background: #f8f9fa;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 111)                 border-left: 4px solid #007bff;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 112)                 font-family: 'Times New Roman', serif;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 113)                 font-style: italic;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 114)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 115)             .preview-content .math {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 116)                 font-family: 'Times New Roman', serif;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 117)                 font-style: italic;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 118)                 background: #f0f0f0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 119)                 padding: 2px 4px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 120)                 border-radius: 3px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 121)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 122)             .preview-content ul, .preview-content ol {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 123)                 margin: 10px 0 10px 20px;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 124)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 125)             .preview-content li {
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 126)                 margin: 5px 0;
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 127)             }
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 128)         `)
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 129)     );
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 130) };
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 131) 
+b045b9ad (Ferrari 2025-09-16 18:03:02 -0400 132) export default PreviewPane;
+
+frontend/editor/src/Toolbar.js  
+
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  1) const Toolbar = ({ viewMode, onViewModeChange, latexCode }) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  2)     const handleDownload = () => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  3)         const blob = new Blob([latexCode], { type: 'text/plain' });
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  4)         const url = URL.createObjectURL(blob);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  5)         const a = document.createElement('a');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  6)         a.href = url;
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  7)         a.download = 'document.tex';
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  8)         document.body.appendChild(a);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400  9)         a.click();
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 10)         document.body.removeChild(a);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 11)         URL.revokeObjectURL(url);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 12)     };
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 13) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 14)     const handleClear = () => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 15)         if (confirm('Are you sure you want to clear the editor?')) {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 16)             onViewModeChange('editor');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 17)             // This will be handled by the parent component
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 18)             const event = new CustomEvent('clearEditor');
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 19)             window.dispatchEvent(event);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 20)         }
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 21)     };
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 22) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 23)     // Debug helpers - log button clicks
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 24)     const handleViewClick = (mode) => {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 25)         console.log('[Toolbar] button click ->', mode);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 26)         onViewModeChange(mode);
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 27)     };
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 28) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 29)     return React.createElement('div', { className: 'toolbar' },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 30)         React.createElement('h1', null, 'LaTeX Editor'),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 31)         React.createElement('div', { className: 'toolbar-buttons' },
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 32)             React.createElement('button', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 33)                 className: `btn ${viewMode === 'editor' ? 'btn-primary' : 'btn-secondary'}`,
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 34)                 onClick: () => handleViewClick('editor')
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 35)             }, 'Editor'),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 36)             React.createElement('button', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 37)                 className: `btn ${viewMode === 'split' ? 'btn-primary' : 'btn-secondary'}`,
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 38)                 onClick: () => handleViewClick('split')
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 39)             }, 'Split'),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 40)             React.createElement('button', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 41)                 className: `btn ${viewMode === 'preview' ? 'btn-primary' : 'btn-secondary'}`,
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 42)                 onClick: () => handleViewClick('preview')
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 43)             }, 'Preview'),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 44)             React.createElement('button', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 45)                 className: 'btn btn-secondary',
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 46)                 onClick: handleDownload
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 47)             }, 'Download'),
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 48)             React.createElement('button', {
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 49)                 className: 'btn btn-secondary',
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 50)                 onClick: handleClear
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 51)             }, 'Clear')
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 52)         )
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 53)     );
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 54) };
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 55) 
+^8b16a41 (Aaron Brown 2025-10-01 23:24:10 -0400 56) export default Toolbar;
