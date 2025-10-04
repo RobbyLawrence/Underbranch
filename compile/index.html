@@ -1,0 +1,190 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>LaTeX → PDF</title>
+        <style>
+            :root {
+                --gap: 12px;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    "Segoe UI",
+                    Roboto,
+                    "Helvetica Neue",
+                    Arial;
+            }
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+            .container {
+                display: flex;
+                height: 100vh;
+                gap: var(--gap);
+                padding: var(--gap);
+                box-sizing: border-box;
+            }
+            .panel {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+            .left {
+                border-right: 1px solid #eee;
+                padding-right: var(--gap);
+            }
+            h1 {
+                margin: 0 0 8px 0;
+                font-size: 16px;
+            }
+            textarea {
+                width: 100%;
+                height: 100%;
+                resize: none;
+                box-sizing: border-box;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+                    monospace;
+                font-size: 13px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+            }
+            .controls {
+                margin-top: 10px;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+            button {
+                padding: 8px 12px;
+                font-size: 14px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+            a.button {
+                text-decoration: none;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                display: inline-block;
+            }
+            #status {
+                color: #666;
+                font-size: 13px;
+            }
+            .right {
+                padding-left: var(--gap);
+                min-width: 0;
+            }
+            iframe {
+                width: 100%;
+                height: calc(100% - 32px);
+                border: 1px solid #ddd;
+                border-radius: 6px;
+            }
+            .note {
+                color: #666;
+                font-size: 13px;
+                margin-top: 6px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="panel left">
+                <h1>LaTeX source</h1>
+                <textarea id="latex" spellcheck="false">
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\begin{document}
+Hello, world!
+
+% Try editing and click "Compile to PDF"
+\end{document} </textarea
+                >
+
+                ```
+                <div class="controls">
+                    <button id="compileBtn">Compile to PDF</button>
+                    <a
+                        id="download"
+                        class="button"
+                        href="#"
+                        download="document.pdf"
+                        style="display: none"
+                        >Download PDF</a
+                    >
+                    <span id="status">Ready</span>
+                </div>
+            </div>
+
+            <div class="panel right">
+                <h1>PDF preview</h1>
+                <iframe id="pdfFrame" title="PDF preview"></iframe>
+            </div>
+            ```
+        </div>
+
+        <script>
+            const compileBtn = document.getElementById("compileBtn");
+            const status = document.getElementById("status");
+            const download = document.getElementById("download");
+            const pdfFrame = document.getElementById("pdfFrame");
+            const latexInput = document.getElementById("latex");
+
+            let currentUrl = null;
+
+            compileBtn.addEventListener("click", compile);
+
+            async function compile() {
+                compileBtn.disabled = true;
+                status.textContent = "Compiling…";
+                download.style.display = "none";
+
+                try {
+                    const latex = latexInput.value;
+                    const res = await fetch("/compile", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ latex }),
+                    });
+
+                    if (!res.ok) {
+                        // try to read JSON error, fall back to text
+                        let errText = "Unknown error";
+                        try {
+                            const j = await res.json();
+                            errText = j.error || JSON.stringify(j);
+                        } catch (e) {
+                            errText = await res.text();
+                        }
+                        status.textContent = "Error: " + errText;
+                        compileBtn.disabled = false;
+                        return;
+                    }
+
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    if (currentUrl) URL.revokeObjectURL(currentUrl);
+                    currentUrl = url;
+                    pdfFrame.src = url;
+                    download.href = url;
+                    download.style.display = "inline-block";
+                    status.textContent = "Compiled successfully";
+                } catch (err) {
+                    status.textContent =
+                        "Network error: " +
+                        (err && err.message ? err.message : String(err));
+                } finally {
+                    compileBtn.disabled = false;
+                }
+            }
+        </script>
+    </body>
+</html>
