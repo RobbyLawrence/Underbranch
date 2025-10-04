@@ -1,89 +1,47 @@
-// server.js
-
 const express = require("express");
+const bodyParser = require("body-parser");
 const fs = require("fs");
-const fsp = require("fs").promises;
-const os = require("os");
+const { exec } = require("child_process");
 const path = require("path");
-const { spawn } = require("child_process");
 
 const app = express();
 const PORT = 3002;
 
-app.use(express.json({ limit: "200kb" }));
+// Serve static frontend files from the compile/ directory
+app.use(express.static(path.join(__dirname)));
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
+// Parse JSON requests
+app.use(bodyParser.json());
 
-function runPdflatex(dir) {
-    return new Promise((resolve, reject) => {
-        const proc = spawn(
-            "pdflatex",
-            [
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                "-no-shell-escape",
-                "document.tex",
-            ],
-            { cwd: dir },
-        );
-
-        proc.on("error", reject);
-        proc.on("close", (code) => resolve(code));
-    });
-}
-
-app.post("/compile", async (req, res) => {
-    const latex = req.body.latex;
-    if (typeof latex !== "string") {
-        return res.status(400).json({ error: "Missing LaTeX source" });
+// POST to both /compile and /compile/ — compile LaTeX into PDF
+app.post(["/compile", "/compile/"], (req, res) => {
+    const latexCode = req.body.latex;
+    if (!latexCode) {
+        return res.status(400).send("No LaTeX code provided");
     }
 
-    let tmpDir;
-    try {
-        tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), "latex-"));
-        const texPath = path.join(tmpDir, "document.tex");
-        await fsp.writeFile(texPath, latex, "utf8");
+    const texFile = "document.tex";
+    fs.writeFileSync(texFile, latexCode);
 
-        const code1 = await runPdflatex(tmpDir);
-        if (code1 !== 0) {
-            return res
-                .status(400)
-                .json({ error: "pdflatex failed (first run)" });
-        }
-        const code2 = await runPdflatex(tmpDir);
-        if (code2 !== 0) {
-            return res
-                .status(400)
-                .json({ error: "pdflatex failed (second run)" });
-        }
+    exec(
+        `pdflatex -interaction=nonstopmode -halt-on-error ${texFile}`,
+        (error, stdout, stderr) => {
+            if (error) {
+                console.error(stderr);
+                return res.status(500).send("Compilation failed");
+            }
 
-        const pdfPath = path.join(tmpDir, "document.pdf");
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", 'inline; filename="document.pdf"');
-        const stream = fs.createReadStream(pdfPath);
-        stream.pipe(res);
+            const pdfFile = "document.pdf";
+            if (!fs.existsSync(pdfFile)) {
+                return res.status(500).send("PDF not generated");
+            }
 
-        const cleanup = async () => {
-            try {
-                await fsp.rm(tmpDir, { recursive: true, force: true });
-            } catch {}
-        };
-        stream.on("close", cleanup);
-        stream.on("end", cleanup);
-        stream.on("error", cleanup);
-    } catch (err) {
-        if (tmpDir) {
-            try {
-                await fsp.rm(tmpDir, { recursive: true, force: true });
-            } catch {}
-        }
-        console.error(err);
-        res.status(500).json({ error: "Internal server error" });
-    }
+            res.setHeader("Content-Type", "application/pdf");
+            fs.createReadStream(pdfFile).pipe(res);
+        },
+    );
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
