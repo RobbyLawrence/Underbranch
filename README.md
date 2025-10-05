@@ -100,3 +100,15 @@ npm install
 npm run build    # For production build
 npm run dev      # For development with watch mode
 ```
+
+## Running the Development Server
+
+To serve the LaTeX Editor locally on port 8080:
+
+```bash
+node frontend\editor\dev-server.js
+```
+
+Then access the editor at: **http://localhost:8080/**
+
+This development server serves the built React application and all necessary static assets from the correct paths.
