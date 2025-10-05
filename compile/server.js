@@ -8,6 +8,7 @@ const app = express();
 const PORT = 3002;
 
 // Serve static frontend files from the compile/ directory
+app.use("/compile", express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname)));
 
 // Parse JSON requests
