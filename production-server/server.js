@@ -1,5 +1,6 @@
 require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const compression = require('compression');
 const cors = require('cors');
@@ -14,6 +15,12 @@ app.use(compression());
 app.use(cors());
 app.use(express.json());
 
+// Simple request logger to help debug frontend loading issues
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} -> ${req.method} ${req.url}`);
+  next();
+});
+
 // Serve collaborative demo from production-server/public at /collab
 const collabPublic = path.join(__dirname, 'public');
 app.use('/collab', express.static(collabPublic));
@@ -26,8 +33,10 @@ app.get('/collab', (req, res) => {
 const frontendDist = path.join(__dirname, '..', 'frontend', 'editor', 'public', 'dist');
 if (require('fs').existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
-  // fallback to the editor index if a non-api route is requested
-  app.get('*', (req, res, next) => {
+  // support legacy index paths that reference frontend/dist/bundle.js
+  app.use('/frontend/dist', express.static(frontendDist));
+  // fallback to the editor index for non-API routes (avoid swallowing /api/*)
+  app.get(/^\/(?!api\/).*/, (req, res, next) => {
     const indexFile = path.join(__dirname, '..', 'frontend', 'editor', 'index.html');
     res.sendFile(indexFile, (err) => {
       if (err) next(err);
@@ -35,12 +44,51 @@ if (require('fs').existsSync(frontendDist)) {
   });
 }
 
+else {
+  // If no built frontend exists, serve the collab demo at root so testing is easier
+  app.get('/', (req, res) => {
+    const collabIndex = path.join(collabPublic, 'index.html');
+    if (fs.existsSync(collabIndex)) return res.sendFile(collabIndex);
+    return res.status(404).send('No frontend available - collab demo missing');
+  });
+}
+
+// Log static file 404s (helpful to see missing bundles)
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    if (res.statusCode === 404) {
+      console.warn(`STATIC_MISS: ${req.method} ${req.originalUrl} -> 404`);
+    }
+  });
+  next();
+});
+
+// Debug endpoints to inspect in-memory state when the frontend is stuck
+app.get('/api/status', (req, res) => {
+  res.json({
+    port: PORT,
+    frontendDistExists: fs.existsSync(frontendDist),
+    collabPublicExists: fs.existsSync(path.join(__dirname, 'public')),
+    env: process.env.NODE_ENV || 'development',
+  });
+});
+
+app.get('/api/docs', (req, res) => {
+  const rooms = [];
+  for (const [room, content] of docs.entries()) {
+    const users = usersByRoom.has(room) ? Array.from(usersByRoom.get(room).values()) : [];
+    rooms.push({ room, length: content.length, users });
+  }
+  res.json({ rooms });
+});
+
 const server = http.createServer(app);
 
 // Socket.IO for collaborative editing with presence and cursor positions
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    // allow local test origin (python http.server) and the node server itself
+    origin: ['http://localhost:8000', 'http://localhost:3001', '*'],
     methods: ['GET', 'POST'],
   },
 });
