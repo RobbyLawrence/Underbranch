@@ -147,7 +147,7 @@ Hello, world!
 
                 try {
                     const latex = latexInput.value;
-                    const res = await fetch("/compile/", {
+                    const res = await fetch("/compile", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ latex }),
