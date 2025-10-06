@@ -55,6 +55,14 @@ else {
 
 // Log static file 404s (helpful to see missing bundles)
 app.use((req, res, next) => {
+  // compatibility rewrite: some deployed HTML references
+  // /frontend/editor/frontend/dist/... due to relative paths. Remap
+  // those requests to /frontend/dist/... which is the actual location.
+  if (req.path.startsWith('/frontend/editor/frontend/dist/')) {
+    const newPath = req.path.replace('/frontend/editor/frontend/dist/', '/frontend/dist/');
+    console.log('REWRITE:', req.path, '->', newPath);
+    req.url = newPath + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+  }
   res.on('finish', () => {
     if (res.statusCode === 404) {
       console.warn(`STATIC_MISS: ${req.method} ${req.originalUrl} -> 404`);
@@ -93,6 +101,36 @@ const io = new Server(server, {
   },
 });
 
+// Log low-level handshake info to help diagnose production origin/CORS differences
+io.use((socket, next) => {
+  try {
+    const h = socket.handshake || {};
+    console.log('socket handshake', {
+      id: socket.id,
+      address: h.address || (socket.conn && socket.conn.remoteAddress),
+      headers: h.headers && {
+        origin: h.headers.origin,
+        referer: h.headers.referer || h.headers.referrer,
+        host: h.headers.host,
+        'user-agent': h.headers['user-agent'],
+      },
+      query: h.query,
+    });
+  } catch (err) {
+    console.warn('error logging handshake', err && err.message);
+  }
+  next();
+});
+
+// Listen for engine-level connection errors
+if (io.engine && io.engine.on) {
+  io.engine.on('connection', (engineSocket) => {
+    engineSocket.on('error', (err) => {
+      console.error('engine socket error', err && err.message);
+    });
+  });
+}
+
 // In-memory stores (not durable)
 const docs = new Map(); // room -> content string
 const usersByRoom = new Map(); // room -> Map(socketId -> {id,name,color})
@@ -103,6 +141,17 @@ function randomColor() {
   const h = hues[Math.floor(Math.random() * hues.length)];
   return `hsl(${h} 70% 60%)`;
 }
+
+// Receive client-side logs (console errors) from the website for diagnosis
+app.post('/api/client-log', (req, res) => {
+  const payload = req.body || {};
+  console.log('CLIENT_LOG:', {
+    ts: new Date().toISOString(),
+    origin: req.get('origin') || req.get('referer') || req.ip,
+    payload,
+  });
+  res.status(204).end();
+});
 
 io.on('connection', (socket) => {
   console.log('socket connected', socket.id);
