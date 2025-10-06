@@ -7,15 +7,14 @@ const path = require("path");
 const app = express();
 const PORT = 3002;
 
-// Serve static frontend files from the compile/ directory
+// Serve static files if needed
 app.use("/compile", express.static(path.join(__dirname)));
-app.use(express.static(path.join(__dirname)));
 
-// Parse JSON requests
+// Parse JSON bodies
 app.use(bodyParser.json());
 
-// POST to both /compile and /compile/ — compile LaTeX into PDF
-app.post(["/compile", "/compile/"], (req, res) => {
+// POST /compile, compile LaTeX
+app.post("/compile", (req, res) => {
     const latexCode = req.body.latex;
     if (!latexCode) {
         return res.status(400).send("No LaTeX code provided");
