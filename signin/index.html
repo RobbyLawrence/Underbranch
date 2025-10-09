@@ -754,6 +754,7 @@
                         currentUser = result.user;
                         setTimeout(() => {
                             showUserDashboard();
+                            window.location.href = "/frontend/editor/index.html";
                         }, 1000);
                     } else {
                         showStatusMessage(
@@ -813,6 +814,8 @@
                         currentUser = result.user;
                         setTimeout(() => {
                             showUserDashboard();
+                            //forwards to editor, when signing up. 
+                            window.location.href = "/frontend/editor/index.html";
                         }, 1500);
                     } else {
                         if (result.error === "Email already exists") {
@@ -891,6 +894,8 @@
                         currentUser = data.user;
                         setTimeout(() => {
                             showUserDashboard();
+                            //forwards to editor, when logging in from google up. 
+                            window.location.href = "/frontend/editor/index.html";
                         }, 1000);
                     } else {
                         throw new Error(data.error || "Authentication failed");
