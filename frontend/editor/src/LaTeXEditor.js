@@ -124,6 +124,11 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                             onChange(currentValue);
                         }
                     });
+
+                    // Expose Monaco editor instance for collaborative features
+                    if (editorRef.current) {
+                        editorRef.current._monacoEditor = monacoRef.current;
+                    }
                 }
             });
         }
