@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>LaTeX → PDF</title>
+        <title>Test LaTeX Compilation</title>
         <style>
             :root {
                 --gap: 12px;
@@ -109,7 +109,6 @@ Hello, world!
 \end{document} </textarea
                 >
 
-                ```
                 <div class="controls">
                     <button id="compileBtn">Compile to PDF</button>
                     <a
@@ -128,7 +127,6 @@ Hello, world!
                 <h1>PDF preview</h1>
                 <iframe id="pdfFrame" title="PDF preview"></iframe>
             </div>
-            ```
         </div>
 
         <script>
@@ -149,22 +147,15 @@ Hello, world!
 
                 try {
                     const latex = latexInput.value;
-                    const res = await fetch("/compile", {
+                    const res = await fetch("/compile/", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ latex }),
                     });
 
                     if (!res.ok) {
-                        // try to read JSON error, fall back to text
-                        let errText = "Unknown error";
-                        try {
-                            const j = await res.json();
-                            errText = j.error || JSON.stringify(j);
-                        } catch (e) {
-                            errText = await res.text();
-                        }
-                        status.textContent = "Error: " + errText;
+                        const text = await res.text();
+                        status.textContent = "Error: " + text;
                         compileBtn.disabled = false;
                         return;
                     }

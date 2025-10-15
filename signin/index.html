@@ -754,6 +754,7 @@
                         currentUser = result.user;
                         setTimeout(() => {
                             showUserDashboard();
+                            window.location.href = "/frontend/editor/index.html";
                         }, 1000);
                     } else {
                         showStatusMessage(
@@ -813,6 +814,8 @@
                         currentUser = result.user;
                         setTimeout(() => {
                             showUserDashboard();
+                            //forwards to editor, when signing up. 
+                            window.location.href = "/frontend/editor/index.html";
                         }, 1500);
                     } else {
                         if (result.error === "Email already exists") {
@@ -891,6 +894,8 @@
                         currentUser = data.user;
                         setTimeout(() => {
                             showUserDashboard();
+                            //forwards to editor, when logging in from google up. 
+                            window.location.href = "/frontend/editor/index.html";
                         }, 1000);
                     } else {
                         throw new Error(data.error || "Authentication failed");
@@ -1009,9 +1014,22 @@
             });
             document
                 .getElementById("forgotPassword")
-                .addEventListener("click", () => {
+                .addEventListener("click", async () => {
+                    const email = prompt(
+                        "Enter your email for password reset:",
+                    );
+                    if (!email) return;
+
+                    const res = await fetch("/signin/api/auth/forgot", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email }),
+                    });
+                    const data = await res.json();
                     alert(
-                        "This feature is not implemented yet. Please check back later, or contact admin@underbranch.org!",
+                        data.success
+                            ? "Check your email for reset link"
+                            : "Error: " + data.error,
                     );
                 });
         </script>
