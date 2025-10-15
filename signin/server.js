@@ -1,4 +1,4 @@
-// server.js - Updated to support email/password signup/login + Google OAuth
+// server.js
 
 const express = require("express");
 const { OAuth2Client } = require("google-auth-library");
@@ -8,6 +8,8 @@ const path = require("path");
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,7 +34,7 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 
 // Session + Security
-const SESSION_SECRET = process.env.SESSION_SECRET || "dev_change_me";
+const SESSION_SECRET = process.env.SESSION_SECRET || "default";
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
 
 if (process.env.TRUST_PROXY === "1" || process.env.NODE_ENV === "production") {
@@ -54,9 +56,6 @@ app.use(
     }),
 );
 
-// --------------------
-// CORS: whitelist + preflight handling
-// --------------------
 const WHITELIST = new Set([
     "http://localhost:3001",
     "http://localhost:3000",
@@ -86,9 +85,7 @@ app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use("/signin", express.static(path.join(__dirname)));
 
-// --------------------
-// Database initialization / migration
-// --------------------
+// Database initialization
 async function initializeDatabase() {
     try {
         // Create database if missing
@@ -130,9 +127,7 @@ async function initializeDatabase() {
     }
 }
 
-// --------------------
-// Helper DB functions
-// --------------------
+// Helper functions for db
 async function getUserById(id) {
     const conn = await pool.getConnection();
     const [rows] = await conn.execute("SELECT * FROM users WHERE id = ?", [id]);
@@ -250,9 +245,7 @@ function sanitizeUser(row) {
     };
 }
 
-// --------------------
 // Google token verification
-// --------------------
 async function verifyGoogleToken(token) {
     try {
         const ticket = await client.verifyIdToken({
@@ -266,9 +259,7 @@ async function verifyGoogleToken(token) {
     }
 }
 
-// --------------------
 // Routes
-// --------------------
 
 // Serve sign-in page
 app.get("/signin", (req, res) => {
@@ -400,6 +391,8 @@ app.get("/signin/api/auth/status", async (req, res) => {
 });
 
 // Get all users (for testing purposes)
+//
+// I need to remove this soon
 app.get("/signin/api/users", async (req, res) => {
     try {
         const conn = await pool.getConnection();
@@ -432,6 +425,81 @@ app.get("/signin/api/users/:id", async (req, res) => {
     } catch (err) {
         console.error("Get user error:", err);
         res.status(500).json({ error: "Failed to fetch user" });
+    }
+});
+
+app.post("/signin/api/auth/forgot", async (req, res) => {
+    const { email } = req.body;
+    try {
+        const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
+            email,
+        ]);
+        if (rows.length === 0 || !rows[0].password_hash) {
+            return res
+                .status(400)
+                .json({ error: "No password account with that email" });
+        }
+        const user = rows[0];
+        // generate random token, should last for 15 minutes
+        const token = crypto.randomBytes(32).toString("hex");
+        const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+        await pool.query(
+            "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
+            [user.id, token, expires],
+        );
+        // Send reset email
+        // still need to write frontend file that accepts token
+        const resetLink = `https://underbranch.org/signin/reset.html?token=${token}$`;
+        let transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "Password Reset",
+            text: `Click here to reset: ${resetLink}`,
+        });
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to process reset request" });
+    }
+});
+
+// Reset password
+app.post("/signin/api/auth/reset", async (req, res) => {
+    const { token, password } = req.body;
+    try {
+        const [rows] = await pool.query(
+            "SELECT * FROM password_resets WHERE token = ?",
+            [token],
+        );
+        if (rows.length === 0)
+            return res.status(400).json({ error: "Invalid or expired token" });
+
+        const reset = rows[0];
+        if (new Date(reset.expires_at) < new Date()) {
+            return res.status(400).json({ error: "Token expired" });
+        }
+
+        const hash = await bcrypt.hash(password, 10);
+        await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+            hash,
+            reset.user_id,
+        ]);
+        await pool.query("DELETE FROM password_resets WHERE id = ?", [
+            reset.id,
+        ]); // invalidate
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to reset password" });
     }
 });
 
