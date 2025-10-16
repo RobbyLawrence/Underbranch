@@ -1,0 +1,1517 @@
+Note that some of the commits say "Underbranch Server". This was when I was pushing from the XPS machine.
+This user has the same GitHub credentials as my main account, just a different name.
+
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400   1) // server.js
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400  11) const crypto = require("crypto");
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400  12) const nodemailer = require("nodemailer");
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400  37) const SESSION_SECRET = process.env.SESSION_SECRET || "default";
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400  88) // Database initialization
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 130) // Helper functions for db
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 394) //
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 395) // I need to remove this soon
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 431) app.post("/signin/api/auth/forgot", async (req, res) => {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 432)     const { email } = req.body;
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 433)     try {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 434)         const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 435)             email,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 436)         ]);
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 437)         if (rows.length === 0 || !rows[0].password_hash) {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 438)             return res
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 439)                 .status(400)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 440)                 .json({ error: "No password account with that email" });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 441)         }
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 442)         const user = rows[0];
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 443)         // generate random token, should last for 15 minutes
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 444)         const token = crypto.randomBytes(32).toString("hex");
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 445)         const expires = new Date(Date.now() + 15 * 60 * 1000);
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 446)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 447)         await pool.query(
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 448)             "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 449)             [user.id, token, expires],
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 450)         );
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 451)         // Send reset email
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 452)         // still need to write frontend file that accepts token
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 453)         const resetLink = `https://underbranch.org/signin/reset.html?token=${token}$`;
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 454)         let transporter = nodemailer.createTransport({
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 455)             service: "gmail",
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 456)             auth: {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 457)                 user: process.env.EMAIL_USER,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 458)                 pass: process.env.EMAIL_PASS,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 459)             },
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 460)         });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 461)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 462)         await transporter.sendMail({
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 463)             from: process.env.EMAIL_USER,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 464)             to: email,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 465)             subject: "Password Reset",
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 466)             text: `Click here to reset: ${resetLink}`,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 467)         });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 468)         res.json({ success: true });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 469)     } catch (err) {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 470)         console.error(err);
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 471)         res.status(500).json({ error: "Failed to process reset request" });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 472)     }
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 473) });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 474)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 475) // Reset password
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 476) app.post("/signin/api/auth/reset", async (req, res) => {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 477)     const { token, password } = req.body;
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 478)     try {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 479)         const [rows] = await pool.query(
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 480)             "SELECT * FROM password_resets WHERE token = ?",
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 481)             [token],
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 482)         );
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 483)         if (rows.length === 0)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 484)             return res.status(400).json({ error: "Invalid or expired token" });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 485)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 486)         const reset = rows[0];
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 487)         if (new Date(reset.expires_at) < new Date()) {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 488)             return res.status(400).json({ error: "Token expired" });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 489)         }
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 490)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 491)         const hash = await bcrypt.hash(password, 10);
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 492)         await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 493)             hash,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 494)             reset.user_id,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 495)         ]);
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 496)         await pool.query("DELETE FROM password_resets WHERE id = ?", [
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 497)             reset.id,
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 498)         ]); // invalidate
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 499)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 500)         res.json({ success: true });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 501)     } catch (err) {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 502)         res.status(500).json({ error: "Failed to reset password" });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 503)     }
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 504) });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 505)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   2)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   9) const bcrypt = require("bcryptjs");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  10) const session = require("express-session");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  15) const PORT = process.env.PORT || 3001;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  36) // Session + Security
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  38) const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  39)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  40) if (process.env.TRUST_PROXY === "1" || process.env.NODE_ENV === "production") {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  41)     app.set("trust proxy", 1);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  42) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  43)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  44) app.use(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  45)     session({
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  46)         name: "underbranch.sid",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  47)         secret: SESSION_SECRET,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  48)         resave: false,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  49)         saveUninitialized: false,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  50)         cookie: {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  51)             httpOnly: true,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  52)             secure: process.env.NODE_ENV === "production", // ensure HTTPS in prod
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  53)             sameSite: "lax",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  54)             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  55)         },
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  56)     }),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  57) );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  58)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  60)     "http://localhost:3001",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  61)     "http://localhost:3000",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  63)     "https://underbranch.org",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  69)         // allow when no origin (curl/postman/server-to-server)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  70)         if (!origin) return callback(null, true);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  71)         if (WHITELIST.has(origin)) return callback(null, true);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  72)         callback(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  86) app.use("/signin", express.static(path.join(__dirname)));
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  91)         // Create database if missing
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  92)         const tempConn = await mysql.createConnection({
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  97)         await tempConn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  98)             `CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 100)         await tempConn.end();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 102)         const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 104)         // Create users table with support for local accounts (password_hash) and optional google_id
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 108)                 google_id VARCHAR(255) UNIQUE,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 109)                 email VARCHAR(255) NOT NULL UNIQUE,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 111)                 password_hash VARCHAR(255),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 118)             ) ENGINE=InnoDB;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 121)         await conn.execute(createTableQuery);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 122)         conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 123)         console.log("Database and users table are ready");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 124)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 125)         console.error("Database initialization error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 126)         throw err;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 131) async function getUserById(id) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 132)     const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 133)     const [rows] = await conn.execute("SELECT * FROM users WHERE id = ?", [id]);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 134)     conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 135)     return rows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 136) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 138) async function getUserByEmail(email) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 139)     const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 140)     const [rows] = await conn.execute("SELECT * FROM users WHERE email = ?", [
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 141)         email,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 142)     ]);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 143)     conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 144)     return rows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 147) async function getUserByGoogleId(gid) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 148)     const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 149)     const [rows] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 150)         "SELECT * FROM users WHERE google_id = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 151)         [gid],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 152)     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 153)     conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 154)     return rows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 155) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 156)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 157) async function createLocalUser({ name, email, password_hash }) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 158)     const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 159)     const [result] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 160)         "INSERT INTO users (google_id, email, name, password_hash) VALUES (NULL, ?, ?, ?)",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 161)         [email, name, password_hash],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 162)     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 163)     const [rows] = await conn.execute("SELECT * FROM users WHERE id = ?", [
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 164)         result.insertId,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 165)     ]);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 166)     conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 167)     return rows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 168) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 170) async function upsertGoogleUserFromPayload(payload) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 171)     const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 172)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 173)     // Try find by google_id
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 174)     const [byGid] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 175)         "SELECT * FROM users WHERE google_id = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 176)         [payload.sub],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 177)     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 178)     if (byGid.length > 0) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 179)         // update last_login + increment count
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 180)         await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 181)             "UPDATE users SET last_login = CURRENT_TIMESTAMP, login_count = login_count + 1, name = COALESCE(?, name), picture_url = COALESCE(?, picture_url) WHERE google_id = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 182)             [payload.name, payload.picture, payload.sub],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 183)         );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 184)         const [rows] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 186)             [payload.sub],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 188)         conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 189)         return rows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 190)     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 192)     // If no google_id match, check if an account with same email exists.
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 193)     const [byEmail] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 194)         "SELECT * FROM users WHERE email = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 195)         [payload.email],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 196)     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 197)     if (byEmail.length > 0) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 198)         // Link accounts: set google_id and update profile fields
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 199)         await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 200)             "UPDATE users SET google_id = ?, last_login = CURRENT_TIMESTAMP, login_count = login_count + 1, name = COALESCE(?, name), picture_url = COALESCE(?, picture_url) WHERE email = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 201)             [payload.sub, payload.name, payload.picture, payload.email],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 202)         );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 203)         const [rows] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 204)             "SELECT * FROM users WHERE email = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 205)             [payload.email],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 206)         );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 207)         conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 208)         return rows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 209)     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 211)     // Otherwise insert a new user
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 212)     const [insertResult] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 213)         "INSERT INTO users (google_id, email, name, picture_url) VALUES (?, ?, ?, ?)",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 214)         [payload.sub, payload.email, payload.name, payload.picture],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 215)     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 216)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 217)     const [newRows] = await conn.execute("SELECT * FROM users WHERE id = ?", [
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 218)         insertResult.insertId,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 219)     ]);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 220)     conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 221)     return newRows[0];
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 222) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 223)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 224) async function incrementLoginStatsById(id) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 225)     const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 226)     await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 227)         "UPDATE users SET last_login = CURRENT_TIMESTAMP, login_count = login_count + 1 WHERE id = ?",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 228)         [id],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 229)     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 230)     conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 231) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 232)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 233) function sanitizeUser(row) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 234)     if (!row) return null;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 235)     return {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 236)         id: row.id,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 237)         google_id: row.google_id || null,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 238)         email: row.email,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 239)         name: row.name,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 240)         picture: row.picture_url || null,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 241)         first_login: row.first_login,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 242)         last_login: row.last_login,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 243)         login_count: row.login_count,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 244)         created_at: row.created_at,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 245)     };
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 246) }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 247)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 248) // Google token verification
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 249) async function verifyGoogleToken(token) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 250)     try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 251)         const ticket = await client.verifyIdToken({
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 252)             idToken: token,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 253)             audience: GOOGLE_CLIENT_ID,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 254)         });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 255)         return ticket.getPayload();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 256)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 257)         console.error("Invalid Google token", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 258)         throw new Error("Invalid Google token");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 264) // Serve sign-in page
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 267) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 268)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 269) // Health
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 270) app.get("/signin/api/health", (req, res) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 271)     res.json({ status: "OK", timestamp: new Date().toISOString() });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 278)         if (!credential)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 282)         const savedUser = await upsertGoogleUserFromPayload(userPayload);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 284)         // set session
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 285)         req.session.userId = savedUser.id;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 289)             message: savedUser ? "User logged in" : "New user created",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 290)             user: sanitizeUser(savedUser),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 292)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 293)         console.error("Authentication error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 294)         res.status(401).json({ error: err.message || "Authentication failed" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 295)     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 296) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 297)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 298) // Sign up (local)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 299) app.post("/signin/api/auth/signup", async (req, res) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 300)     try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 301)         const { name, email, password } = req.body;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 302)         if (!email || !password)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 303)             return res.status(400).json({ error: "Missing email or password" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 304)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 305)         // See if email already exists
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 306)         const existing = await getUserByEmail(email);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 307)         if (existing)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 308)             return res.status(400).json({ error: "Email already exists" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 309)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 310)         const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 311)         const newUser = await createLocalUser({ name, email, password_hash });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 312)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 313)         // Set session
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 314)         req.session.userId = newUser.id;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 315)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 316)         res.json({
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 317)             success: true,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 318)             message: "Account created",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 319)             user: sanitizeUser(newUser),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 320)         });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 321)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 322)         console.error("Signup error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 323)         res.status(500).json({ error: "Signup failed" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 324)     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 325) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 326)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 327) // Login (local)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 328) app.post("/signin/api/auth/login", async (req, res) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 329)     try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 330)         const { email, password } = req.body;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 331)         if (!email || !password)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 332)             return res.status(400).json({ error: "Missing email or password" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 333)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 334)         const user = await getUserByEmail(email);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 335)         if (!user || !user.password_hash) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 336)             // user not found or only has Google account
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 337)             return res.status(401).json({ error: "Invalid email or password" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 338)         }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 339)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 340)         const ok = await bcrypt.compare(password, user.password_hash);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 341)         if (!ok)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 342)             return res.status(401).json({ error: "Invalid email or password" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 343)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 344)         // update stats
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 345)         await incrementLoginStatsById(user.id);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 346)         const updated = await getUserById(user.id);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 347)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 348)         // Set session
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 349)         req.session.userId = updated.id;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 350)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 351)         res.json({
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 352)             success: true,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 353)             message: "Login successful",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 354)             user: sanitizeUser(updated),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 355)         });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 356)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 357)         console.error("Login error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 358)         res.status(500).json({ error: "Login failed" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 359)     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 360) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 361)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 362) // Logout
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 363) app.post("/signin/api/auth/logout", (req, res) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 364)     try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 365)         req.session.destroy((err) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 366)             if (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 367)                 console.error("Session destroy error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 368)                 return res.status(500).json({ error: "Logout failed" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 369)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 370)             // clear cookie in response
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 371)             res.clearCookie("underbranch.sid");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 372)             return res.json({ success: true, message: "Logged out" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 373)         });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 374)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 375)         console.error("Logout error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 376)         res.status(500).json({ error: "Logout failed" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 377)     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 378) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 379)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 380) // Auth status - used by frontend on page load
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 381) app.get("/signin/api/auth/status", async (req, res) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 382)     try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 383)         if (!req.session?.userId) return res.json({ authenticated: false });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 384)         const user = await getUserById(req.session.userId);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 385)         if (!user) return res.json({ authenticated: false });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 386)         res.json({ authenticated: true, user: sanitizeUser(user) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 387)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 388)         console.error("Status error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 389)         res.status(500).json({ authenticated: false });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 398)         const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 399)         const [users] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 402)         conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 404)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 405)         console.error("Get users error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 410) // Get user by ID or google_id
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 414)         const conn = await pool.getConnection();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 416)         const [users] = await conn.execute(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 420)         conn.release();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 422)         if (users.length === 0)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 424)         res.json({ user: sanitizeUser(users[0]) });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 425)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 426)         console.error("Get user error:", err);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 506) // 404 handler
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 507) app.use((req, res) => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 508)     res.status(404).json({ error: "Endpoint not found" });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 536)             console.log(`Frontend: http://localhost:${PORT}/signin`);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 542)     } catch (err) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 543)         console.error("Failed to start server:", err);
+
+
+Underbranch/signin/index.html:
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1012)                 .addEventListener("click", async () => {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1013)                     const email = prompt(
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1014)                         "Enter your email for password reset:",
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1015)                     );
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1016)                     if (!email) return;
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1017)
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1018)                     const res = await fetch("/signin/api/auth/forgot", {
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1019)                         method: "POST",
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1020)                         headers: { "Content-Type": "application/json" },
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1021)                         body: JSON.stringify({ email }),
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1022)                     });
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1023)                     const data = await res.json();
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1025)                         data.success
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1026)                             ? "Check your email for reset link"
+59fc11a4 (Robby Lawrence     2025-10-10 11:02:20 -0400 1027)                             : "Error: " + data.error,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   14)             :root {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   15)                 --primary-color: rgb(181, 94, 43);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   16)                 --primary-dark: rgb(150, 78, 36);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   17)                 --primary-light: rgb(200, 120, 70);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   18)                 --primary-bg: rgba(181, 94, 43, 0.1);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   19)                 --text-dark: #333;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   20)                 --text-light: #666;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   21)                 --border-color: #e0e0e0;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   22)                 --error-color: #dc3545;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   23)                 --success-color: #28a745;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   24)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   25)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   27)                 font-family:
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   28)                     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   29)                     "Helvetica Neue", Arial, sans-serif;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   34)                 background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   35)                 padding: 20px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   40)                 padding: 2.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   41)                 border-radius: 20px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   42)                 box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   43)                 width: 100%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   44)                 max-width: 420px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   45)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   46)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   47)             .logo-section {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   49)                 margin-bottom: 2rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   53)                 color: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   54)                 margin-bottom: 0.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   56)                 font-weight: 700;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   57)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   58)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   59)             .subtitle {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   60)                 color: var(--text-light);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   61)                 font-size: 0.95rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   62)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   63)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   64)             .auth-tabs {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   65)                 display: flex;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   66)                 margin-bottom: 2rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   67)                 border-bottom: 2px solid var(--border-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   70)             .tab-button {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   71)                 flex: 1;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   72)                 padding: 12px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   73)                 background: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   74)                 border: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   75)                 color: var(--text-light);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   76)                 font-size: 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   77)                 cursor: pointer;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   78)                 position: relative;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   79)                 transition: color 0.3s;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   82)             .tab-button.active {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   83)                 color: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   84)                 font-weight: 600;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   85)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   86)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   87)             .tab-button.active::after {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   88)                 content: "";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   89)                 position: absolute;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   90)                 bottom: -2px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   91)                 left: 0;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   92)                 right: 0;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   93)                 height: 3px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   94)                 background: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   95)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   96)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   97)             .tab-content {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   98)                 display: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000   99)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  100)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  101)             .tab-content.active {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  102)                 display: block;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  103)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  104)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  105)             .form-group {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  106)                 margin-bottom: 1.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  107)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  108)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  109)             label {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  110)                 display: block;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  111)                 margin-bottom: 0.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  112)                 color: var(--text-dark);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  113)                 font-weight: 500;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  114)                 font-size: 0.95rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  115)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  116)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  117)             input[type="email"],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  118)             input[type="password"],
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  119)             input[type="text"] {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  120)                 width: 100%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  121)                 padding: 12px 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  122)                 border: 2px solid var(--border-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  123)                 border-radius: 8px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  124)                 font-size: 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  125)                 transition:
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  126)                     border-color 0.3s,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  127)                     box-shadow 0.3s;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  128)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  129)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  130)             input[type="email"]:focus,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  131)             input[type="password"]:focus,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  132)             input[type="text"]:focus {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  133)                 outline: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  134)                 border-color: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  135)                 box-shadow: 0 0 0 3px var(--primary-bg);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  136)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  137)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  138)             .password-toggle {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  139)                 position: relative;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  140)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  141)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  142)             .toggle-password {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  143)                 position: absolute;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  144)                 right: 12px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  145)                 top: 50%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  146)                 transform: translateY(-50%);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  147)                 background: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  148)                 border: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  149)                 color: var(--text-light);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  150)                 cursor: pointer;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  151)                 padding: 4px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  152)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  153)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  154)             .btn-primary {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  155)                 width: 100%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  156)                 padding: 12px 24px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  157)                 background: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  160)                 border-radius: 8px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  161)                 font-size: 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  162)                 font-weight: 600;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  163)                 cursor: pointer;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  164)                 transition:
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  165)                     background-color 0.3s,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  166)                     transform 0.2s;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  167)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  168)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  169)             .btn-primary:hover {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  170)                 background: var(--primary-dark);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  171)                 transform: translateY(-1px);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  172)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  173)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  174)             .btn-primary:active {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  175)                 transform: translateY(0);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  176)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  177)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  178)             .btn-primary:disabled {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  179)                 background: #ccc;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  180)                 cursor: not-allowed;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  181)                 transform: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  182)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  183)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  184)             .divider {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  185)                 display: flex;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  186)                 align-items: center;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  187)                 margin: 1.5rem 0;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  188)                 color: var(--text-light);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  189)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  190)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  191)             .divider::before,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  192)             .divider::after {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  193)                 content: "";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  194)                 flex: 1;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  195)                 height: 1px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  196)                 background: var(--border-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  197)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  198)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  199)             .divider span {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  200)                 padding: 0 1rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  201)                 font-size: 0.9rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  202)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  203)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  204)             .google-signin-btn {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  205)                 width: 100%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  207)                 background: white;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  208)                 color: var(--text-dark);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  209)                 border: 2px solid var(--border-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  217)                 transition:
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  218)                     background-color 0.3s,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  219)                     border-color 0.3s;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  222)             .google-signin-btn:hover {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  223)                 background: #f8f9fa;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  224)                 border-color: #4285f4;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  227)             .google-icon {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  228)                 width: 20px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  229)                 height: 20px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  232)             .user-dashboard {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  233)                 display: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  234)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  235)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  236)             .user-dashboard.active {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  237)                 display: block;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  238)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  239)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  240)             .welcome-card {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  241)                 background: var(--primary-bg);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  242)                 border-radius: 12px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  244)                 margin-bottom: 1.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  247)             .welcome-title {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  248)                 color: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  249)                 font-size: 1.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  250)                 margin-bottom: 0.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  251)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  252)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  253)             .user-info {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  254)                 background: white;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  255)                 border-radius: 12px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  256)                 padding: 1.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  257)                 border: 2px solid var(--border-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  263)                 padding: 0.75rem 0;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  264)                 border-bottom: 1px solid var(--border-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  271)             .info-label {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  273)                 color: var(--text-dark);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  276)             .info-value {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  277)                 color: var(--text-light);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  278)                 text-align: right;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  280)                 max-width: 60%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  283)             .btn-signout {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  284)                 width: 100%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  285)                 padding: 12px 24px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  286)                 background: white;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  287)                 color: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  288)                 border: 2px solid var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  289)                 border-radius: 8px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  290)                 font-size: 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  291)                 font-weight: 600;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  292)                 cursor: pointer;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  293)                 margin-top: 1.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  294)                 transition:
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  295)                     background-color 0.3s,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  296)                     color 0.3s;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  297)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  298)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  299)             .btn-signout:hover {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  300)                 background: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  301)                 color: white;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  302)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  303)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  304)             .status-message {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  305)                 padding: 12px 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  308)                 font-size: 0.95rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  309)                 animation: slideDown 0.3s ease-out;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  312)             .status-message.success {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  318)             .status-message.error {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  324)             .status-message.loading {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  330)             @keyframes slideDown {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  331)                 from {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  332)                     opacity: 0;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  333)                     transform: translateY(-10px);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  334)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  335)                 to {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  336)                     opacity: 1;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  337)                     transform: translateY(0);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  338)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  341)             .forgot-password {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  342)                 text-align: right;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  343)                 margin-top: 0.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  344)                 font-size: 0.9rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  347)             .forgot-password a {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  348)                 color: var(--primary-color);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  349)                 text-decoration: none;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  352)             .forgot-password a:hover {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  353)                 text-decoration: underline;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  354)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  355)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  356)             .loading-spinner {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  357)                 display: inline-block;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  358)                 width: 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  359)                 height: 16px;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  360)                 border: 2px solid rgba(255, 255, 255, 0.3);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  361)                 border-radius: 50%;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  362)                 border-top-color: white;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  363)                 animation: spin 0.6s linear infinite;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  364)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  365)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  366)             @keyframes spin {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  367)                 to {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  368)                     transform: rotate(360deg);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  369)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  370)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  371)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  372)             @media (max-width: 480px) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  373)                 .container {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  374)                     padding: 2rem 1.5rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  375)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  376)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  377)                 h1 {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  378)                     font-size: 1.75rem;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  379)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  385)             <!-- Auth Section -->
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  386)             <div id="authSection">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  387)                 <div class="logo-section">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  388)                     <h1>Underbranch</h1>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  389)                     <p class="subtitle">Welcome to your account</p>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  390)                 </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  391)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  392)                 <div class="auth-tabs">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  393)                     <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  394)                         class="tab-button active"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  395)                         onclick="switchTab('login')"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  396)                     >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  397)                         Log In
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  398)                     </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  399)                     <button class="tab-button" onclick="switchTab('signup')">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  400)                         Sign Up
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  401)                     </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  402)                 </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  403)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  404)                 <!-- Login Tab -->
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  405)                 <div id="loginTab" class="tab-content active">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  406)                     <form id="loginForm" onsubmit="handleLogin(event)">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  407)                         <div class="form-group">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  408)                             <label for="loginEmail">Email Address</label>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  409)                             <input
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  410)                                 type="email"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  411)                                 id="loginEmail"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  412)                                 name="email"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  413)                                 required
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  414)                                 placeholder="Enter your email"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  415)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  416)                         </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  417)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  418)                         <div class="form-group">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  419)                             <label for="loginPassword">Password</label>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  420)                             <div class="password-toggle">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  421)                                 <input
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  422)                                     type="password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  423)                                     id="loginPassword"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  424)                                     name="password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  425)                                     required
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  426)                                     placeholder="Enter your password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  427)                                 />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  428)                                 <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  429)                                     type="button"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  430)                                     class="toggle-password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  431)                                     onclick="togglePasswordVisibility('loginPassword')"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  432)                                 >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  433)                                     👁️
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  434)                                 </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  435)                             </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  436)                             <div class="forgot-password">
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000  437)                                 <button id="forgotPassword">
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000  438)                                     Forgot Password?
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000  439)                                 </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  440)                             </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  441)                         </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  442)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  443)                         <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  444)                             type="submit"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  445)                             class="btn-primary"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  446)                             id="loginButton"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  447)                         >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  448)                             Log In
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  449)                         </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  450)                     </form>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  451)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  452)                     <div class="divider">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  453)                         <span>or continue with</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  454)                     </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  455)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  456)                     <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  457)                         class="google-signin-btn"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  458)                         id="googleSignInBtn"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  459)                         onclick="handleGoogleSignIn()"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  460)                     >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  461)                         <svg class="google-icon" viewBox="0 0 24 24">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  462)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  463)                                 fill="#4285F4"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  464)                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  465)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  466)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  467)                                 fill="#34A853"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  468)                                 d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  469)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  470)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  471)                                 fill="#FBBC04"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  472)                                 d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  473)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  474)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  475)                                 fill="#EA4335"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  476)                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  477)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  478)                         </svg>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  479)                         Sign in with Google
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  480)                     </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  481)                 </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  482)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  483)                 <!-- Sign Up Tab -->
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  484)                 <div id="signupTab" class="tab-content">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  485)                     <form id="signupForm" onsubmit="handleSignup(event)">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  486)                         <div class="form-group">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  487)                             <label for="signupName">Full Name</label>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  488)                             <input
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  489)                                 type="text"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  490)                                 id="signupName"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  491)                                 name="name"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  492)                                 required
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  493)                                 placeholder="Enter your full name"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  494)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  495)                         </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  496)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  497)                         <div class="form-group">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  498)                             <label for="signupEmail">Email Address</label>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  499)                             <input
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  500)                                 type="email"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  501)                                 id="signupEmail"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  502)                                 name="email"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  503)                                 required
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  504)                                 placeholder="Enter your email"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  505)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  506)                         </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  507)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  508)                         <div class="form-group">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  509)                             <label for="signupPassword">Password</label>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  510)                             <div class="password-toggle">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  511)                                 <input
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  512)                                     type="password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  513)                                     id="signupPassword"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  514)                                     name="password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  515)                                     required
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  516)                                     placeholder="Create a password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  517)                                     minlength="6"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  518)                                 />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  519)                                 <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  520)                                     type="button"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  521)                                     class="toggle-password"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  522)                                     onclick="togglePasswordVisibility('signupPassword')"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  523)                                 >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  524)                                     👁️
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  525)                                 </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  526)                             </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  527)                         </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  528)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  529)                         <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  530)                             type="submit"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  531)                             class="btn-primary"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  532)                             id="signupButton"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  533)                         >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  534)                             Create Account
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  535)                         </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  536)                     </form>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  537)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  538)                     <div class="divider">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  539)                         <span>or sign up with</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  540)                     </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  541)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  542)                     <button
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  543)                         class="google-signin-btn"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  544)                         onclick="handleGoogleSignIn()"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  545)                     >
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  546)                         <svg class="google-icon" viewBox="0 0 24 24">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  547)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  548)                                 fill="#4285F4"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  549)                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  550)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  551)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  552)                                 fill="#34A853"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  553)                                 d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  554)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  555)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  556)                                 fill="#FBBC04"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  557)                                 d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  558)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  559)                             <path
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  560)                                 fill="#EA4335"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  561)                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  562)                             />
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  563)                         </svg>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  564)                         Sign up with Google
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  565)                     </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  566)                 </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  569)             <!-- User Dashboard (shown when logged in) -->
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  570)             <div id="userDashboard" class="user-dashboard">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  571)                 <div class="welcome-card">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  572)                     <h2 class="welcome-title">Welcome back!</h2>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  573)                     <p id="welcomeMessage">Loading...</p>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  574)                 </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  575)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  578)                         <span class="info-label">Name</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  579)                         <span class="info-value" id="userName">-</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  580)                     </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  581)                     <div class="info-row">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  582)                         <span class="info-label">Email</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  583)                         <span class="info-value" id="userEmail">-</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  586)                         <span class="info-label">Account Type</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  587)                         <span class="info-value" id="accountType">-</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  590)                         <span class="info-label">Login Count</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  591)                         <span class="info-value" id="loginCount">-</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  592)                     </div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  593)                     <div class="info-row">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  594)                         <span class="info-label">Member Since</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  595)                         <span class="info-value" id="memberSince">-</span>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  598)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  599)                 <button class="btn-signout" onclick="handleSignOut()">
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  600)                     Sign Out
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  601)                 </button>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  604)             <!-- Status messages -->
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  605)             <div id="statusMessage"></div>
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  616)             // Configuration
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  619)             const API_ENDPOINT = "/signin/api";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  622)             let isGoogleInitialized = false;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  626)                 // Check if user is already logged in (from session/cookie)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  627)                 checkAuthStatus();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  628)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  629)                 // Initialize Google
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  630)                 if (typeof google !== "undefined" && google.accounts) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  631)                     initializeGoogleSignIn();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  632)                 } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  633)                     // Wait for Google library to load
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  634)                     setTimeout(() => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  635)                         if (typeof google !== "undefined" && google.accounts) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  636)                             initializeGoogleSignIn();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  637)                         }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  638)                     }, 1000);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  639)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  642)             function initializeGoogleSignIn() {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  644)                     google.accounts.id.initialize({
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  645)                         client_id: GOOGLE_CLIENT_ID,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  646)                         callback: handleGoogleResponse,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  647)                         auto_select: false,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  648)                         cancel_on_tap_outside: true,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  649)                     });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  650)                     isGoogleInitialized = true;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  651)                 } catch (error) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  652)                     console.error(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  653)                         "Failed to initialize Google Sign-In:",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  654)                         error,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  655)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  656)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  657)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  659)             // Check if user is already authenticated
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  660)             async function checkAuthStatus() {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  661)                 try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  662)                     const response = await fetch(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  663)                         `${API_ENDPOINT}/auth/status`,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  664)                         {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  665)                             credentials: "include",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  666)                         },
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  667)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  668)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  669)                     if (response.ok) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  670)                         const data = await response.json();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  671)                         if (data.authenticated && data.user) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  672)                             currentUser = data.user;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  673)                             showUserDashboard();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  674)                         }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  675)                     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  676)                 } catch (error) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  677)                     console.error("Auth check failed:", error);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  678)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  679)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  680)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  681)             // Switch between login and signup tabs
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  682)             function switchTab(tab) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  683)                 const loginTab = document.getElementById("loginTab");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  684)                 const signupTab = document.getElementById("signupTab");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  685)                 const loginButton = document.querySelector(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  686)                     ".tab-button:first-child",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  687)                 );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  688)                 const signupButton = document.querySelector(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  689)                     ".tab-button:last-child",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  690)                 );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  691)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  692)                 if (tab === "login") {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  693)                     loginTab.classList.add("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  694)                     signupTab.classList.remove("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  695)                     loginButton.classList.add("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  696)                     signupButton.classList.remove("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  697)                 } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  698)                     loginTab.classList.remove("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  699)                     signupTab.classList.add("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  700)                     loginButton.classList.remove("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  701)                     signupButton.classList.add("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  702)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  703)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  704)                 clearStatusMessage();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  705)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  707)             // Toggle password visibility
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  708)             function togglePasswordVisibility(inputId) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  709)                 const input = document.getElementById(inputId);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  710)                 const button = input.nextElementSibling;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  711)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  712)                 if (input.type === "password") {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  713)                     input.type = "text";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  714)                     button.textContent = "🙈";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  715)                 } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  716)                     input.type = "password";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  717)                     button.textContent = "👁️";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  718)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  719)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  720)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  721)             // Handle login form submission
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  722)             async function handleLogin(event) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  723)                 event.preventDefault();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  724)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  725)                 const button = document.getElementById("loginButton");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  726)                 const originalText = button.innerHTML;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  727)                 button.innerHTML =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  728)                     '<span class="loading-spinner"></span> Logging in...';
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  729)                 button.disabled = true;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  731)                 const formData = new FormData(event.target);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  732)                 const loginData = {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  733)                     email: formData.get("email"),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  734)                     password: formData.get("password"),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  735)                 };
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  736)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  737)                 try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  738)                     const response = await fetch(`${API_ENDPOINT}/auth/login`, {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  739)                         method: "POST",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  740)                         headers: {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  741)                             "Content-Type": "application/json",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  742)                         },
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  743)                         credentials: "include",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  744)                         body: JSON.stringify(loginData),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  745)                     });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  746)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  747)                     const result = await response.json();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  748)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  749)                     if (response.ok) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  750)                         showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  751)                             "Login successful! Redirecting...",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  752)                             "success",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  753)                         );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  754)                         currentUser = result.user;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  755)                         setTimeout(() => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  756)                             showUserDashboard();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  757)                         }, 1000);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  758)                     } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  759)                         showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  760)                             result.error || "Login failed",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  761)                             "error",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  762)                         );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  763)                     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  765)                     console.error("Login error:", error);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  766)                     showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  767)                         "Network error. Please try again.",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  770)                 } finally {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  771)                     button.innerHTML = originalText;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  772)                     button.disabled = false;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  776)             // Handle signup form submission
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  777)             async function handleSignup(event) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  778)                 event.preventDefault();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  780)                 const button = document.getElementById("signupButton");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  781)                 const originalText = button.innerHTML;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  782)                 button.innerHTML =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  783)                     '<span class="loading-spinner"></span> Creating account...';
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  784)                 button.disabled = true;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  786)                 const formData = new FormData(event.target);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  787)                 const signupData = {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  788)                     name: formData.get("name"),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  789)                     email: formData.get("email"),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  790)                     password: formData.get("password"),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  791)                 };
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  792)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  793)                 try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  794)                     const response = await fetch(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  795)                         `${API_ENDPOINT}/auth/signup`,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  796)                         {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  797)                             method: "POST",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  798)                             headers: {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  799)                                 "Content-Type": "application/json",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  800)                             },
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  801)                             credentials: "include",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  802)                             body: JSON.stringify(signupData),
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  803)                         },
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  804)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  806)                     const result = await response.json();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  807)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  808)                     if (response.ok) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  809)                         showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  810)                             "Account created successfully! Logging you in...",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  811)                             "success",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  812)                         );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  813)                         currentUser = result.user;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  814)                         setTimeout(() => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  815)                             showUserDashboard();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  816)                         }, 1500);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  817)                     } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  818)                         if (result.error === "Email already exists") {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  819)                             showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  820)                                 "An account with this email already exists. Please log in instead.",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  821)                                 "error",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  822)                             );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  823)                             setTimeout(() => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  824)                                 switchTab("login");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  825)                                 document.getElementById("loginEmail").value =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  826)                                     signupData.email;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  827)                             }, 2000);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  828)                         } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  829)                             showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  830)                                 result.error || "Signup failed",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  831)                                 "error",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  832)                             );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  833)                         }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  834)                     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  835)                 } catch (error) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  836)                     console.error("Signup error:", error);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  837)                     showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  838)                         "Network error. Please try again.",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  839)                         "error",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  840)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  841)                 } finally {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  842)                     button.innerHTML = originalText;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  843)                     button.disabled = false;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  844)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  847)             // Handle Google Sign In
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  848)             function handleGoogleSignIn() {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  849)                 if (!isGoogleInitialized) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  850)                     showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  851)                         "Google Sign-In is still loading. Please try again.",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  852)                         "error",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  853)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  854)                     return;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  855)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  856)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  858)                     google.accounts.id.prompt();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  859)                 } catch (error) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  860)                     console.error("Google Sign-In error:", error);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  861)                     showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  862)                         "Google Sign-In failed. Please try again.",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  863)                         "error",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  864)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  865)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  866)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  868)             // Handle Google credential response
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  869)             async function handleGoogleResponse(response) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  870)                 showStatusMessage("Authenticating with Google...", "loading");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  871)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  872)                 try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  873)                     const result = await fetch(`${API_ENDPOINT}/auth/google`, {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  878)                         credentials: "include",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  880)                             credential: response.credential,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  884)                     const data = await result.json();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  886)                     if (result.ok) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  887)                         showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  888)                             "Successfully authenticated!",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  891)                         currentUser = data.user;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  892)                         setTimeout(() => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  893)                             showUserDashboard();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  894)                         }, 1000);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  896)                         throw new Error(data.error || "Authentication failed");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  899)                     console.error("Google auth error:", error);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  900)                     showStatusMessage(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  901)                         "Authentication failed: " + error.message,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  907)             // Show user dashboard
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  908)             function showUserDashboard() {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  909)                 if (!currentUser) return;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  910)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  911)                 document.getElementById("authSection").style.display = "none";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  912)                 document
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  913)                     .getElementById("userDashboard")
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  914)                     .classList.add("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  915)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  916)                 // Update user information
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  917)                 document.getElementById("welcomeMessage").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  918)                     `Hi ${currentUser.name}, you're successfully logged in!`;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  919)                 document.getElementById("userName").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  920)                     currentUser.name || "-";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  921)                 document.getElementById("userEmail").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  922)                     currentUser.email || "-";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  923)                 document.getElementById("accountType").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  924)                     currentUser.google_id ? "Google Account" : "Email Account";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  925)                 document.getElementById("loginCount").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  926)                     currentUser.login_count || "1";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  927)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  928)                 // Format member since date
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  929)                 if (currentUser.first_login) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  930)                     const date = new Date(currentUser.first_login);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  931)                     document.getElementById("memberSince").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  932)                         date.toLocaleDateString("en-US", {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  933)                             month: "short",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  934)                             day: "numeric",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  935)                             year: "numeric",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  936)                         });
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  937)                 } else {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  938)                     document.getElementById("memberSince").textContent =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  939)                         "Today";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  940)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  941)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  942)                 clearStatusMessage();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  943)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  945)             // Handle sign out
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  946)             async function handleSignOut() {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  947)                 try {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  948)                     const response = await fetch(
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  949)                         `${API_ENDPOINT}/auth/logout`,
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  950)                         {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  951)                             method: "POST",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  952)                             credentials: "include",
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  953)                         },
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  954)                     );
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  956)                     if (response.ok) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  957)                         // Sign out from Google as well
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  958)                         if (isGoogleInitialized && currentUser?.google_id) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  959)                             google.accounts.id.disableAutoSelect();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  960)                         }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  961)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  962)                         currentUser = null;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  963)                         document.getElementById("authSection").style.display =
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  964)                             "block";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  965)                         document
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  966)                             .getElementById("userDashboard")
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  967)                             .classList.remove("active");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  968)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  969)                         // Clear forms
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  970)                         document.getElementById("loginForm").reset();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  971)                         document.getElementById("signupForm").reset();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  972)
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  973)                         showStatusMessage("Signed out successfully", "success");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  974)                         setTimeout(() => {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  975)                             clearStatusMessage();
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  976)                         }, 2000);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  977)                     }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  978)                 } catch (error) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  979)                     console.error("Signout error:", error);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  980)                     showStatusMessage("Sign out failed", "error");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  981)                 }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  984)             // Show status message
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  985)             function showStatusMessage(message, type) {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  986)                 const statusDiv = document.getElementById("statusMessage");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  988)                 statusDiv.className = `status-message ${type}`;
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  989)             }
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  991)             // Clear status message
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  992)             function clearStatusMessage() {
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  993)                 const statusDiv = document.getElementById("statusMessage");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  994)                 statusDiv.textContent = "";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  995)                 statusDiv.className = "";
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000  998)             // Handle network status
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 1000)                 showStatusMessage("Connection restored", "success");
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 1001)                 setTimeout(clearStatusMessage, 2000);
+4d3f97ce (Underbranch Server 2025-10-02 04:33:24 +0000 1005)                 showStatusMessage(
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000 1010)             document
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000 1011)                 .getElementById("forgotPassword")
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000 1024)                     alert(
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000 1028)                     );
+f09d2c6f (Underbranch Server 2025-10-02 19:44:19 +0000 1029)                 });
+
+Underbranch/compile/server.js:
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  1) const express = require("express");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000  2) const bodyParser = require("body-parser");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  3) const fs = require("fs");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000  4) const { exec } = require("child_process");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  5) const path = require("path");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  6)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  7) const app = express();
+01a2fb12 (Robby Lawrence     2025-10-04 12:12:10 -0400  8) const PORT = 3002;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  9)
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 10) // Serve static files if needed
+8594df96 (Robby Lawrence     2025-10-05 18:51:20 -0400 11) app.use("/compile", express.static(path.join(__dirname)));
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 12)
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 13) // Parse JSON bodies
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 14) app.use(bodyParser.json());
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 15)
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 16) // POST /compile, compile LaTeX
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 17) app.post("/compile", (req, res) => {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 18)     const latexCode = req.body.latex;
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 19)     if (!latexCode) {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 20)         return res.status(400).send("No LaTeX code provided");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 21)     }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 22)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 23)     const texFile = "document.tex";
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 24)     fs.writeFileSync(texFile, latexCode);
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 25)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 26)     exec(
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 27)         `pdflatex -interaction=nonstopmode -halt-on-error ${texFile}`,
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 28)         (error, stdout, stderr) => {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 29)             if (error) {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 30)                 console.error(stderr);
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 31)                 return res.status(500).send("Compilation failed");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 32)             }
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 33)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 34)             const pdfFile = "document.pdf";
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 35)             if (!fs.existsSync(pdfFile)) {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 36)                 return res.status(500).send("PDF not generated");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 37)             }
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 38)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 39)             res.setHeader("Content-Type", "application/pdf");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 40)             fs.createReadStream(pdfFile).pipe(res);
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 41)         },
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 42)     );
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 43) });
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 44)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 45) app.listen(PORT, () => {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 46)     console.log(`Server running on port ${PORT}`);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 47) });
+
+Underbranch/compile/index.html:
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  1) const express = require("express");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000  2) const bodyParser = require("body-parser");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  3) const fs = require("fs");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000  4) const { exec } = require("child_process");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  5) const path = require("path");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  6)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  7) const app = express();
+01a2fb12 (Robby Lawrence     2025-10-04 12:12:10 -0400  8) const PORT = 3002;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  9)
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 10) // Serve static files if needed
+8594df96 (Robby Lawrence     2025-10-05 18:51:20 -0400 11) app.use("/compile", express.static(path.join(__dirname)));
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 12)
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 13) // Parse JSON bodies
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 14) app.use(bodyParser.json());
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 15)
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 16) // POST /compile, compile LaTeX
+928b557e (Robby Lawrence     2025-10-05 23:04:12 -0400 17) app.post("/compile", (req, res) => {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 18)     const latexCode = req.body.latex;
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 19)     if (!latexCode) {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 20)         return res.status(400).send("No LaTeX code provided");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 21)     }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 22)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 23)     const texFile = "document.tex";
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 24)     fs.writeFileSync(texFile, latexCode);
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 25)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 26)     exec(
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 27)         `pdflatex -interaction=nonstopmode -halt-on-error ${texFile}`,
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 28)         (error, stdout, stderr) => {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 29)             if (error) {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 30)                 console.error(stderr);
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 31)                 return res.status(500).send("Compilation failed");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 32)             }
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 33)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 34)             const pdfFile = "document.pdf";
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 35)             if (!fs.existsSync(pdfFile)) {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 36)                 return res.status(500).send("PDF not generated");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 37)             }
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 38)
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 39)             res.setHeader("Content-Type", "application/pdf");
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 40)             fs.createReadStream(pdfFile).pipe(res);
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 41)         },
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 42)     );
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 43) });
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 44)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 45) app.listen(PORT, () => {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 46)     console.log(`Server running on port ${PORT}`);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 47) });
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   1) <!doctype html>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   2)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   3) <html lang="en">
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   4)     <head>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   5)         <meta charset="utf-8" />
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   6)         <meta name="viewport" content="width=device-width,initial-scale=1" />
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   8)         <style>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400   9)             :root {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  10)                 --gap: 12px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  11)                 font-family:
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  12)                     system-ui,
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  13)                     -apple-system,
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  14)                     "Segoe UI",
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  15)                     Roboto,
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  16)                     "Helvetica Neue",
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  17)                     Arial;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  18)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  19)             html,
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  20)             body {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  21)                 height: 100%;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  22)                 margin: 0;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  23)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  24)             .container {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  25)                 display: flex;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  26)                 height: 100vh;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  27)                 gap: var(--gap);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  28)                 padding: var(--gap);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  29)                 box-sizing: border-box;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  30)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  31)             .panel {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  32)                 flex: 1;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  33)                 display: flex;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  34)                 flex-direction: column;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  35)                 min-width: 0;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  36)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  37)             .left {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  38)                 border-right: 1px solid #eee;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  39)                 padding-right: var(--gap);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  40)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  41)             h1 {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  42)                 margin: 0 0 8px 0;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  43)                 font-size: 16px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  44)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  45)             textarea {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  46)                 width: 100%;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  47)                 height: 100%;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  48)                 resize: none;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  49)                 box-sizing: border-box;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  50)                 font-family:
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  51)                     ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  52)                     monospace;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  53)                 font-size: 13px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  54)                 padding: 10px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  55)                 border: 1px solid #ddd;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  56)                 border-radius: 6px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  57)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  58)             .controls {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  59)                 margin-top: 10px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  60)                 display: flex;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  61)                 gap: 8px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  62)                 align-items: center;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  63)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  64)             button {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  65)                 padding: 8px 12px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  66)                 font-size: 14px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  67)                 border-radius: 6px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  68)                 cursor: pointer;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  69)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  70)             a.button {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  71)                 text-decoration: none;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  72)                 padding: 8px 12px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  73)                 border-radius: 6px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  74)                 border: 1px solid #ccc;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  75)                 display: inline-block;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  76)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  77)             #status {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  78)                 color: #666;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  79)                 font-size: 13px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  80)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  81)             .right {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  82)                 padding-left: var(--gap);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  83)                 min-width: 0;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  84)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  85)             iframe {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  86)                 width: 100%;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  87)                 height: calc(100% - 32px);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  88)                 border: 1px solid #ddd;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  89)                 border-radius: 6px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  90)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  91)             .note {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  92)                 color: #666;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  93)                 font-size: 13px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  94)                 margin-top: 6px;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  95)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  96)         </style>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  97)     </head>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  98)     <body>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400  99)         <div class="container">
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 100)             <div class="panel left">
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 101)                 <h1>LaTeX source</h1>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 102)                 <textarea id="latex" spellcheck="false">
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 103) \documentclass{article}
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 104) \usepackage[utf8]{inputenc}
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 105) \begin{document}
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 106) Hello, world!
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 107)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 108) % Try editing and click "Compile to PDF"
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 109) \end{document} </textarea
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 110)                 >
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 111)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 112)                 <div class="controls">
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 113)                     <button id="compileBtn">Compile to PDF</button>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 114)                     <a
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 115)                         id="download"
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 116)                         class="button"
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 117)                         href="#"
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 118)                         download="document.pdf"
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 119)                         style="display: none"
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 120)                         >Download PDF</a
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 121)                     >
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 122)                     <span id="status">Ready</span>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 123)                 </div>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 124)             </div>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 125)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 126)             <div class="panel right">
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 127)                 <h1>PDF preview</h1>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 128)                 <iframe id="pdfFrame" title="PDF preview"></iframe>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 129)             </div>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 130)         </div>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 131)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 132)         <script>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 133)             const compileBtn = document.getElementById("compileBtn");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 134)             const status = document.getElementById("status");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 135)             const download = document.getElementById("download");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 136)             const pdfFrame = document.getElementById("pdfFrame");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 137)             const latexInput = document.getElementById("latex");
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 138)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 139)             let currentUrl = null;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 140)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 141)             compileBtn.addEventListener("click", compile);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 142)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 143)             async function compile() {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 144)                 compileBtn.disabled = true;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 145)                 status.textContent = "Compiling…";
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 146)                 download.style.display = "none";
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 147)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 148)                 try {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 149)                     const latex = latexInput.value;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 151)                         method: "POST",
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 152)                         headers: { "Content-Type": "application/json" },
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 153)                         body: JSON.stringify({ latex }),
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 154)                     });
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 155)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 156)                     if (!res.ok) {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 159)                         compileBtn.disabled = false;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 160)                         return;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 161)                     }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 162)
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 163)                     const blob = await res.blob();
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 164)                     const url = URL.createObjectURL(blob);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 165)                     if (currentUrl) URL.revokeObjectURL(currentUrl);
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 166)                     currentUrl = url;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 167)                     pdfFrame.src = url;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 168)                     download.href = url;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 169)                     download.style.display = "inline-block";
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 170)                     status.textContent = "Compiled successfully";
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 171)                 } catch (err) {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 172)                     status.textContent =
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 173)                         "Network error: " +
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 174)                         (err && err.message ? err.message : String(err));
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 175)                 } finally {
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 176)                     compileBtn.disabled = false;
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 177)                 }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 178)             }
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 179)         </script>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 180)     </body>
+3c0739e1 (Robby Lawrence     2025-10-04 12:10:32 -0400 181) </html>
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000   7)         <title>Test LaTeX Compilation</title>
+b80686da (Underbranch Server 2025-10-06 03:14:43 +0000 150)                     const res = await fetch("/compile/", {
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 157)                         const text = await res.text();
+0fe4b148 (Underbranch Server 2025-10-04 21:16:09 +0000 158)                         status.textContent = "Error: " + text;
