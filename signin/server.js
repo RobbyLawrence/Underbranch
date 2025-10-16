@@ -450,7 +450,7 @@ app.post("/signin/api/auth/forgot", async (req, res) => {
         );
         // Send reset email
         // still need to write frontend file that accepts token
-        const resetLink = `https://underbranch.org/signin/reset.html?token=${token}$`;
+        const resetLink = `https://underbranch.org/signin/reset.html?token=${token}`;
         let transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
