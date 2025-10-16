@@ -10,7 +10,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve static files from public/dist directory (where webpack outputs bundle.js)
+// Serve static files from dist directory (where webpack outputs bundle.js)
 app.use("/dist", express.static(path.join(__dirname, "dist")));
 
 // Serve static files from the root directory
