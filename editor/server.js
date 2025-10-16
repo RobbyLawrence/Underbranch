@@ -11,10 +11,7 @@ app.use((req, res, next) => {
 });
 
 // Serve static files from public/dist directory (where webpack outputs bundle.js)
-app.use(
-    "/frontend/dist",
-    express.static(path.join(__dirname, "public", "dist")),
-);
+app.use("/dist", express.static(path.join(__dirname, "dist")));
 
 // Serve static files from the root directory
 app.use(express.static(__dirname));
@@ -28,7 +25,7 @@ app.listen(PORT, () => {
     console.log(`\n✅ LaTeX Editor Server Running!`);
     console.log(`\n📝 Open your browser to: http://localhost:${PORT}`);
     console.log(
-        `\n📦 Serving bundle.js from: ${path.join(__dirname, "public", "dist", "bundle.js")}`,
+        `\n📦 Serving bundle.js from: ${path.join(__dirname, "dist", "bundle.js")}`,
     );
     console.log(`\n🔧 Press Ctrl+C to stop the server\n`);
 });
