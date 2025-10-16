@@ -1,0 +1,760 @@
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   1) /******/ (() => { // webpackBootstrap
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   2) /******/ 	"use strict";
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   3) /******/ 	var __webpack_modules__ = ({
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   4) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   5) /***/ "./src/App.js":
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   6) /*!********************!*\
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   7)   !*** ./src/App.js ***!
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   8)   \********************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400   9) /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  10) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  11) __webpack_require__.r(__webpack_exports__);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  12) /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  13) /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  14) /* harmony export */ });
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  15) // Pull React hooks off the global React object. This file assumes React is
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  16) // available globally (e.g. via a <script> tag or bundler that provides it).
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  17) const {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  18)   useState,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  19)   useEffect
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  20) } = React;
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  21) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  22) // Main application component. This is a small, non-JSX React component that
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  23) // uses React.createElement to build the UI. It wires together three pieces:
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  24) // - Toolbar: lets the user switch view modes and perform actions
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  25) // - LaTeXEditor: an editor component for editing LaTeX source
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  26) // - PreviewPane: renders the LaTeX source as HTML or a preview
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  27) const App = () => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  28)   // latexCode holds the current LaTeX source the user is editing. We
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  29)   // initialize it with a small sample document so the preview shows
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  30)   // something on first load.
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  31)   const [latexCode, setLatexCode] = useState(`\\documentclass{article}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  32) \\usepackage[utf8]{inputenc}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  33) \\title{My LaTeX Document}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  34) \\author{Author Name}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  35) \\date{\\today}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  36) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  37) \\begin{document}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  38) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  39) \\maketitle
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  40) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  41) \\section{Introduction}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  42) This is a sample LaTeX document. You can edit this text in the editor.
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  43) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  44) \\section{Mathematical Equations}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  45) Here's a mathematical equation:
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  46) \\begin{equation}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  47) E = mc^2
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  48) \\end{equation}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  49) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  50) And an inline equation: $\\alpha + \\beta = \\gamma$
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  51) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  52) \\subsection{More Examples}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  53) \\begin{itemize}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  54) \\item First item
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  55) \\item Second item
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  56) \\item Third item
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  57) \\end{itemize}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  58) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  59) \\end{document}`);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  60) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  61)   // viewMode controls which panes are visible. Possible values:
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  62)   // - 'editor'  -> only the editor is shown
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  63)   // - 'preview' -> only the preview is shown
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  64)   // - 'split'   -> both are shown side-by-side
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  65)   const [viewMode, setViewMode] = useState('split'); // 'editor', 'preview', 'split'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  66) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  67)   // handleCodeChange is passed to the editor component. It receives the
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  68)   // new text value and updates the latexCode state. We guard against
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  69)   // undefined/null by falling back to an empty string.
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  70)   const handleCodeChange = value => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  71)     setLatexCode(value || '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400  72)   };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  73) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  74)   // Debug: log viewMode transitions so we can trace state changes while
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  75)   // reproducing the issue in the browser console.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  76)   useEffect(() => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  77)     console.log('[App] viewMode changed ->', viewMode);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  78)     // Also update the document title so the current mode is visible
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  79)     // in the browser tab (easy to spot without opening devtools).
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  80)     try {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  81)       document.title = `LaTeX Editor — ${viewMode}`;
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  82)     } catch (e) {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  83)       // ignore (server side or non-browser env)
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  84)     }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  85)     // Trigger a resize event to nudge layout systems (Monaco, CSS)
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  86)     // to recompute sizes when the view mode changes.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  87)     try {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  88)       window.dispatchEvent(new Event('resize'));
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  89)     } catch (e) {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  90)       // ignore in non-browser environments
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  91)     }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  92)   }, [viewMode]);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  93) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  94)   // The UI layout is built with React.createElement calls instead of JSX.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  95)   // To avoid layout glitches when switching modes we render both panes
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  96)   // consistently and toggle their visibility/size using explicit CSS
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  97)   // class names: 'split', 'full', or 'hidden'. This prevents frequent
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  98)   // unmount/remount of the editor which can cause Monaco/DOM layout issues.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400  99)   const editorClass = viewMode === 'split' ? 'split' : viewMode === 'editor' ? 'full' : 'hidden';
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 100)   const previewClass = viewMode === 'split' ? 'split' : viewMode === 'preview' ? 'full' : 'hidden';
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 101)   const editorVisible = viewMode === 'split' || viewMode === 'editor';
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 102)   const previewVisible = viewMode === 'split' || viewMode === 'preview';
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 103)   return React.createElement('div', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 104)     className: 'app'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 105)   }, React.createElement(Toolbar, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 106)     viewMode: viewMode,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 107)     onViewModeChange: setViewMode,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 108)     latexCode: latexCode
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 109)   }), React.createElement('div', {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 110)     className: `editor-container mode-${viewMode}`
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 111)   },
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 112)   // Editor pane is always present but may be hidden via the
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 113)   // 'hidden' class. This keeps Monaco mounted and stable.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 114)   React.createElement('div', {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 115)     className: `editor-pane ${editorClass}`
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 116)   }, React.createElement(LaTeXEditor, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 117)     value: latexCode,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 118)     onChange: handleCodeChange,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 119)     isVisible: editorVisible
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 120)   })),
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 121)   // Preview pane is always present as well; it will be hidden
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 122)   // when not in 'preview' or 'split' modes.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 123)   React.createElement('div', {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 124)     className: `preview-pane ${previewClass}`
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 125)   }, React.createElement(PreviewPane, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 126)     latexCode: latexCode
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 127)   }))));
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 128) };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 129) /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (App);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 130) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 131) /***/ }),
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 132) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 133) /***/ "./src/LaTeXEditor.js":
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 134) /*!****************************!*\
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 135)   !*** ./src/LaTeXEditor.js ***!
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 136)   \****************************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 137) /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 138) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 139) __webpack_require__.r(__webpack_exports__);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 140) /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 141) /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 142) /* harmony export */ });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 143) const {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 144)   useEffect,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 145)   useRef
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 146) } = React;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 147) const LaTeXEditor = ({
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 148)   value,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 149)   onChange,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 150)   isVisible = true
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 151) }) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 152)   const editorRef = useRef(null);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 153)   const monacoRef = useRef(null);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 154)   const layoutTimeout = useRef(null);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 155)   useEffect(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 156)     // Initialize Monaco Editor
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 157)     if (window.require && !monacoRef.current) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 158)       window.require.config({
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 159)         paths: {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 160)           vs: "https://unpkg.com/monaco-editor@0.44.0/min/vs"
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 161)         }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 162)       });
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 163)       window.require(["vs/editor/editor.main"], () => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 164)         if (editorRef.current && !monacoRef.current) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 165)           // Configure LaTeX language (basic syntax highlighting)
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 166)           monaco.languages.register({
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 167)             id: "latex"
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 168)           });
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 169)           monaco.languages.setMonarchTokensProvider("latex", {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 170)             tokenizer: {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 171)               root: [[/\\[a-zA-Z@]+/, "keyword"], [/\\begin\{[^}]+\}/, "keyword"], [/\\end\{[^}]+\}/, "keyword"], [/\$.*?\$/, "string"], [/\\\(.*?\\\)/, "string"], [/\\\[.*?\\\]/, "string"], [/%.*$/, "comment"], [/\{/, "bracket"], [/\}/, "bracket"]]
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 172)             }
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 173)           });
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 174) 
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 175)           // Register completion provider for LaTeX commands starting with backslash
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 176)           monaco.languages.registerCompletionItemProvider("latex", {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 177)             triggerCharacters: ["\\"],
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 178)             provideCompletionItems: (model, position) => {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 179)               const lineContent = model.getLineContent(position.lineNumber);
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 180)               const textBeforeCursor = lineContent.substring(0, position.column - 1);
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 181) 
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 182)               // Check if we're typing after a backslash
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 183)               const commandMatch = textBeforeCursor.match(/\\([a-zA-Z]*)$/);
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 184)               if (commandMatch) {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 185)                 const partialCommand = commandMatch[1];
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 186) 
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 187)                 // LaTeX commands that need curly braces
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 188)                 const commandsWithBraces = [{
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 189)                   command: "begin",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 190)                   insertText: "begin{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 191)                   documentation: "Begin environment"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 192)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 193)                   command: "end",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 194)                   insertText: "end{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 195)                   documentation: "End environment"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 196)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 197)                   command: "textbf",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 198)                   insertText: "textbf{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 199)                   documentation: "Bold text"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 200)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 201)                   command: "textit",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 202)                   insertText: "textit{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 203)                   documentation: "Italic text"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 204)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 205)                   command: "underline",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 206)                   insertText: "underline{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 207)                   documentation: "Underline text"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 208)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 209)                   command: "section",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 210)                   insertText: "section{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 211)                   documentation: "Section"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 212)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 213)                   command: "subsection",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 214)                   insertText: "subsection{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 215)                   documentation: "Subsection"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 216)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 217)                   command: "subsubsection",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 218)                   insertText: "subsubsection{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 219)                   documentation: "Subsubsection"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 220)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 221)                   command: "chapter",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 222)                   insertText: "chapter{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 223)                   documentation: "Chapter"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 224)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 225)                   command: "title",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 226)                   insertText: "title{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 227)                   documentation: "Document title"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 228)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 229)                   command: "author",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 230)                   insertText: "author{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 231)                   documentation: "Document author"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 232)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 233)                   command: "date",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 234)                   insertText: "date{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 235)                   documentation: "Document date"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 236)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 237)                   command: "emph",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 238)                   insertText: "emph{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 239)                   documentation: "Emphasize text"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 240)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 241)                   command: "frac",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 242)                   insertText: "frac{$1}{$2}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 243)                   documentation: "Fraction"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 244)                 }, {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 245)                   command: "sqrt",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 246)                   insertText: "sqrt{$0}",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 247)                   documentation: "Square root"
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 248)                 }];
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 249) 
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 250)                 // Filter commands that match the partial input
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 251)                 const suggestions = commandsWithBraces.filter(cmd => cmd.command.startsWith(partialCommand)).map(cmd => {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 252)                   const completionItem = {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 253)                     label: cmd.command,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 254)                     kind: monaco.languages.CompletionItemKind.Function,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 255)                     insertText: cmd.insertText,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 256)                     insertTextFormat: monaco.languages.CompletionItemInsertTextFormat.Snippet,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 257)                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 258)                     documentation: cmd.documentation,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 259)                     range: {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 260)                       startLineNumber: position.lineNumber,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 261)                       startColumn: position.column - partialCommand.length,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 262)                       endLineNumber: position.lineNumber,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 263)                       endColumn: position.column
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 264)                     }
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 265)                   };
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 266) 
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 267)                   // For 'begin' command, trigger suggestions after insertion
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 268)                   if (cmd.command === 'begin') {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 269)                     completionItem.command = {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 270)                       id: 'editor.action.triggerSuggest',
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 271)                       title: 'Trigger Suggest'
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 272)                     };
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 273)                   }
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 274)                   return completionItem;
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 275)                 });
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 276)                 return {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 277)                   suggestions
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 278)                 };
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 279)               }
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 280)               return {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 281)                 suggestions: []
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 282)               };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 283)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 284)           });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 285) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 286)           // Register completion provider for common LaTeX environments
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 287)           monaco.languages.registerCompletionItemProvider("latex", {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 288)             triggerCharacters: ["{"],
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 289)             provideCompletionItems: (model, position) => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 290)               const lineContent = model.getLineContent(position.lineNumber);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 291)               const textBeforeCursor = lineContent.substring(0, position.column - 1);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 292) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 293)               // Check if we just typed \begin{
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 294)               if (textBeforeCursor.match(/\\begin\{$/)) {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 295)                 const environments = ["document", "equation", "align", "itemize", "enumerate", "figure", "table", "center", "abstract", "theorem", "proof", "definition", "lemma", "corollary", "example", "remark", "verbatim", "quote", "tabular", "array"];
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 296)                 return {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 297)                   suggestions: environments.map(env => ({
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 298)                     label: env,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 299)                     kind: monaco.languages.CompletionItemKind.Snippet,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 300)                     insertText: `${env}}\n\t$0\n\\end{${env}}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 301)                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 302)                     documentation: `Insert ${env} environment`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 303)                     range: {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 304)                       startLineNumber: position.lineNumber,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 305)                       startColumn: position.column,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 306)                       endLineNumber: position.lineNumber,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 307)                       endColumn: position.column
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 308)                     }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 309)                   }))
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 310)                 };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 311)               }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 312)               return {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 313)                 suggestions: []
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 314)               };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 315)             }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 316)           });
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 317) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 318)           // Register completion provider for auto-closing \begin{...} with \end{...}
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 319)           monaco.languages.registerCompletionItemProvider("latex", {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 320)             triggerCharacters: ["}"],
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 321)             provideCompletionItems: (model, position) => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 322)               const lineContent = model.getLineContent(position.lineNumber);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 323)               const textBeforeCursor = lineContent.substring(0, position.column - 1);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 324) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 325)               // Check if we just typed \begin{environmentName}
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 326)               const beginMatch = textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 327)               if (beginMatch) {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 328)                 const environmentName = beginMatch[1];
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 329)                 return {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 330)                   suggestions: [{
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 331)                     label: `Auto-close \\end{${environmentName}}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 332)                     kind: monaco.languages.CompletionItemKind.Snippet,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 333)                     insertText: `\n\t$0\n\\end{${environmentName}}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 334)                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 335)                     documentation: `Auto-close with \\end{${environmentName}}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 336)                     range: {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 337)                       startLineNumber: position.lineNumber,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 338)                       startColumn: position.column,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 339)                       endLineNumber: position.lineNumber,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 340)                       endColumn: position.column
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 341)                     }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 342)                   }]
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 343)                 };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 344)               }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 345)               return {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 346)                 suggestions: []
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 347)               };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 348)             }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 349)           });
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 350) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 351)           // Create the editor
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 352)           monacoRef.current = monaco.editor.create(editorRef.current, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 353)             value: value,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 354)             language: "latex",
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 355)             theme: "vs-light",
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 356)             fontSize: 14,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 357)             lineNumbers: "on",
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 358)             roundedSelection: false,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 359)             scrollBeyondLastLine: false,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 360)             automaticLayout: true,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 361)             minimap: {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 362)               enabled: false
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 363)             },
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 364)             wordWrap: "on",
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 365)             lineHeight: 20,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 366)             padding: {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 367)               top: 10,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 368)               bottom: 10
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 369)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 370)           });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 371) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 372)           // Listen for content changes
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 373)           monacoRef.current.onDidChangeModelContent(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 374)             const currentValue = monacoRef.current.getValue();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 375)             if (onChange) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 376)               onChange(currentValue);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 377)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 378)           });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 379)         }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 380)       });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 381)     }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 382) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 383)     // Listen for clear editor event
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 384)     const handleClearEditor = () => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 385)       if (monacoRef.current) {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 386)         monacoRef.current.setValue("");
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 387)       }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 388)     };
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 389)     window.addEventListener("clearEditor", handleClearEditor);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 390)     return () => {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 391)       window.removeEventListener("clearEditor", handleClearEditor);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 392)       if (monacoRef.current) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 393)         monacoRef.current.dispose();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 394)         monacoRef.current = null;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 395)       }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 396)     };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 397)   }, []);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 398) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 399)   // Update editor value when prop changes
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 400)   useEffect(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 401)     if (monacoRef.current && monacoRef.current.getValue() !== value) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 402)       monacoRef.current.setValue(value);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 403)     }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 404)   }, [value]);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 405) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 406)   // When the editor becomes visible ensure Monaco recalculates layout.
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 407)   useEffect(() => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 408)     if (!monacoRef.current) return;
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 409)     if (isVisible) {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 410)       // Debounce a bit in case of rapid toggles
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 411)       if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 412)       layoutTimeout.current = setTimeout(() => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 413)         try {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 414)           monacoRef.current.layout();
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 415)           console.log("[LaTeXEditor] called monaco.layout() because isVisible=true");
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 416)         } catch (e) {
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 417)           console.warn("monaco.layout failed", e);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 418)         }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 419)       }, 50);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 420)     }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 421)     return () => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 422)       if (layoutTimeout.current) {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 423)         clearTimeout(layoutTimeout.current);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 424)         layoutTimeout.current = null;
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 425)       }
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 426)     };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 427)   }, [isVisible]);
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 428)   return React.createElement("div", {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 429)     ref: editorRef,
+9b6bdc7d dist/bundle.js          (Ferrari 2025-10-16 10:12:26 -0400 430)     id: "monaco-editor"
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 431)   });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 432) };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 433) /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (LaTeXEditor);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 434) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 435) /***/ }),
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 436) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 437) /***/ "./src/PreviewPane.js":
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 438) /*!****************************!*\
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 439)   !*** ./src/PreviewPane.js ***!
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 440)   \****************************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 441) /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 442) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 443) __webpack_require__.r(__webpack_exports__);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 444) /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 445) /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 446) /* harmony export */ });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 447) const PreviewPane = ({
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 448)   latexCode
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 449) }) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 450)   const {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 451)     useState,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 452)     useEffect
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 453)   } = React;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 454)   const [processedContent, setProcessedContent] = useState('');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 455)   const [isLoading, setIsLoading] = useState(false);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 456) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 457)   // Simple LaTeX to HTML converter for basic preview
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 458)   const processLaTeX = latex => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 459)     setIsLoading(true);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 460) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 461)     // Basic LaTeX processing - this is a simplified version
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 462)     let html = latex;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 463) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 464)     // Document structure
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 465)     html = html.replace(/\\documentclass\{[^}]+\}/, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 466)     html = html.replace(/\\usepackage(?:\[[^\]]*\])?\{[^}]+\}/g, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 467)     html = html.replace(/\\title\{([^}]+)\}/, '<h1 class="title">$1</h1>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 468)     html = html.replace(/\\author\{([^}]+)\}/, '<p class="author">By: $1</p>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 469)     html = html.replace(/\\date\{([^}]+)\}/, '<p class="date">$1</p>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 470)     html = html.replace(/\\maketitle/, '<div class="titlepage"></div>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 471) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 472)     // Sections
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 473)     html = html.replace(/\\section\{([^}]+)\}/g, '<h2>$1</h2>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 474)     html = html.replace(/\\subsection\{([^}]+)\}/g, '<h3>$1</h3>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 475)     html = html.replace(/\\subsubsection\{([^}]+)\}/g, '<h4>$1</h4>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 476) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 477)     // Math environments
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 478)     html = html.replace(/\\begin\{equation\}([\s\S]*?)\\end\{equation\}/g, '<div class="equation">$$1$</div>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 479)     html = html.replace(/\$([^$]+)\$/g, '<span class="math">$1</span>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 480) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 481)     // Lists
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 482)     html = html.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 483)       const items = content.replace(/\\item\s+/g, '<li>').split('<li>').filter(item => item.trim());
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 484)       return '<ul>' + items.map(item => '<li>' + item.trim() + '</li>').join('') + '</ul>';
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 485)     });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 486)     html = html.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 487)       const items = content.replace(/\\item\s+/g, '<li>').split('<li>').filter(item => item.trim());
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 488)       return '<ol>' + items.map(item => '<li>' + item.trim() + '</li>').join('') + '</ol>';
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 489)     });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 490) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 491)     // Text formatting
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 492)     html = html.replace(/\\textbf\{([^}]+)\}/g, '<strong>$1</strong>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 493)     html = html.replace(/\\textit\{([^}]+)\}/g, '<em>$1</em>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 494)     html = html.replace(/\\emph\{([^}]+)\}/g, '<em>$1</em>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 495) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 496)     // Clean up LaTeX commands and environments
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 497)     html = html.replace(/\\begin\{document\}/, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 498)     html = html.replace(/\\end\{document\}/, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 499)     html = html.replace(/\\[a-zA-Z]+(?:\[[^\]]*\])?\{[^}]*\}/g, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 500)     html = html.replace(/\\[a-zA-Z]+/g, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 501) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 502)     // Convert line breaks
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 503)     html = html.replace(/\n\s*\n/g, '</p><p>');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 504)     html = '<p>' + html + '</p>';
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 505)     html = html.replace(/<p>\s*<\/p>/g, '');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 506)     setProcessedContent(html);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 507)     setIsLoading(false);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 508)   };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 509)   useEffect(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 510)     const timeoutId = setTimeout(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 511)       processLaTeX(latexCode);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 512)     }, 500); // Debounce processing
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 513) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 514)     return () => clearTimeout(timeoutId);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 515)   }, [latexCode]);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 516)   if (isLoading) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 517)     return React.createElement('div', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 518)       className: 'loading'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 519)     }, 'Processing LaTeX...');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 520)   }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 521)   return React.createElement('div', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 522)     className: 'preview-content'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 523)   }, React.createElement('div', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 524)     dangerouslySetInnerHTML: {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 525)       __html: processedContent
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 526)     }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 527)   }), React.createElement('style', null, `
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 528)             .preview-content h1.title {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 529)                 text-align: center;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 530)                 margin-bottom: 10px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 531)                 font-size: 24px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 532)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 533)             .preview-content .author, .preview-content .date {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 534)                 text-align: center;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 535)                 margin: 5px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 536)                 color: #666;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 537)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 538)             .preview-content h2 {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 539)                 margin: 20px 0 10px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 540)                 color: #333;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 541)                 border-bottom: 1px solid #ddd;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 542)                 padding-bottom: 5px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 543)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 544)             .preview-content h3 {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 545)                 margin: 15px 0 8px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 546)                 color: #444;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 547)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 548)             .preview-content h4 {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 549)                 margin: 12px 0 6px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 550)                 color: #555;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 551)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 552)             .preview-content p {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 553)                 margin: 10px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 554)                 line-height: 1.6;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 555)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 556)             .preview-content .equation {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 557)                 text-align: center;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 558)                 margin: 20px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 559)                 padding: 10px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 560)                 background: #f8f9fa;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 561)                 border-left: 4px solid #007bff;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 562)                 font-family: 'Times New Roman', serif;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 563)                 font-style: italic;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 564)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 565)             .preview-content .math {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 566)                 font-family: 'Times New Roman', serif;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 567)                 font-style: italic;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 568)                 background: #f0f0f0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 569)                 padding: 2px 4px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 570)                 border-radius: 3px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 571)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 572)             .preview-content ul, .preview-content ol {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 573)                 margin: 10px 0 10px 20px;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 574)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 575)             .preview-content li {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 576)                 margin: 5px 0;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 577)             }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 578)         `));
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 579) };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 580) /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PreviewPane);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 581) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 582) /***/ }),
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 583) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 584) /***/ "./src/Toolbar.js":
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 585) /*!************************!*\
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 586)   !*** ./src/Toolbar.js ***!
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 587)   \************************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 588) /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 589) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 590) __webpack_require__.r(__webpack_exports__);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 591) /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 592) /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 593) /* harmony export */ });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 594) const Toolbar = ({
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 595)   viewMode,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 596)   onViewModeChange,
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 597)   latexCode
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 598) }) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 599)   const handleDownload = () => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 600)     const blob = new Blob([latexCode], {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 601)       type: 'text/plain'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 602)     });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 603)     const url = URL.createObjectURL(blob);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 604)     const a = document.createElement('a');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 605)     a.href = url;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 606)     a.download = 'document.tex';
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 607)     document.body.appendChild(a);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 608)     a.click();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 609)     document.body.removeChild(a);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 610)     URL.revokeObjectURL(url);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 611)   };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 612)   const handleClear = () => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 613)     if (confirm('Are you sure you want to clear the editor?')) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 614)       onViewModeChange('editor');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 615)       // This will be handled by the parent component
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 616)       const event = new CustomEvent('clearEditor');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 617)       window.dispatchEvent(event);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 618)     }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 619)   };
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 620) 
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 621)   // Debug helpers - log button clicks
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 622)   const handleViewClick = mode => {
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 623)     console.log('[Toolbar] button click ->', mode);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 624)     onViewModeChange(mode);
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 625)   };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 626)   return React.createElement('div', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 627)     className: 'toolbar'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 628)   }, React.createElement('h1', null, 'LaTeX Editor'), React.createElement('div', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 629)     className: 'toolbar-buttons'
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 630)   }, React.createElement('button', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 631)     className: `btn ${viewMode === 'editor' ? 'btn-primary' : 'btn-secondary'}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 632)     onClick: () => handleViewClick('editor')
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 633)   }, 'Editor'), React.createElement('button', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 634)     className: `btn ${viewMode === 'split' ? 'btn-primary' : 'btn-secondary'}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 635)     onClick: () => handleViewClick('split')
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 636)   }, 'Split'), React.createElement('button', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 637)     className: `btn ${viewMode === 'preview' ? 'btn-primary' : 'btn-secondary'}`,
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 638)     onClick: () => handleViewClick('preview')
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 639)   }, 'Preview'), React.createElement('button', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 640)     className: 'btn btn-secondary',
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 641)     onClick: handleDownload
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 642)   }, 'Download'), React.createElement('button', {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 643)     className: 'btn btn-secondary',
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 644)     onClick: handleClear
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 645)   }, 'Clear')));
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 646) };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 647) /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Toolbar);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 648) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 649) /***/ })
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 650) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 651) /******/ 	});
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 652) /************************************************************************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 653) /******/ 	// The module cache
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 654) /******/ 	var __webpack_module_cache__ = {};
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 655) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 656) /******/ 	// The require function
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 657) /******/ 	function __webpack_require__(moduleId) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 658) /******/ 		// Check if module is in cache
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 659) /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 660) /******/ 		if (cachedModule !== undefined) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 661) /******/ 			return cachedModule.exports;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 662) /******/ 		}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 663) /******/ 		// Create a new module (and put it into the cache)
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 664) /******/ 		var module = __webpack_module_cache__[moduleId] = {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 665) /******/ 			// no module.id needed
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 666) /******/ 			// no module.loaded needed
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 667) /******/ 			exports: {}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 668) /******/ 		};
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 669) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 670) /******/ 		// Execute the module function
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 671) /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 672) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 673) /******/ 		// Return the exports of the module
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 674) /******/ 		return module.exports;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 675) /******/ 	}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 676) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 677) /************************************************************************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 678) /******/ 	/* webpack/runtime/define property getters */
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 679) /******/ 	(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 680) /******/ 		// define getter functions for harmony exports
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 681) /******/ 		__webpack_require__.d = (exports, definition) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 682) /******/ 			for(var key in definition) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 683) /******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 684) /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 685) /******/ 				}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 686) /******/ 			}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 687) /******/ 		};
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 688) /******/ 	})();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 689) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 690) /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 691) /******/ 	(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 692) /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 693) /******/ 	})();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 694) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 695) /******/ 	/* webpack/runtime/make namespace object */
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 696) /******/ 	(() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 697) /******/ 		// define __esModule on exports
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 698) /******/ 		__webpack_require__.r = (exports) => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 699) /******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 700) /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 701) /******/ 			}
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 702) /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 703) /******/ 		};
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 704) /******/ 	})();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 705) /******/ 	
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 706) /************************************************************************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 707) var __webpack_exports__ = {};
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 708) // This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 709) (() => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 710) /*!**********************!*\
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 711)   !*** ./src/index.js ***!
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 712)   \**********************/
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 713) __webpack_require__.r(__webpack_exports__);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 714) /* harmony import */ var _Toolbar_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Toolbar.js */ "./src/Toolbar.js");
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 715) /* harmony import */ var _LaTeXEditor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./LaTeXEditor.js */ "./src/LaTeXEditor.js");
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 716) /* harmony import */ var _PreviewPane_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PreviewPane.js */ "./src/PreviewPane.js");
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 717) /* harmony import */ var _App_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./App.js */ "./src/App.js");
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 718) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 719) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 720) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 721) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 722) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 723) // Make components available globally for backward compatibility
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 724) window.Toolbar = _Toolbar_js__WEBPACK_IMPORTED_MODULE_0__["default"];
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 725) window.LaTeXEditor = _LaTeXEditor_js__WEBPACK_IMPORTED_MODULE_1__["default"];
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 726) window.PreviewPane = _PreviewPane_js__WEBPACK_IMPORTED_MODULE_2__["default"];
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 727) window.App = _App_js__WEBPACK_IMPORTED_MODULE_3__["default"];
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 728) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 729) // Function to initialize the app
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 730) const initializeApp = () => {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 731)   try {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 732)     // Wait for React to be available
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 733)     if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 734)       const root = ReactDOM.createRoot(document.getElementById('root'));
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 735)       root.render(React.createElement(_App_js__WEBPACK_IMPORTED_MODULE_3__["default"]));
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 736)     } else {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 737)       console.error('React or ReactDOM not loaded');
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 738)     }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 739)   } catch (error) {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 740)     console.error('Error loading app:', error);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 741)     document.getElementById('root').innerHTML = `
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 742)             <div style="padding: 20px; text-align: center; color: red;">
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 743)                 <h2>Error Loading Editor</h2>
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 744)                 <p>There was an error loading the LaTeX editor. Please check the console for details.</p>
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 745)             </div>
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 746)         `;
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 747)   }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 748) };
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 749) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 750) // Initialize when DOM is ready
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 751) if (document.readyState === 'loading') {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 752)   document.addEventListener('DOMContentLoaded', initializeApp);
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 753) } else {
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 754)   initializeApp();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 755) }
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 756) })();
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 757) 
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 758) /******/ })()
+0e4720a8 frontend/dist/bundle.js (Ferrari 2025-09-16 21:02:55 -0400 759) ;
+74eb3d64 frontend/dist/bundle.js (Ferrari 2025-10-02 17:32:22 -0400 760) //# sourceMappingURL=bundle.js.map
