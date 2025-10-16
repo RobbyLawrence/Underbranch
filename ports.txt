@@ -6,3 +6,4 @@ Each entry should list the port and use.
 80, 443 - nginx
 3306 - mysql
 3001 - node server for sign-in
+3000 - editor testing server
