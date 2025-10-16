@@ -1,11 +1,11 @@
 # Task List
-## Robby - 
+## Robby -
   Restyling login page
-## Matthew - 
+## Matthew -
   Something
-## Aaron - 
+## Aaron -
   Collaborative editor prototype
-## Brett - 
+## Brett -
   Syntax highlighting
 ## Paul -
   Editor restyling
