@@ -1,26 +1,26 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  1) const express = require("express");
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  2) const path = require("path");
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  3) 
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  4) const app = express();
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  3)
+9b6bdc7d (Ferrari 2026-10-16 10:12:26 -0400  4) const app = express();
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  5) const PORT = process.env.PORT || 3000;
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  6) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  6)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  7) // Simple request logger
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  8) app.use((req, res, next) => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  9)     console.log(`${new Date().toISOString()} -> ${req.method} ${req.url}`);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 10)     next();
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 11) });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 12) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 12)
 20cb152f (Ferrari 2025-10-16 10:55:48 -0400 13) // Serve static files from dist directory (where webpack outputs bundle.js)
 23326349 (Ferrari 2025-10-16 10:42:17 -0400 14) app.use("/dist", express.static(path.join(__dirname, "dist")));
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 15) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 15)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 16) // Serve static files from the root directory
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 17) app.use(express.static(__dirname));
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 18) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 18)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 19) // Serve index.html for all routes
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 20) app.get("*", (req, res) => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 21)     res.sendFile(path.join(__dirname, "index.html"));
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 22) });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 23) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 23)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 24) app.listen(PORT, () => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 25)     console.log(`\n✅ LaTeX Editor Server Running!`);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 26)     console.log(`\n📝 Open your browser to: http://localhost:${PORT}`);
@@ -30,24 +30,24 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 30)     console.log(`\n🔧 Press Ctrl+C to stop the server\n`);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 31) });
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   1) const { useEffect, useRef } = React;
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   2) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   2)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   3) const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   4)     const editorRef = useRef(null);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   5)     const monacoRef = useRef(null);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   6)     const layoutTimeout = useRef(null);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   7) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   7)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   8)     useEffect(() => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400   9)         // Initialize Monaco Editor
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  10)         if (window.require && !monacoRef.current) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  11)             window.require.config({
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  12)                 paths: { vs: "https://unpkg.com/monaco-editor@0.44.0/min/vs" },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  13)             });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  14) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  14)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  15)             window.require(["vs/editor/editor.main"], () => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  16)                 if (editorRef.current && !monacoRef.current) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  17)                     // Configure LaTeX language (basic syntax highlighting)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  18)                     monaco.languages.register({ id: "latex" });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  19) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  19)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  20)                     monaco.languages.setMonarchTokensProvider("latex", {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  21)                         tokenizer: {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  22)                             root: [
@@ -63,7 +63,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  32)                             ],
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  33)                         },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  34)                     });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  35) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  35)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  36)                     // Register completion provider for LaTeX commands starting with backslash
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  37)                     monaco.languages.registerCompletionItemProvider("latex", {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  38)                         triggerCharacters: ["\\"],
@@ -75,14 +75,14 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  44)                                 0,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  45)                                 position.column - 1,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  46)                             );
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  47) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  47)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  48)                             // Check if we're typing after a backslash
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  49)                             const commandMatch =
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  50)                                 textBeforeCursor.match(/\\([a-zA-Z]*)$/);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  51) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  51)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  52)                             if (commandMatch) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  53)                                 const partialCommand = commandMatch[1];
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  54) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  54)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  55)                                 // LaTeX commands that need curly braces
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  56)                                 const commandsWithBraces = [
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  57)                                     {
@@ -120,7 +120,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  89)                                         insertText: "subsection{$0}",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  90)                                         documentation: "Subsection",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  91)                                     },
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  92) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  92)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  93)                                     {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  94)                                         command: "subsubsection",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400  95)                                         insertText: "subsubsection{$0}",
@@ -162,7 +162,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 131)                                         documentation: "Square root",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 132)                                     },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 133)                                 ];
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 134) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 134)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 135)                                 // Filter commands that match the partial input
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 136)                                 const suggestions = commandsWithBraces
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 137)                                     .filter((cmd) =>
@@ -194,7 +194,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 163)                                                 endColumn: position.column,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 164)                                             },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 165)                                         };
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 166) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 166)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 167)                                         // For 'begin' command, trigger suggestions after insertion
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 168)                                         if (cmd.command === "begin") {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 169)                                             completionItem.command = {
@@ -202,17 +202,17 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 171)                                                 title: "Trigger Suggest",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 172)                                             };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 173)                                         }
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 174) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 174)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 175)                                         return completionItem;
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 176)                                     });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 177) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 177)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 178)                                 return { suggestions };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 179)                             }
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 180) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 180)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 181)                             return { suggestions: [] };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 182)                         },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 183)                     });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 184) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 184)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 185)                     // Register completion provider for common LaTeX environments
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 186)                     monaco.languages.registerCompletionItemProvider("latex", {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 187)                         triggerCharacters: ["{"],
@@ -224,7 +224,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 193)                                 0,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 194)                                 position.column - 1,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 195)                             );
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 196) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 196)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 197)                             // Check if we just typed \begin{
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 198)                             if (textBeforeCursor.match(/\\begin\{$/)) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 199)                                 const environments = [
@@ -249,7 +249,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 218)                                     "tabular",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 219)                                     "array",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 220)                                 ];
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 221) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 221)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 222)                                 return {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 223)                                     suggestions: environments.map((env) => ({
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 224)                                         label: env,
@@ -271,11 +271,11 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 240)                                     })),
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 241)                                 };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 242)                             }
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 243) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 243)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 244)                             return { suggestions: [] };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 245)                         },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 246)                     });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 247) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 247)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 248)                     // Register completion provider for auto-closing \begin{...} with \end{...}
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 249)                     monaco.languages.registerCompletionItemProvider("latex", {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 250)                         triggerCharacters: ["}"],
@@ -287,11 +287,11 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 256)                                 0,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 257)                                 position.column - 1,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 258)                             );
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 259) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 259)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 260)                             // Check if we just typed \begin{environmentName}
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 261)                             const beginMatch =
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 262)                                 textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 263) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 263)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 264)                             if (beginMatch) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 265)                                 const environmentName = beginMatch[1];
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 266)                                 return {
@@ -318,11 +318,11 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 287)                                     ],
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 288)                                 };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 289)                             }
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 290) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 290)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 291)                             return { suggestions: [] };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 292)                         },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 293)                     });
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 294) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 294)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 295)                     // Create the editor
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 296)                     monacoRef.current = monaco.editor.create(
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 297)                         editorRef.current,
@@ -341,7 +341,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 310)                             padding: { top: 10, bottom: 10 },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 311)                         },
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 312)                     );
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 313) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 313)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 314)                     // Listen for content changes
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 315)                     monacoRef.current.onDidChangeModelContent(() => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 316)                         const currentValue = monacoRef.current.getValue();
@@ -352,16 +352,16 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 321)                 }
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 322)             });
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 323)         }
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 324) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 324)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 325)         // Listen for clear editor event
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 326)         const handleClearEditor = () => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 327)             if (monacoRef.current) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 328)                 monacoRef.current.setValue("");
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 329)             }
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 330)         };
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 331) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 331)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 332)         window.addEventListener("clearEditor", handleClearEditor);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 333) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 333)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 334)         return () => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 335)             window.removeEventListener("clearEditor", handleClearEditor);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 336)             if (monacoRef.current) {
@@ -370,18 +370,18 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 339)             }
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 340)         };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 341)     }, []);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 342) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 342)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 343)     // Update editor value when prop changes
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 344)     useEffect(() => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 345)         if (monacoRef.current && monacoRef.current.getValue() !== value) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 346)             monacoRef.current.setValue(value);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 347)         }
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 348)     }, [value]);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 349) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 349)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 350)     // When the editor becomes visible ensure Monaco recalculates layout.
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 351)     useEffect(() => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 352)         if (!monacoRef.current) return;
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 353) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 353)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 354)         if (isVisible) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 355)             // Debounce a bit in case of rapid toggles
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 356)             if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
@@ -396,7 +396,7 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 365)                 }
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 366)             }, 50);
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 367)         }
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 368) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 368)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 369)         return () => {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 370)             if (layoutTimeout.current) {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 371)                 clearTimeout(layoutTimeout.current);
@@ -404,11 +404,11 @@
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 373)             }
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 374)         };
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 375)     }, [isVisible]);
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 376) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 376)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 377)     return React.createElement("div", {
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 378)         ref: editorRef,
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 379)         id: "monaco-editor",
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 380)     });
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 381) };
-9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 382) 
+9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 382)
 9b6bdc7d (Ferrari 2025-10-16 10:12:26 -0400 383) export default LaTeXEditor;
