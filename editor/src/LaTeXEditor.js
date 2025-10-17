@@ -17,6 +17,26 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                     // Configure LaTeX language (basic syntax highlighting)
                     monaco.languages.register({ id: "latex" });
 
+                    // Define custom theme
+                    monaco.editor.defineTheme('underbranch-theme', {
+                        base: 'vs',
+                        inherit: true,
+                        rules: [
+                            { token: 'keyword', foreground: 'B5632D' }, // Underbranch brand color
+                            { token: 'string', foreground: '218721' },  // Soft green for math
+                            { token: 'comment', foreground: '737373', fontStyle: 'italic' },
+                            { token: 'bracket', foreground: '505050' }
+                        ],
+                        colors: {
+                            'editor.background': '#FFFFFF',
+                            'editor.foreground': '#333333',
+                            'editor.lineHighlightBackground': '#F5F5F5',
+                            'editorCursor.foreground': '#B5632D',
+                            'editor.selectionBackground': '#E8D3C7',
+                            'editorLineNumber.foreground': '#999999'
+                        }
+                    });
+
                     monaco.languages.setMonarchTokensProvider("latex", {
                         tokenizer: {
                             root: [
@@ -298,16 +318,26 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                         {
                             value: value,
                             language: "latex",
-                            theme: "vs-light",
-                            fontSize: 14,
+                            theme: "underbranch-theme",
+                            fontSize: 15,
                             lineNumbers: "on",
-                            roundedSelection: false,
+                            roundedSelection: true,
                             scrollBeyondLastLine: false,
                             automaticLayout: true,
                             minimap: { enabled: false },
                             wordWrap: "on",
-                            lineHeight: 20,
-                            padding: { top: 10, bottom: 10 },
+                            lineHeight: 24,
+                            padding: { top: 16, bottom: 16 },
+                            renderLineHighlight: "all",
+                            cursorBlinking: "smooth",
+                            cursorWidth: 2,
+                            fontFamily: "'Fira Code', 'SF Mono', Consolas, 'Courier New', monospace",
+                            fontLigatures: true,
+                            smoothScrolling: true,
+                            guides: {
+                                indentation: true,
+                                bracketPairs: true
+                            },
                         },
                     );
 
