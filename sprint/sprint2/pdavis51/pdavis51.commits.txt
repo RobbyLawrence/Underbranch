@@ -1,3 +1,4 @@
+Underbranch/production-server/server.js
 
 28553f2c (pau1davis   2025-10-06 15:24:52 -0400   3) const fs = require('fs');
 28553f2c (pau1davis   2025-10-06 15:24:52 -0400  18) // Simple request logger to help debug frontend loading issues
@@ -99,3 +100,45 @@
 3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 153)   res.status(204).end();
 3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 154) });
 3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 155) 
+
+Underbranch/editor/src/LaTeXEditor.js
+
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  20)                     // Define custom theme
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  21)                     monaco.editor.defineTheme('underbranch-theme', {
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  22)                         base: 'vs',
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  23)                         inherit: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  24)                         rules: [
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  25)                             { token: 'keyword', foreground: 'B5632D' }, // Underbranch brand color
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  26)                             { token: 'string', foreground: '218721' },  // Soft green for math
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  27)                             { token: 'comment', foreground: '737373', fontStyle: 'italic' },
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  28)                             { token: 'bracket', foreground: '505050' }
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  29)                         ],
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  30)                         colors: {
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  31)                             'editor.background': '#FFFFFF',
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  32)                             'editor.foreground': '#333333',
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  33)                             'editor.lineHighlightBackground': '#F5F5F5',
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  34)                             'editorCursor.foreground': '#B5632D',
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  35)                             'editor.selectionBackground': '#E8D3C7',
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  36)                             'editorLineNumber.foreground': '#999999'
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  37)                         }
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  38)                     });
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  39) 
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 321)                             theme: "underbranch-theme",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 322)  
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 324)                             roundedSelection: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 329)                             lineHeight: 24,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 330)                             padding: { top: 16, bottom: 16 },
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 331)                             renderLineHighlight: "all",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 332)                             cursorBlinking: "smooth",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 333)                             cursorWidth: 2,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 334)                             fontFamily: "'Fira Code', 'SF Mono', Consolas, 'Courier New', monospace",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 335)                             fontLigatures: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 336)                             smoothScrolling: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 337)                             guides: {
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 338)                                 indentation: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 339)                                 bracketPairs: true
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 340)         
+
+Underbranch/editor/index.html
+
+b34531c7 editor/index.html(pau1davis 2025-10-16 20:42:52 -0400 8)         <link rel="icon" type="image/png" href="/public/assets/underbranch.png" />

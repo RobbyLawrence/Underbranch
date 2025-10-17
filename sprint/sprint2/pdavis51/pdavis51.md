@@ -19,13 +19,15 @@ In this sprint, I had a hard time debugging the loading error. Since my changes 
 
 ### Issues you worked on
 * [Editor Loading Error #24](https://github.com/RobbyLawrence/Underbranch/issues/24)
-* [Add logo #28](https://github.com/RobbyLawrence/Underbranch/issues/28)
+* [Add Logo #28](https://github.com/RobbyLawrence/Underbranch/issues/28)
+* [Add Monaco Styling #29](https://github.com/RobbyLawrence/Underbranch/issues/29)
 
 ### Files you worked on
 * Underbranch/production-server/server.js
 * Underbranch/editor/index.html
+* Underbranch/editor/src/LaTeXEditor.js
 
 ### Use of AI and/or 3rd party software
-I didn't use AI much for this sprint. For debugging, AI is good at spotting bugs, but not fixing them. I already knew where the error was, so it didn't serve much purpose for this sprint.
+I didn't use AI much for this sprint. For debugging, AI is good at spotting bugs, but not fixing them. I already knew where the loading error was, so it didn't help me much on finding bugs. However, I did use it to help me make basic stylistic changes to the Monaco editor.
 ### What you accomplished
-For this sprint, I mostly focused on maintenance. I fixed server side bugs that were introduced by other commits. I also added the logo to our website. Our to-do list was underwhelming, as we made substantial progress in sprint 1.
+For this sprint, I mostly focused on maintenance. I fixed server side bugs that were introduced by other commits. I also added the logo to our website as well as visual changes to the Monaco editor. Our to-do list was underwhelming, as we made substantial progress in sprint 1.
