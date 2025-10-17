@@ -1,0 +1,291 @@
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 257)         });
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 258)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 259)         console.log('🎯 Editor event listeners setup complete');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 260)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 261)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 262)     updateDocumentContent(content) {     
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 263)         if (this.editor && this.editor.getValue() !== content) {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 264)             console.log('🔄 Updating editor content from remote...', content.length, 'characters');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 265)             this.isUpdatingFromRemote = true;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 266)             const position = this.editor.getPosition();
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 267)             this.editor.setValue(content);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 268)             if (position) {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 269)                 this.editor.setPosition(position);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 270)             }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 271)             this.isUpdatingFromRemote = false;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 272)             console.log('✅ Editor content updated successfully');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 273)         } else {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 274)             console.log('⏭️ Content alreaady up to date, skipping update');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 275)         }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 276)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 277)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 278)     handleRemoteUpdate(data) {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 279)         console.log('📥 Received remote update from', data.userId);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 280)         this.updateDocumentContent(data.content);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 281)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 282)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 283)     handleCursorUpdate(data) {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 284)         if (!this.editor) return;        
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 285)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 286)         // Remove old decorations for this user
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 287)         const oldDecorations = this.decorations.filter(d => d.userId === data.userId);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 288)         if (oldDecorations.length > 0) { 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 289)             this.editor.deltaDecorations(oldDecorations.map(d => d.id), []);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 290)         }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 291)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 292)         // Add new cursor decoration     
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 293)         const decoration = {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 294)             range: new monaco.Range(     
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 295)                 data.cursor.lineNumber,  
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 296)                 data.cursor.column,      
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 297)                 data.cursor.lineNumber,  
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 298)                 data.cursor.column + 1
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 299)             ),
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 300)             options: {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 301)                 className: 'collaborative-cursor',
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 302)                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 303)                 hoverMessage: { value: `${data.user.name}'s cursor` },
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 304)                 after: {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 305)                     content: `${data.user.name}`,
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 306)                     inlineClassName: 'collaborative-cursor-label',
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 307)                     color: data.user.color
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 308)                 }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 309)             }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 310)         };
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 311)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 312)         const decorationIds = this.editor.deltaDecorations([], [decoration]);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 313)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 314)         // Store decoration info
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 315)         this.decorations = this.decorations.filter(d => d.userId !== data.userId);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 316)         this.decorations.push({
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 317)             userId: data.userId,
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 318)             id: decorationIds[0]
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 319)         });
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 320)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 321)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 322)     updateUsersList() {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 323)         // Create or update users list UI
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 324)         this.createUsersListUI();        
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 325)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 326)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 327)     createUsersListUI() {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 328)         // Remove existing users list    
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 329)         const existingList = document.getElementById('collaborative-users');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 330)         if (existingList) {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 331)             existingList.remove();       
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 332)         }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 333)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 334)         // Create new users list
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 335)         const usersList = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 336)         usersList.id = 'collaborative-users';
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 337)         usersList.style.cssText = `      
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 338)             position: fixed;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 339)             top: 60px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 340)             right: 20px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 341)             background: white;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 342)             border: 1px solid #ddd;      
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 343)             border-radius: 8px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 344)             padding: 12px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 345)             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 346)             z-index: 1000;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 347)             max-width: 220px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 348)         `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 349)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 350)         // Room info
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 351)         const roomInfo = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 352)         roomInfo.style.cssText = `       
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 353)             background: #f8f9fa;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 354)             padding: 8px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 355)             border-radius: 4px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 356)             margin-bottom: 12px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 357)             border-left: 3px solid #4834D4;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 358)         `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 359)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 360)         const roomTitle = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 361)         roomTitle.textContent = `Room: ${this.currentRoom || 'Not connected'}`;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 362)         roomTitle.style.cssText = `      
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 363)             font-weight: bold;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 364)             color: #333;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 365)             font-size: 13px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 366)             margin-bottom: 4px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 367)         `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 368)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 369)         const switchButton = document.createElement('button');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 370)         switchButton.textContent = 'Switch Room';
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 371)         switchButton.style.cssText = `   
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 372)             background: #4834D4;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 373)             color: white;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 374)             border: none;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 375)             padding: 4px 8px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 376)             border-radius: 3px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 377)             font-size: 11px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 378)             cursor: pointer;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 379)         `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 380)         switchButton.onclick = () => this.promptForRoom();
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 381)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 382)         roomInfo.appendChild(roomTitle); 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 383)         roomInfo.appendChild(switchButton);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 384)         usersList.appendChild(roomInfo); 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 385)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 386)         // Users title
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 387)         const title = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 388)         title.textContent = `Online Users (${this.users.length})`;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 389)         title.style.cssText = `
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 390)             font-weight: bold;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 391)             margin-bottom: 8px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 392)             color: #333;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 393)             font-size: 14px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 394)         `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 395)         usersList.appendChild(title);    
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 396)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 397)         // Users list
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 398)         this.users.forEach(user => {     
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 399)             const userElement = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 400)             userElement.style.cssText = `
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 401)                 display: flex;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 402)                 align-items: center;     
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 403)                 margin-bottom: 6px;      
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 404)                 font-size: 13px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 405)             `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 406) 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 407)             const colorDot = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 408)             colorDot.style.cssText = `   
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 409)                 width: 12px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 410)                 height: 12px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 411)                 background-color: ${user.color};
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 412)                 border-radius: 50%;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 413)                 margin-right: 8px;       
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 414)             `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 415)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 416)             const nameElement = document.createElement('span');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 417)             nameElement.textContent = user.name;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 418)             nameElement.style.color = '#555';
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 419)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 420)             userElement.appendChild(colorDot);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 421)             userElement.appendChild(nameElement);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 422)             usersList.appendChild(userElement);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 423)         });
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 424)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 425)         document.body.appendChild(usersList);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 426)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 427)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 428)     getRandomColor() {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 429)         const colors = [
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 430)             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 431)             '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43'
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 432)         ];
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 433)         return colors[Math.floor(Math.random() * colors.length)];
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 434)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 435)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 436)     showMessage(message, type = 'info') {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 437)         // Create message element        
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 438)         const messageDiv = document.createElement('div');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 439)         messageDiv.textContent = message;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 440)         messageDiv.style.cssText = `     
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 441)             position: fixed;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 442)             top: 20px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 443)             right: 20px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 444)             padding: 12px 20px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 445)             border-radius: 6px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 446)             color: white;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 447)             font-weight: bold;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 448)             z-index: 10000;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 449)             max-width: 300px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 450)             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 451)             background-color: ${type === 'success' ? '#10AC84' : type === 'error' ? '#EE5A24' : '#4834D4'};
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 452)         `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 453)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 454)         document.body.appendChild(messageDiv);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 455)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 456)         // Remove after 4 seconds        
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 457)         setTimeout(() => {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 458)             if (messageDiv.parentNode) { 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 459)                 messageDiv.parentNode.removeChild(messageDiv);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 460)             }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 461)         }, 4000);
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 462)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 463) }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 464)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 465) // CSS for collaborative cursors
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 466) const style = document.createElement('style');
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 467) style.textContent = `
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 468)     .collaborative-cursor {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 469)         border-left: 2px solid !important;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 470)         background-color: rgba(255, 107, 107, 0.2) !important;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 471)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 472)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 473)     .collaborative-cursor-label {        
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 474)         background-color: #FF6B6B;       
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 475)         color: white;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 476)         padding: 2px 6px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 477)         border-radius: 3px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 478)         font-size: 11px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 479)         position: relative;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 480)         top: -20px;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 481)         white-space: nowrap;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 482)     }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 483) `;
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 484) document.head.appendChild(style);        
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 485) 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 486) // Initialize when DOM is ready
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 487) if (document.readyState === 'loading') { 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 488)     document.addEventListener('DOMContentLoaded', () => {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 489)         window.collaborative = new Collaborative();
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 490)     });
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 491) } else {
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 492)     window.collaborative = new Collaborative();
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 493) }
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 494)
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 495) // Make Collaborative available globally 
+5bf4b4af (Aaron Brown 2025-10-05 17:08:38 -0400 496) window.Collaborative = Collaborative;    
+PS C:\Users\aaron\Desktop\Newest> git blame frontend/editor/index.html
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   1) <!DOCTYPE html>
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   2) <html lang="en">
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   3) <head>       
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   4)     <meta charset="UTF-8">
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   5)     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   6)     <title>LaTeX Editor</title>
+3d2e314f frontend/editor/index.html  (pau1davis   2025-10-06 15:48:55 -0400   7)     <base href="/">
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   8)     <style>  
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400   9)         * {  
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  10)             margin: 0;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  11)             padding: 0;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  12)             box-sizing: border-box;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  13)         }    
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  14)
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  15)         body {
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  16)             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  17)             background-color: #f5f5f5;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  18)         }    
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  19)
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  20)         .app {
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  21)             height: 100vh;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  22)             display: flex;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  23)             flex-direction: column;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  24)         }    
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  25)
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  26)         .toolbar {
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  27)             background: #2d3748;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  28)             color: white;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  29)             padding: 12px 16px;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  30)             display: flex;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  31)             align-items: center;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  32)             gap: 16px;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  33)             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  34)         }    
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  35)
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  36)         .toolbar h1 {
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  37)             font-size: 18px;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  38)             font-weight: 600;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  39)         }    
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  40)
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  41)         .toolbar-buttons {
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  42)             display: flex;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  43)             gap: 8px;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  44)             margin-left: auto;
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  45)         }    
+b045b9ad frontend/editor/editor.html (Ferrari     2025-09-16 18:03:02 -0400  46)
+^8b16a41 frontend/editor/index.html  (Aaron Brown 2025-10-01 23:24:10 -0400  47)         /* viewmode-indicator removed for production look */
+^8b16a41 frontend/editor/index.html  (Aaron Brown 2025-10-01 23:24:10 -0400  48)
+^8b16a41 frontend/editor/index.html  (Aaron Brown 2025-10-01 23:24:10 -0400  49)         /* Explicit split rules to ensure panes share space equally and
+^8b16a41 frontend/editor/index.html  (Aaron Brown 2025-10-01 23:24:10 -0400  50)            avoid overlap (helps when Monaco or other editors don't
