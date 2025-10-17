@@ -1,0 +1,101 @@
+
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400   3) const fs = require('fs');
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  18) // Simple request logger to help debug frontend loading issues
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  19) app.use((req, res, next) => {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  20)   console.log(`${new Date().toISOString()} -> ${req.method} ${req.url}`);
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  21)   next();
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  22) });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  23) 
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  36)   // support legacy index paths that reference frontend/dist/bundle.js
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  37)   app.use('/frontend/dist', express.static(frontendDist));
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  38)   // fallback to the editor index for non-API routes (avoid swallowing /api/*)
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  39)   app.get(/^\/(?!api\/).*/, (req, res, next) => {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  47) else {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  48)   // If no built frontend exists, serve the collab demo at root so testing is easier
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  49)   app.get('/', (req, res) => {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  50)     const collabIndex = path.join(collabPublic, 'index.html');
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  51)     if (fs.existsSync(collabIndex)) return res.sendFile(collabIndex);
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  52)     return res.status(404).send('No frontend available - collab demo missing');
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  53)   });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  54) }
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  55) 
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  56) // Log static file 404s (helpful to see missing bundles)
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  57) app.use((req, res, next) => {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  58)   // compatibility rewrite: some deployed HTML references
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  59)   // /frontend/editor/frontend/dist/... due to relative paths. Remap
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  60)   // those requests to /frontend/dist/... which is the actual location.
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  61)   if (req.path.startsWith('/frontend/editor/frontend/dist/')) {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  62)     const newPath = req.path.replace('/frontend/editor/frontend/dist/', '/frontend/dist/');
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  63)     console.log('REWRITE:', req.path, '->', newPath);
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  64)     req.url = newPath + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400  65)   }
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  66)   res.on('finish', () => {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  67)     if (res.statusCode === 404) {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  68)       console.warn(`STATIC_MISS: ${req.method} ${req.originalUrl} -> 404`);
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  69)     }
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  70)   });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  71)   next();
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  72) });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  73) 
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  74) // Debug endpoints to inspect in-memory state when the frontend is stuck
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  75) app.get('/api/status', (req, res) => {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  76)   res.json({
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  77)     port: PORT,
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  78)     frontendDistExists: fs.existsSync(frontendDist),
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  79)     collabPublicExists: fs.existsSync(path.join(__dirname, 'public')),
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  80)     env: process.env.NODE_ENV || 'development',
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  81)   });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  82) });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  83) 
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  84) app.get('/api/docs', (req, res) => {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  85)   const rooms = [];
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  86)   for (const [room, content] of docs.entries()) {
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  87)     const users = usersByRoom.has(room) ? Array.from(usersByRoom.get(room).values()) : [];
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  88)     rooms.push({ room, length: content.length, users });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  89)   }
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  90)   res.json({ rooms });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  91) });
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  92) 
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  98)     // allow local test origin (python http.server) and the node server itself
+28553f2c (pau1davis   2025-10-06 15:24:52 -0400  99)     origin: ['http://localhost:8000', 'http://localhost:3001', '*'],
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 104) // Log low-level handshake info to help diagnose production origin/CORS differences
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 105) io.use((socket, next) => {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 106)   try {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 107)     const h = socket.handshake || {};
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 108)     console.log('socket handshake', {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 109)       id: socket.id,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 110)       address: h.address || (socket.conn && socket.conn.remoteAddress),
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 111)       headers: h.headers && {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 112)         origin: h.headers.origin,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 113)         referer: h.headers.referer || h.headers.referrer,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 114)         host: h.headers.host,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 115)         'user-agent': h.headers['user-agent'],
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 116)       },
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 117)       query: h.query,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 118)     });
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 119)   } catch (err) {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 120)     console.warn('error logging handshake', err && err.message);
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 121)   }
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 122)   next();
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 123) });
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 124) 
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 125) // Listen for engine-level connection errors
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 126) if (io.engine && io.engine.on) {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 127)   io.engine.on('connection', (engineSocket) => {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 128)     engineSocket.on('error', (err) => {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 129)       console.error('engine socket error', err && err.message);
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 130)     });
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 131)   });
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 132) }
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 133) 
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 145) // Receive client-side logs (console errors) from the website for diagnosis
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 146) app.post('/api/client-log', (req, res) => {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 147)   const payload = req.body || {};
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 148)   console.log('CLIENT_LOG:', {
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 149)     ts: new Date().toISOString(),
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 150)     origin: req.get('origin') || req.get('referer') || req.ip,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 151)     payload,
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 152)   });
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 153)   res.status(204).end();
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 154) });
+3d2e314f (pau1davis   2025-10-06 15:48:55 -0400 155) 
