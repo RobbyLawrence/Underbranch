@@ -277,19 +277,34 @@ const LaTeXEditor = ({
               const commandMatch = textBeforeCursor.match(/\\([a-zA-Z]*)$/);
               if (commandMatch) {
                 const partialCommand = commandMatch[1];
-                const suggestions = latexCommands.filter(cmd => cmd.command.startsWith(partialCommand)).map(cmd => ({
-                  label: cmd.command,
-                  kind: monaco.languages.CompletionItemKind.Function,
-                  insertText: cmd.insertText,
-                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                  documentation: cmd.documentation,
-                  range: {
-                    startLineNumber: position.lineNumber,
-                    startColumn: position.column - partialCommand.length,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column
+                const textAfterCursor = lineContent.substring(position.column - 1);
+                const suggestions = latexCommands.filter(cmd => cmd.command.startsWith(partialCommand)).map(cmd => {
+                  // Check if cursor is inside braces and there's a closing brace
+                  const hasOpenBrace = textBeforeCursor.match(/\{[^}]*$/);
+                  const hasClosingBrace = hasOpenBrace && textAfterCursor.startsWith('}');
+
+                  // If we're inside braces with a closing brace, don't include it in insertText
+                  let insertText = cmd.insertText;
+                  let endColumn = position.column;
+                  if (hasClosingBrace && insertText.includes('{')) {
+                    // Remove the closing brace from commands like "textbf{$0}"
+                    insertText = insertText.replace(/\{([^}]*)\}/, '{$1');
+                    endColumn = position.column + 1; // Include the closing brace in replacement
                   }
-                }));
+                  return {
+                    label: cmd.command,
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    insertText: insertText,
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                    documentation: cmd.documentation,
+                    range: {
+                      startLineNumber: position.lineNumber,
+                      startColumn: position.column - partialCommand.length,
+                      endLineNumber: position.lineNumber,
+                      endColumn: endColumn
+                    }
+                  };
+                });
                 return {
                   suggestions
                 };
@@ -299,19 +314,36 @@ const LaTeXEditor = ({
               const beginMatch = textBeforeCursor.match(/\\begin\{([^}]*)$/);
               if (beginMatch) {
                 const partialEnv = beginMatch[1];
-                const suggestions = latexEnvironments.filter(env => env.startsWith(partialEnv)).map(env => ({
-                  label: env,
-                  kind: monaco.languages.CompletionItemKind.Keyword,
-                  insertText: `${env}}\n\t$0\n\\end{${env}}`,
-                  insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                  documentation: `Insert ${env} environment`,
-                  range: {
-                    startLineNumber: position.lineNumber,
-                    startColumn: position.column - partialEnv.length,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column
+                const textAfterCursor = lineContent.substring(position.column - 1);
+
+                // Check if there's already a closing brace after the cursor
+                const hasClosingBrace = textAfterCursor.startsWith('}');
+                const suggestions = latexEnvironments.filter(env => env.startsWith(partialEnv)).map(env => {
+                  // If there's already a closing brace, we need to handle it carefully
+                  let insertText, endColumn;
+                  if (hasClosingBrace) {
+                    // Include the environment content but skip past the existing closing brace
+                    insertText = `${env}}\n\t$0\n\\end{${env}}`;
+                    endColumn = position.column + 1; // Replace up to and including the }
+                  } else {
+                    // No closing brace, add everything including the brace
+                    insertText = `${env}}\n\t$0\n\\end{${env}}`;
+                    endColumn = position.column;
                   }
-                }));
+                  return {
+                    label: env,
+                    kind: monaco.languages.CompletionItemKind.Keyword,
+                    insertText: insertText,
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                    documentation: `Insert ${env} environment`,
+                    range: {
+                      startLineNumber: position.lineNumber,
+                      startColumn: position.column - partialEnv.length,
+                      endLineNumber: position.lineNumber,
+                      endColumn: endColumn
+                    }
+                  };
+                });
                 return {
                   suggestions
                 };
