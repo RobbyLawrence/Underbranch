@@ -2,7 +2,7 @@ import Toolbar from './Toolbar.js';
 import LaTeXEditor from './LaTeXEditor.js';
 import PreviewPane from './PreviewPane.js';
 import App from './App.js';
-// Import Collaborative features
+// Import Collaborative features (this also initializes collaboration automatically)
 import './Collaborative.js';
 
 // Make components available globally for backward compatibility
