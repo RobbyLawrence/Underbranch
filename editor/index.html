@@ -4,8 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>LaTeX Editor</title>
-        <base href="/" />
-        <link rel="icon" type="image/png" href="/public/assets/underbranch.png" />
+        <!-- Remove base href to avoid path issues -->
+        <link rel="icon" type="image/png" href="../underbranch.png" />
         <style>
             * {
                 margin: 0;
@@ -149,20 +149,15 @@
             <div class="loading">Loading LaTeX Editor...</div>
         </div>
 
-        <!-- React and ReactDOM from CDN for simplicity -->
-        <script
-            crossorigin
-            src="https://unpkg.com/react@18/umd/react.development.js"
-        ></script>
-        <script
-            crossorigin
-            src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
-        ></script>
-
+        <!-- Socket.IO for real-time collaboration -->
+        <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+        <!-- React and ReactDOM from CDN -->
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
         <!-- Monaco Editor -->
         <script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
 
-        <!-- Our bundled JavaScript (use the editor build output) -->
-        <script src="/dist/bundle.js"></script>
+        <!-- Our bundled JavaScript (includes Collaborative.js) -->
+        <script src="dist/bundle.js"></script>
     </body>
 </html>
