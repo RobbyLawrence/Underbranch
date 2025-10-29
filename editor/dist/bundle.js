@@ -62,19 +62,48 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
   // - 'editor'  -> only the editor is shown
   // - 'preview' -> only the preview is shown
   // - 'split'   -> both are shown side-by-side
-  const [viewMode, setViewMode] = useState('split'); // 'editor', 'preview', 'split'
-
+  const [viewMode, setViewMode] = useState("split"); // 'editor', 'preview', 'split'
+  const [pdfUrl, setPdfUrl] = useState(null);
   // handleCodeChange is passed to the editor component. It receives the
   // new text value and updates the latexCode state. We guard against
   // undefined/null by falling back to an empty string.
   const handleCodeChange = value => {
-    setLatexCode(value || '');
+    setLatexCode(value || "");
+  };
+  // handle compilation
+  const handleCompile = async () => {
+    try {
+      const res = await fetch("/compile/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          latex: latexCode
+        })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        alert("Compilation error:\n" + errText);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob) + `#${Date.now()}`;
+      // clean up old blobs
+      setPdfUrl(prevUrl => {
+        if (prevUrl) URL.revokeObjectURL(prevUrl);
+        return url;
+      });
+      setViewMode("preview"); // auto-switch to preview
+    } catch (err) {
+      alert("Network or server error: " + err.message);
+    }
   };
 
   // Debug: log viewMode transitions so we can trace state changes while
   // reproducing the issue in the browser console.
   useEffect(() => {
-    console.log('[App] viewMode changed ->', viewMode);
+    console.log("[App] viewMode changed ->", viewMode);
     // Also update the document title so the current mode is visible
     // in the browser tab (easy to spot without opening devtools).
     try {
@@ -85,7 +114,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     // Trigger a resize event to nudge layout systems (Monaco, CSS)
     // to recompute sizes when the view mode changes.
     try {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     } catch (e) {
       // ignore in non-browser environments
     }
@@ -96,22 +125,24 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
   // consistently and toggle their visibility/size using explicit CSS
   // class names: 'split', 'full', or 'hidden'. This prevents frequent
   // unmount/remount of the editor which can cause Monaco/DOM layout issues.
-  const editorClass = viewMode === 'split' ? 'split' : viewMode === 'editor' ? 'full' : 'hidden';
-  const previewClass = viewMode === 'split' ? 'split' : viewMode === 'preview' ? 'full' : 'hidden';
-  const editorVisible = viewMode === 'split' || viewMode === 'editor';
-  const previewVisible = viewMode === 'split' || viewMode === 'preview';
-  return React.createElement('div', {
-    className: 'app'
+  const editorClass = viewMode === "split" ? "split" : viewMode === "editor" ? "full" : "hidden";
+  const previewClass = viewMode === "split" ? "split" : viewMode === "preview" ? "full" : "hidden";
+  const editorVisible = viewMode === "split" || viewMode === "editor";
+  const previewVisible = viewMode === "split" || viewMode === "preview";
+  return React.createElement("div", {
+    className: "app"
   }, React.createElement(Toolbar, {
     viewMode: viewMode,
     onViewModeChange: setViewMode,
-    latexCode: latexCode
-  }), React.createElement('div', {
+    latexCode: latexCode,
+    // add compilation handler
+    onCompile: handleCompile
+  }), React.createElement("div", {
     className: `editor-container mode-${viewMode}`
   },
   // Editor pane is always present but may be hidden via the
   // 'hidden' class. This keeps Monaco mounted and stable.
-  React.createElement('div', {
+  React.createElement("div", {
     className: `editor-pane ${editorClass}`
   }, React.createElement(LaTeXEditor, {
     value: latexCode,
@@ -120,11 +151,19 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
   })),
   // Preview pane is always present as well; it will be hidden
   // when not in 'preview' or 'split' modes.
-  React.createElement('div', {
+  React.createElement("div", {
     className: `preview-pane ${previewClass}`
-  }, React.createElement(PreviewPane, {
-    latexCode: latexCode
-  }))));
+  }, pdfUrl ? React.createElement("iframe", {
+    src: pdfUrl,
+    style: {
+      width: "100%",
+      height: "100%",
+      border: "none"
+    },
+    title: "PDF Preview"
+  }) : React.createElement("div", {
+    className: "loading"
+  }, "No PDF yet"))));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (App);
 
@@ -1111,55 +1150,61 @@ __webpack_require__.r(__webpack_exports__);
 const Toolbar = ({
   viewMode,
   onViewModeChange,
-  latexCode
+  latexCode,
+  onCompile
 }) => {
   const handleDownload = () => {
     const blob = new Blob([latexCode], {
-      type: 'text/plain'
+      type: "text/plain"
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'document.tex';
+    a.download = "document.tex";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
   const handleClear = () => {
-    if (confirm('Are you sure you want to clear the editor?')) {
-      onViewModeChange('editor');
+    if (confirm("Are you sure you want to clear the editor?")) {
+      onViewModeChange("editor");
       // This will be handled by the parent component
-      const event = new CustomEvent('clearEditor');
+      const event = new CustomEvent("clearEditor");
       window.dispatchEvent(event);
     }
   };
 
   // Debug helpers - log button clicks
   const handleViewClick = mode => {
-    console.log('[Toolbar] button click ->', mode);
+    console.log("[Toolbar] button click ->", mode);
     onViewModeChange(mode);
   };
-  return React.createElement('div', {
-    className: 'toolbar'
-  }, React.createElement('h1', null, 'LaTeX Editor'), React.createElement('div', {
-    className: 'toolbar-buttons'
-  }, React.createElement('button', {
-    className: `btn ${viewMode === 'editor' ? 'btn-primary' : 'btn-secondary'}`,
-    onClick: () => handleViewClick('editor')
-  }, 'Editor'), React.createElement('button', {
-    className: `btn ${viewMode === 'split' ? 'btn-primary' : 'btn-secondary'}`,
-    onClick: () => handleViewClick('split')
-  }, 'Split'), React.createElement('button', {
-    className: `btn ${viewMode === 'preview' ? 'btn-primary' : 'btn-secondary'}`,
-    onClick: () => handleViewClick('preview')
-  }, 'Preview'), React.createElement('button', {
-    className: 'btn btn-secondary',
+  return React.createElement("div", {
+    className: "toolbar"
+  }, React.createElement("h1", null, "LaTeX Editor"), React.createElement("div", {
+    className: "toolbar-buttons"
+  }, React.createElement("button", {
+    className: `btn ${viewMode === "editor" ? "btn-primary" : "btn-secondary"}`,
+    onClick: () => handleViewClick("editor")
+  }, "Editor"), React.createElement("button", {
+    className: `btn ${viewMode === "split" ? "btn-primary" : "btn-secondary"}`,
+    onClick: () => handleViewClick("split")
+  }, "Split"), React.createElement("button", {
+    className: `btn ${viewMode === "preview" ? "btn-primary" : "btn-secondary"}`,
+    onClick: () => handleViewClick("preview")
+  }, "Preview"), React.createElement("button", {
+    className: "btn btn-secondary",
     onClick: handleDownload
-  }, 'Download'), React.createElement('button', {
-    className: 'btn btn-secondary',
+  }, "Download"),
+  // add button for compilation
+  React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onCompile
+  }, "Compile to PDF"), React.createElement("button", {
+    className: "btn btn-secondary",
     onClick: handleClear
-  }, 'Clear')));
+  }, "Clear")));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Toolbar);
 
