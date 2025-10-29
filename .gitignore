@@ -1,8 +1,5 @@
 **/node_modules/
 .claude
 document.*
-<<<<<<< HEAD
 todo.md
-=======
 *.claude
->>>>>>> 2804e9c2d33d35a9bb45320759b0e598856867ed
