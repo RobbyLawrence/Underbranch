@@ -118,7 +118,20 @@ async function initializeDatabase() {
             ) ENGINE=InnoDB;
         `;
 
+        const createPasswordResetsQuery = `
+          CREATE TABLE IF NOT EXISTS password_resets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            token VARCHAR(128) NOT NULL UNIQUE,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX (expires_at)
+          ) ENGINE=InnoDB;
+        `;
+
         await conn.execute(createTableQuery);
+        await conn.execute(createPasswordResetsQuery);
         conn.release();
         console.log("Database and users table are ready");
     } catch (err) {
@@ -430,45 +443,65 @@ app.get("/signin/api/users/:id", async (req, res) => {
 
 app.post("/signin/api/auth/forgot", async (req, res) => {
     const { email } = req.body;
+
     try {
+        // Try to find the user
         const [rows] = await pool.query("SELECT * FROM users WHERE email = ?", [
             email,
         ]);
+
+        // If no user or user has no password, we still return success to avoid enumeration.
         if (rows.length === 0 || !rows[0].password_hash) {
-            return res
-                .status(400)
-                .json({ error: "No password account with that email" });
+            console.warn(
+                `Password reset requested for non-existing or google-only account: ${email}`,
+            );
+            // Respond with a generic success
+            return res.json({ success: true });
         }
+
         const user = rows[0];
+
         // generate random token, should last for 15 minutes
         const token = crypto.randomBytes(32).toString("hex");
         const expires = new Date(Date.now() + 15 * 60 * 1000);
 
+        // store token
         await pool.query(
             "INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)",
             [user.id, token, expires],
         );
+
         // Send reset email
-        // still need to write frontend file that accepts token
         const resetLink = `https://underbranch.org/signin/reset.html?token=${token}`;
+
         let transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+                pass: process.env.EMAIL_PASS, // or use OAuth2
             },
         });
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "Password Reset",
-            text: `Click here to reset: ${resetLink}`,
-        });
-        res.json({ success: true });
+        // Attempt to send email, but still return generic success even if mail fails
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: "Password Reset",
+                text: `Click here to reset your password: ${resetLink}`,
+            });
+        } catch (mailErr) {
+            console.error("Failed to send reset email:", mailErr);
+            // fall through and return success to the client; investigate server logs for details
+        }
+
+        return res.json({ success: true });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Failed to process reset request" });
+        console.error("Failed to process reset request:", err);
+        // Return generic success to avoid giving attackers useful info (optionally: res.status(500)...)
+        return res
+            .status(500)
+            .json({ error: "Failed to process reset request" });
     }
 });
 
@@ -488,7 +521,7 @@ app.post("/signin/api/auth/reset", async (req, res) => {
             return res.status(400).json({ error: "Token expired" });
         }
 
-        const hash = await bcrypt.hash(password, 10);
+        const hash = await bcrypt.hash(password, SALT_ROUNDS);
         await pool.query("UPDATE users SET password_hash = ? WHERE id = ?", [
             hash,
             reset.user_id,
