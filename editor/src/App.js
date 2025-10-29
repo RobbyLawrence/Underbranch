@@ -45,19 +45,46 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     // - 'editor'  -> only the editor is shown
     // - 'preview' -> only the preview is shown
     // - 'split'   -> both are shown side-by-side
-    const [viewMode, setViewMode] = useState('split'); // 'editor', 'preview', 'split'
-
+    const [viewMode, setViewMode] = useState("split"); // 'editor', 'preview', 'split'
+    const [pdfUrl, setPdfUrl] = useState(null);
     // handleCodeChange is passed to the editor component. It receives the
     // new text value and updates the latexCode state. We guard against
     // undefined/null by falling back to an empty string.
     const handleCodeChange = (value) => {
-        setLatexCode(value || '');
+        setLatexCode(value || "");
+    };
+    // handle compilation
+    const handleCompile = async () => {
+        try {
+            const res = await fetch("/compile/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ latex: latexCode }),
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                alert("Compilation error:\n" + errText);
+                return;
+            }
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob) + `#${Date.now()}`;
+            // clean up old blobs
+            setPdfUrl((prevUrl) => {
+                if (prevUrl) URL.revokeObjectURL(prevUrl);
+                return url;
+            });
+            setViewMode("preview"); // auto-switch to preview
+        } catch (err) {
+            alert("Network or server error: " + err.message);
+        }
     };
 
     // Debug: log viewMode transitions so we can trace state changes while
     // reproducing the issue in the browser console.
     useEffect(() => {
-        console.log('[App] viewMode changed ->', viewMode);
+        console.log("[App] viewMode changed ->", viewMode);
         // Also update the document title so the current mode is visible
         // in the browser tab (easy to spot without opening devtools).
         try {
@@ -68,7 +95,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
         // Trigger a resize event to nudge layout systems (Monaco, CSS)
         // to recompute sizes when the view mode changes.
         try {
-            window.dispatchEvent(new Event('resize'));
+            window.dispatchEvent(new Event("resize"));
         } catch (e) {
             // ignore in non-browser environments
         }
@@ -79,42 +106,72 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     // consistently and toggle their visibility/size using explicit CSS
     // class names: 'split', 'full', or 'hidden'. This prevents frequent
     // unmount/remount of the editor which can cause Monaco/DOM layout issues.
-    const editorClass = viewMode === 'split' ? 'split' : (viewMode === 'editor' ? 'full' : 'hidden');
-    const previewClass = viewMode === 'split' ? 'split' : (viewMode === 'preview' ? 'full' : 'hidden');
+    const editorClass =
+        viewMode === "split"
+            ? "split"
+            : viewMode === "editor"
+              ? "full"
+              : "hidden";
+    const previewClass =
+        viewMode === "split"
+            ? "split"
+            : viewMode === "preview"
+              ? "full"
+              : "hidden";
 
-    const editorVisible = viewMode === 'split' || viewMode === 'editor';
-    const previewVisible = viewMode === 'split' || viewMode === 'preview';
+    const editorVisible = viewMode === "split" || viewMode === "editor";
+    const previewVisible = viewMode === "split" || viewMode === "preview";
 
-    return React.createElement('div', { className: 'app' },
+    return React.createElement(
+        "div",
+        { className: "app" },
         React.createElement(Toolbar, {
             viewMode: viewMode,
             onViewModeChange: setViewMode,
-            latexCode: latexCode
+            latexCode: latexCode,
+            // add compilation handler
+            onCompile: handleCompile,
         }),
 
-        React.createElement('div', { className: `editor-container mode-${viewMode}` },
+        React.createElement(
+            "div",
+            { className: `editor-container mode-${viewMode}` },
             // Editor pane is always present but may be hidden via the
             // 'hidden' class. This keeps Monaco mounted and stable.
-            React.createElement('div', {
-                className: `editor-pane ${editorClass}`
-            },
+            React.createElement(
+                "div",
+                {
+                    className: `editor-pane ${editorClass}`,
+                },
                 React.createElement(LaTeXEditor, {
                     value: latexCode,
                     onChange: handleCodeChange,
-                    isVisible: editorVisible
-                })
+                    isVisible: editorVisible,
+                }),
             ),
 
             // Preview pane is always present as well; it will be hidden
             // when not in 'preview' or 'split' modes.
-            React.createElement('div', {
-                className: `preview-pane ${previewClass}`
-            },
-                React.createElement(PreviewPane, {
-                    latexCode: latexCode
-                })
-            )
-        )
+            React.createElement(
+                "div",
+                { className: `preview-pane ${previewClass}` },
+                pdfUrl
+                    ? React.createElement("iframe", {
+                          src: pdfUrl,
+                          style: {
+                              width: "100%",
+                              height: "100%",
+                              border: "none",
+                          },
+                          title: "PDF Preview",
+                      })
+                    : React.createElement(
+                          "div",
+                          { className: "loading" },
+                          "No PDF yet",
+                      ),
+            ),
+        ),
     );
 };
 
