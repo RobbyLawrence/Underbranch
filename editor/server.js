@@ -1,15 +1,19 @@
-
 const express = require("express");
-const http = require("http");
 const path = require("path");
+const http = require("http");
 const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = process.env.PORT || 3000;
 
-// In-memory room state (for demo; use a DB for production)
+// In-memory room and document state
 const rooms = {};
 
 // Simple request logger
@@ -32,7 +36,7 @@ app.get("*", (req, res) => {
 // --- Socket.IO Collaboration Logic ---
 io.on("connection", (socket) => {
     let currentRoom = null;
-    let userData = null;
+    let currentUser = null;
 
     // Check if a room exists
     socket.on("check-room", ({ roomId }) => {
@@ -42,7 +46,11 @@ io.on("connection", (socket) => {
     });
 
     // Join or create a room
-    socket.on("join-room", ({ roomId, userData: user, password, createRoom }) => {
+    socket.on("join-room", ({ roomId, userData, password, createRoom }) => {
+        if (!roomId) {
+            socket.emit("room-join-error", { error: "room-not-found", message: "Room name required." });
+            return;
+        }
         // Create room if needed
         if (!rooms[roomId]) {
             if (createRoom) {
@@ -58,17 +66,19 @@ io.on("connection", (socket) => {
         }
         // Password check
         if (rooms[roomId].password && rooms[roomId].password !== password) {
-            socket.emit("room-join-error", { error: "invalid-password", message: "Invalid password." });
+            socket.emit("room-join-error", { error: "invalid-password", message: "Incorrect password." });
             return;
         }
         // Add user to room
         currentRoom = roomId;
-        userData = { ...user, userId: socket.id };
+        currentUser = { ...userData, userId: socket.id };
         socket.join(roomId);
-        // Remove user if already present
-        rooms[roomId].users = rooms[roomId].users.filter((u) => u.userId !== socket.id);
-        rooms[roomId].users.push(userData);
-        // Send current doc content and user list
+        // Remove user from any previous room
+        Object.keys(rooms).forEach((rid) => {
+            rooms[rid].users = rooms[rid].users.filter((u) => u.userId !== socket.id);
+        });
+        rooms[roomId].users.push(currentUser);
+        // Send current document and users
         socket.emit("room-joined", {
             roomId,
             content: rooms[roomId].content,
@@ -79,17 +89,26 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("users-update", rooms[roomId].users);
     });
 
-    // Handle document changes
-    socket.on("document-change", (data) => {
-        if (!currentRoom) return;
-        rooms[currentRoom].content = data.content;
-        socket.to(currentRoom).emit("document-update", { ...data, userId: socket.id });
+    // Document change
+    socket.on("document-change", ({ content }) => {
+        if (currentRoom && rooms[currentRoom]) {
+            rooms[currentRoom].content = content;
+            socket.to(currentRoom).emit("document-update", {
+                content,
+                userId: socket.id,
+            });
+        }
     });
 
-    // Handle cursor updates
+    // Cursor update
     socket.on("cursor-update", (data) => {
-        if (!currentRoom) return;
-        socket.to(currentRoom).emit("cursor-update", { ...data, user: userData, userId: socket.id });
+        if (currentRoom && rooms[currentRoom]) {
+            socket.to(currentRoom).emit("cursor-update", {
+                ...data,
+                user: currentUser,
+                userId: socket.id,
+            });
+        }
     });
 
     // Handle disconnect
@@ -102,7 +121,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`\n✅ LaTeX Editor Server Running!`);
+    console.log(`\n✅ LaTeX Editor Server with Collaboration Running!`);
     console.log(`\n📝 Open your browser to: http://localhost:${PORT}`);
     console.log(
         `\n📦 Serving bundle.js from: ${path.join(__dirname, "dist", "bundle.js")}`,
