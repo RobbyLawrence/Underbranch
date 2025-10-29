@@ -1,3 +1,9 @@
+console.log("🔥 index.js loaded");
+
+
+// DEBUG: check if code is running
+console.log("🔥 Initializing App…");
+
 import Toolbar from './Toolbar.js';
 import LaTeXEditor from './LaTeXEditor.js';
 import PreviewPane from './PreviewPane.js';
@@ -18,6 +24,7 @@ const initializeApp = () => {
         if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
             const root = ReactDOM.createRoot(document.getElementById('root'));
             root.render(React.createElement(App));
+            console.log("🔥 App render called"); // <-- put it here
         } else {
             console.error('React or ReactDOM not loaded');
         }
