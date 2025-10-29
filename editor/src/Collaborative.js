@@ -1,5 +1,5 @@
 // Collaborative features integration for the LaTeX Editor
-// This module handles real-time collaboration via Socket.IO
+// This module handles real-time collaboration via Socket
 
 class Collaborative {
     constructor() {

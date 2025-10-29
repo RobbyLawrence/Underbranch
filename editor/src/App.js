@@ -64,7 +64,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
 
             if (!res.ok) {
                 const errText = await res.text();
-                alert("Compilation error:\n" + errText);
+                alert("Compilation error: server is likely down");
                 return;
             }
 
@@ -75,7 +75,6 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
                 if (prevUrl) URL.revokeObjectURL(prevUrl);
                 return url;
             });
-            setViewMode("preview"); // auto-switch to preview
         } catch (err) {
             alert("Network or server error: " + err.message);
         }
