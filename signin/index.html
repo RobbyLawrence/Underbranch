@@ -764,10 +764,7 @@
                     }
                 } catch (error) {
                     console.error("Login error:", error);
-                    showStatusMessage(
-                        "Network error. Please try again.",
-                        "error",
-                    );
+                    showStatusMessage("Error. Please try again.", "error");
                 } finally {
                     button.innerHTML = originalText;
                     button.disabled = false;
