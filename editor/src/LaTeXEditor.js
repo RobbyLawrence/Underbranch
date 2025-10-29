@@ -342,11 +342,6 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                         },
                     );
 
-                    // Expose Monaco editor instance for collaborative features
-                    if (editorRef.current) {
-                        editorRef.current._monacoEditor = monacoRef.current;
-                    }
-
                     // Listen for content changes
                     monacoRef.current.onDidChangeModelContent(() => {
                         const currentValue = monacoRef.current.getValue();
