@@ -1,0 +1,410 @@
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   1) const { useEffect, useRef } = React;
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   2) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   3) const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   4)     const editorRef = useRef(null);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   5)     const monacoRef = useRef(null);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   6)     const layoutTimeout = useRef(null);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   7) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   8)     useEffect(() => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400   9)         // Initialize Monaco Editor
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  10)         if (window.require && !monacoRef.current) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  11)             window.require.config({
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  12)                 paths: { vs: "https://unpkg.com/monaco-editor@0.44.0/min/vs" },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  13)             });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  14) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  15)             window.require(["vs/editor/editor.main"], () => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  16)                 if (editorRef.current && !monacoRef.current) {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  17)                     // Configure LaTeX language
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  18)                     monaco.languages.register({ id: "latex" });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  19) 
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  20)                     // Define custom theme
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  21)                     monaco.editor.defineTheme("underbranch-theme", {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  22)                         base: "vs",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  23)                         inherit: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  24)                         rules: [
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  25)                             { token: "keyword", foreground: "B5632D" },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  26)                             { token: "string", foreground: "218721" },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  27)                             {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  28)                                 token: "comment",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  29)                                 foreground: "737373",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  30)                                 fontStyle: "italic",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  31)                             },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  32)                             { token: "bracket", foreground: "505050" },
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  33)                         ],
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  34)                         colors: {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  35)                             "editor.background": "#FFFFFF",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  36)                             "editor.foreground": "#333333",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  37)                             "editor.lineHighlightBackground": "#F5F5F5",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  38)                             "editorCursor.foreground": "#B5632D",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  39)                             "editor.selectionBackground": "#E8D3C7",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  40)                             "editorLineNumber.foreground": "#999999",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  41)                         },
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  42)                     });
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400  43) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  44)                     // Syntax highlighting
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  45)                     monaco.languages.setMonarchTokensProvider("latex", {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  46)                         tokenizer: {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  47)                             root: [
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  48)                                 [/\\[a-zA-Z@]+/, "keyword"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  49)                                 [/\\begin\{[^}]+\}/, "keyword"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  50)                                 [/\\end\{[^}]+\}/, "keyword"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  51)                                 [/\$.*?\$/, "string"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  52)                                 [/\\\(.*?\\\)/, "string"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  53)                                 [/\\\[.*?\\\]/, "string"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  54)                                 [/%.*$/, "comment"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  55)                                 [/\{/, "bracket"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  56)                                 [/\}/, "bracket"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  57)                             ],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  58)                         },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  59)                     });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400  60) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  61)                     // LaTeX command definitions
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  62)                     const latexCommands = [
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  63)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  64)                             command: "begin",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  65)                             insertText: "begin{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  66)                             documentation: "Begin environment",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  67)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  68)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  69)                             command: "end",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  70)                             insertText: "end{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  71)                             documentation: "End environment",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  72)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  73)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  74)                             command: "textbf",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  75)                             insertText: "textbf{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  76)                             documentation: "Bold text",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  77)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  78)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  79)                             command: "textit",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  80)                             insertText: "textit{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  81)                             documentation: "Italic text",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  82)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  83)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  84)                             command: "underline",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  85)                             insertText: "underline{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  86)                             documentation: "Underline text",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  87)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  88)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  89)                             command: "section",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  90)                             insertText: "section{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  91)                             documentation: "Section",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  92)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  93)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  94)                             command: "subsection",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  95)                             insertText: "subsection{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  96)                             documentation: "Subsection",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  97)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  98)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400  99)                             command: "subsubsection",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 100)                             insertText: "subsubsection{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 101)                             documentation: "Subsubsection",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 102)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 103)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 104)                             command: "chapter",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 105)                             insertText: "chapter{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 106)                             documentation: "Chapter",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 107)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 108)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 109)                             command: "title",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 110)                             insertText: "title{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 111)                             documentation: "Document title",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 112)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 113)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 114)                             command: "author",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 115)                             insertText: "author{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 116)                             documentation: "Document author",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 117)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 118)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 119)                             command: "date",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 120)                             insertText: "date{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 121)                             documentation: "Document date",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 122)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 123)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 124)                             command: "emph",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 125)                             insertText: "emph{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 126)                             documentation: "Emphasize text",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 127)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 128)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 129)                             command: "frac",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 130)                             insertText: "frac{$1}{$2}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 131)                             documentation: "Fraction",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 132)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 133)                         {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 134)                             command: "sqrt",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 135)                             insertText: "sqrt{$0}",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 136)                             documentation: "Square root",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 137)                         },
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 138)                     ];
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 139) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 140)                     const latexEnvironments = [
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 141)                         "document",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 142)                         "equation",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 143)                         "align",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 144)                         "itemize",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 145)                         "enumerate",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 146)                         "figure",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 147)                         "table",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 148)                         "center",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 149)                         "abstract",
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 150)                     ];
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 151) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 152)                     // Register completion provider for LaTeX commands
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 153)                     monaco.languages.registerCompletionItemProvider("latex", {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 154)                         triggerCharacters: ["\\", "{"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 155)                         provideCompletionItems: (model, position) => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 156)                             const lineContent = model.getLineContent(
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 157)                                 position.lineNumber,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 158)                             );
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 159)                             const textBeforeCursor = lineContent.substring(
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 160)                                 0,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 161)                                 position.column - 1,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 162)                             );
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 163) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 164)                             // Command completions (after \)
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 165)                             const commandMatch =
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 166)                                 textBeforeCursor.match(/\\([a-zA-Z]*)$/);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 167)                             if (commandMatch) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 168)                                 const partialCommand = commandMatch[1];
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 169)                                 const textAfterCursor = lineContent.substring(
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 170)                                     position.column - 1,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 171)                                 );
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 172) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 173)                                 const suggestions = latexCommands
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 174)                                     .filter((cmd) =>
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 175)                                         cmd.command.startsWith(partialCommand),
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 176)                                     )
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 177)                                     .map((cmd) => {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 178)                                         // Check if cursor is inside braces and there's a closing brace
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 179)                                         const hasOpenBrace = textBeforeCursor.match(/\{[^}]*$/);
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 180)                                         const hasClosingBrace = hasOpenBrace && textAfterCursor.startsWith('}');
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 181) 
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 182)                                         // If we're inside braces with a closing brace, don't include it in insertText
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 183)                                         let insertText = cmd.insertText;
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 184)                                         let endColumn = position.column;
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 185) 
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 186)                                         if (hasClosingBrace && insertText.includes('{')) {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 187)                                             // Remove the closing brace from commands like "textbf{$0}"
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 188)                                             insertText = insertText.replace(/\{([^}]*)\}/, '{$1');
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 189)                                             endColumn = position.column + 1; // Include the closing brace in replacement
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 190)                                         }
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 191) 
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 192)                                         return {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 193)                                             label: cmd.command,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 194)                                             kind: monaco.languages
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 195)                                                 .CompletionItemKind.Function,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 196)                                             insertText: insertText,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 197)                                             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 198)                                             documentation: cmd.documentation,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 199)                                             range: {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 200)                                                 startLineNumber:
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 201)                                                     position.lineNumber,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 202)                                                 startColumn:
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 203)                                                     position.column -
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 204)                                                     partialCommand.length,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 205)                                                 endLineNumber: position.lineNumber,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 206)                                                 endColumn: endColumn,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 207)                                             },
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 208)                                         };
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 209)                                     });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 210)                                 return { suggestions };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 211)                             }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 212) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 213)                             // Environment completions (after \begin{)
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 214)                             const beginMatch =
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 215)                                 textBeforeCursor.match(/\\begin\{([^}]*)$/);
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 216)                             if (beginMatch) {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 217)                                 const partialEnv = beginMatch[1];
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 218)                                 const textAfterCursor = lineContent.substring(position.column - 1);
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 219) 
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 220)                                 // Check if there's already a closing brace after the cursor
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 221)                                 const hasClosingBrace = textAfterCursor.startsWith('}');
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 222) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 223)                                 const suggestions = latexEnvironments
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 224)                                     .filter((env) => env.startsWith(partialEnv))
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 225)                                     .map((env) => {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 226)                                         // If there's already a closing brace, we need to handle it carefully
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 227)                                         let insertText, endColumn;
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 228)                                         if (hasClosingBrace) {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 229)                                             // Include the environment content but skip past the existing closing brace
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 230)                                             insertText = `${env}}\n\t$0\n\\end{${env}}`;
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 231)                                             endColumn = position.column + 1; // Replace up to and including the }
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 232)                                         } else {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 233)                                             // No closing brace, add everything including the brace
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 234)                                             insertText = `${env}}\n\t$0\n\\end{${env}}`;
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 235)                                             endColumn = position.column;
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 236)                                         }
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 237) 
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 238)                                         return {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 239)                                             label: env,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 240)                                             kind: monaco.languages
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 241)                                                 .CompletionItemKind.Keyword,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 242)                                             insertText: insertText,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 243)                                             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 244)                                             documentation: `Insert ${env} environment`,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 245)                                             range: {
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 246)                                                 startLineNumber:
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 247)                                                     position.lineNumber,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 248)                                                 startColumn: position.column - partialEnv.length,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 249)                                                 endLineNumber: position.lineNumber,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 250)                                                 endColumn: endColumn,
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 251)                                             },
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 252)                                         };
+8fa4eecd (Ferrari   2025-10-27 23:24:58 -0400 253)                                     });
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 254)                                 return { suggestions };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 255)                             }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 256) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 257)                             return { suggestions: [] };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 258)                         },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 259)                     });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 260) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 261)                     // Auto-close \begin{} with \end{}
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 262)                     monaco.languages.registerCompletionItemProvider("latex", {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 263)                         triggerCharacters: ["}"],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 264)                         provideCompletionItems: (model, position) => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 265)                             const lineContent = model.getLineContent(
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 266)                                 position.lineNumber,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 267)                             );
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 268)                             const textBeforeCursor = lineContent.substring(
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 269)                                 0,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 270)                                 position.column - 1,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 271)                             );
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 272)                             const textAfterCursor = lineContent.substring(
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 273)                                 position.column - 1,
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 274)                             );
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 275)                             const beginMatch =
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 276)                                 textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 277) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 278)                             // Only suggest auto-close if there's not already an \end{} on the same line
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 279)                             // or if we haven't already inserted the environment completion
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 280)                             if (beginMatch && !textAfterCursor.match(/^\s*\n\s*\\end\{/)) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 281)                                 const environmentName = beginMatch[1];
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 282) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 283)                                 // Check if this is one of our predefined environments
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 284)                                 // If so, don't auto-close as it was already handled by the environment completion
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 285)                                 if (latexEnvironments.includes(environmentName)) {
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 286)                                     return { suggestions: [] };
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 287)                                 }
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 288) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 289)                                 return {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 290)                                     suggestions: [
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 291)                                         {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 292)                                             label: `Auto-close \\end{${environmentName}}`,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 293)                                             kind: monaco.languages
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 294)                                                 .CompletionItemKind.Snippet,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 295)                                             insertText: `\n\t$0\n\\end{${environmentName}}`,
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 296)                                             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 297)                                             documentation: `Auto-close with \\end{${environmentName}}`,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 298)                                             range: {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 299)                                                 startLineNumber:
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 300)                                                     position.lineNumber,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 301)                                                 startColumn: position.column,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 302)                                                 endLineNumber:
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 303)                                                     position.lineNumber,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 304)                                                 endColumn: position.column,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 305)                                             },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 306)                                         },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 307)                                     ],
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 308)                                 };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 309)                             }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 310) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 311)                             return { suggestions: [] };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 312)                         },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 313)                     });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 314) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 315)                     // Create the editor
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 316)                     monacoRef.current = monaco.editor.create(
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 317)                         editorRef.current,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 318)                         {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 319)                             value: value,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 320)                             language: "latex",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 321)                             theme: "underbranch-theme",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 322)                             fontSize: 15,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 323)                             lineNumbers: "on",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 324)                             roundedSelection: true,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 325)                             scrollBeyondLastLine: false,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 326)                             automaticLayout: true,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 327)                             minimap: { enabled: false },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 328)                             wordWrap: "on",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 329)                             lineHeight: 24,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 330)                             padding: { top: 16, bottom: 16 },
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 331)                             renderLineHighlight: "all",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 332)                             cursorBlinking: "smooth",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 333)                             cursorWidth: 2,
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 334)                             fontFamily:
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 335)                                 "'Fira Code', 'SF Mono', Consolas, 'Courier New', monospace",
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 336)                             fontLigatures: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 337)                             smoothScrolling: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 338)                             guides: {
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 339)                                 indentation: true,
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 340)                                 bracketPairs: true,
+3e706b4b (pau1davis 2025-10-16 20:59:11 -0400 341)                             },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 342)                         },
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 343)                     );
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 344) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 345)                     // Listen for content changes
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 346)                     monacoRef.current.onDidChangeModelContent(() => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 347)                         const currentValue = monacoRef.current.getValue();
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 348)                         if (onChange) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 349)                             onChange(currentValue);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 350)                         }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 351)                     });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 352)                 }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 353)             });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 354)         }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 355) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 356)         // Listen for clear editor event
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 357)         const handleClearEditor = () => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 358)             if (monacoRef.current) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 359)                 monacoRef.current.setValue("");
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 360)             }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 361)         };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 362) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 363)         window.addEventListener("clearEditor", handleClearEditor);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 364) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 365)         return () => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 366)             window.removeEventListener("clearEditor", handleClearEditor);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 367)             if (monacoRef.current) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 368)                 monacoRef.current.dispose();
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 369)                 monacoRef.current = null;
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 370)             }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 371)         };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 372)     }, []);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 373) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 374)     // Update editor value when prop changes
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 375)     useEffect(() => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 376)         if (monacoRef.current && monacoRef.current.getValue() !== value) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 377)             monacoRef.current.setValue(value);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 378)         }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 379)     }, [value]);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 380) 
+1df2fe04 (Ferrari   2025-10-27 23:02:07 -0400 381)     // Recalculate layout when editor becomes visible
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 382)     useEffect(() => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 383)         if (!monacoRef.current) return;
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 384) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 385)         if (isVisible) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 386)             if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 387)             layoutTimeout.current = setTimeout(() => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 388)                 try {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 389)                     monacoRef.current.layout();
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 390)                 } catch (e) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 391)                     console.warn("monaco.layout failed", e);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 392)                 }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 393)             }, 50);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 394)         }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 395) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 396)         return () => {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 397)             if (layoutTimeout.current) {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 398)                 clearTimeout(layoutTimeout.current);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 399)                 layoutTimeout.current = null;
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 400)             }
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 401)         };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 402)     }, [isVisible]);
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 403) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 404)     return React.createElement("div", {
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 405)         ref: editorRef,
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 406)         id: "monaco-editor",
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 407)     });
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 408) };
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 409) 
+9b6bdc7d (Ferrari   2025-10-16 10:12:26 -0400 410) export default LaTeXEditor;
