@@ -130,6 +130,9 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
             latexCode: latexCode,
             // add compilation handler
             onCompile: handleCompile,
+            // i want the user to be able to download the pdf
+            // - robby
+            pdfUrl: pdfUrl,
         }),
 
         React.createElement(
