@@ -1,7 +1,6 @@
 Underbranch/editor/src/Collaborative.js
 
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   1) // Collaborative features integration for the LaTeX Editor
-a92cc0c9 (Robby Lawrence 2025-10-29 11:24:06 -0400   2) // This module handles real-time collaboration via Socket
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   3) 
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   4) class Collaborative {
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   5)     constructor() {
@@ -548,7 +547,6 @@ c8618eab (pau1davis      2025-10-30 16:33:23 -0400 253)             console.erro
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400 538) }
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400 539) 
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400 540) // Make Collaborative available globally
-a92cc0c9 (Robby Lawrence 2025-10-29 11:24:06 -0400 541) window.Collaborative = Collaborative;
 
 Underbranch/editor/src/LaTeXEditor.js
 
