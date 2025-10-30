@@ -1,4 +1,12 @@
-const Toolbar = ({ viewMode, onViewModeChange, latexCode, onCompile }) => {
+const Toolbar = ({
+    viewMode,
+    onViewModeChange,
+    latexCode,
+    onCompile,
+    pdfUrl,
+    theme,
+    onToggleTheme,
+}) => {
     const handleDownload = () => {
         const blob = new Blob([latexCode], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
@@ -9,6 +17,20 @@ const Toolbar = ({ viewMode, onViewModeChange, latexCode, onCompile }) => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    };
+    // handler for downloading the pdf
+    const handleDownloadPDF = () => {
+        if (!pdfUrl) {
+            alert("No compiled PDF available. Please compile first.");
+            return;
+        }
+
+        const a = document.createElement("a");
+        a.href = pdfUrl;
+        a.download = "document.pdf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     };
 
     const handleClear = () => {
@@ -78,9 +100,29 @@ const Toolbar = ({ viewMode, onViewModeChange, latexCode, onCompile }) => {
                 "button",
                 {
                     className: "btn btn-secondary",
+                    onClick: handleDownloadPDF,
+                    // button will start disabled since you don't
+                    // want to download a pdf that doesn't exist
+                    disabled: !pdfUrl,
+                },
+                "Download PDF",
+            ),
+            React.createElement(
+                "button",
+                {
+                    className: "btn btn-secondary",
                     onClick: handleClear,
                 },
                 "Clear",
+            ),
+            React.createElement(
+                "button",
+                {
+                    className: `btn ${theme === "dark" ? "btn-primary" : "btn-secondary"}`,
+                    onClick: onToggleTheme,
+                    title: "Toggle light/dark theme",
+                },
+                theme === "dark" ? "Light" : "Dark",
             ),
         ),
     );
