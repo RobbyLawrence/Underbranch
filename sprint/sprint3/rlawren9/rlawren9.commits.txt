@@ -1,0 +1,284 @@
+Note that some of the commits say "Underbranch Server". This was when I was pushing from the XPS machine.
+This user has the same GitHub credentials as my main account, just a different name.
+
+Underbranch/signin/server.js:
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 121)         const createPasswordResetsQuery = `
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 122)           CREATE TABLE IF NOT EXISTS password_resets (
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 123)             id INT AUTO_INCREMENT PRIMARY KEY,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 124)             user_id INT NOT NULL,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 125)             token VARCHAR(128) NOT NULL UNIQUE,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 126)             expires_at DATETIME NOT NULL,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 127)             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 128)             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 129)             INDEX (expires_at)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 130)           ) ENGINE=InnoDB;
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 131)         `;
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 132)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 134)         await conn.execute(createPasswordResetsQuery);
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 446)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 448)         // Try to find the user
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 452)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 453)         // If no user or user has no password, we still return success to avoid enumeration.
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 455)             console.warn(
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 456)                 `Password reset requested for non-existing or google-only account: ${email}`,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 457)             );
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 458)             // Respond with a generic success
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 459)             return res.json({ success: true });
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 461)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 463)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 468)         // store token
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 473)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 476)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 481)                 pass: process.env.EMAIL_PASS, // or use OAuth2
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 485)         // Attempt to send email, but still return generic success even if mail fails
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 486)         try {
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 487)             await transporter.sendMail({
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 488)                 from: process.env.EMAIL_USER,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 489)                 to: email,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 490)                 subject: "Password Reset",
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 491)                 text: `Click here to reset your password: ${resetLink}`,
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 492)             });
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 493)         } catch (mailErr) {
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 494)             console.error("Failed to send reset email:", mailErr);
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 495)             // fall through and return success to the client; investigate server logs for details
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 496)         }
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 497)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 498)         return res.json({ success: true });
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 500)         console.error("Failed to process reset request:", err);
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 501)         // Return generic success to avoid giving attackers useful info (optionally: res.status(500)...)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 502)         return res
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 503)             .status(500)
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 504)             .json({ error: "Failed to process reset request" });
+aa309d69 (Robby Lawrence     2025-10-28 20:51:37 -0400 524)         const hash = await bcrypt.hash(password, SALT_ROUNDS);
+
+Underbranch/editor/src/Toolbar.js
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   1) const Toolbar = ({
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   2)     viewMode,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   3)     onViewModeChange,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   4)     latexCode,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   5)     onCompile,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   6)     pdfUrl,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400   7) }) => {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400   9)         const blob = new Blob([latexCode], { type: "text/plain" });
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  11)         const a = document.createElement("a");
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  13)         a.download = "document.tex";
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  19)     // handler for downloading the pdf
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  20)     const handleDownloadPDF = () => {
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  21)         if (!pdfUrl) {
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  22)             alert("No compiled PDF available. Please compile first.");
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  23)             return;
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  24)         }
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  25)
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  26)         const a = document.createElement("a");
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  27)         a.href = pdfUrl;
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  28)         a.download = "document.pdf";
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  29)         document.body.appendChild(a);
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  30)         a.click();
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  31)         document.body.removeChild(a);
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  32)     };
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  35)         if (confirm("Are you sure you want to clear the editor?")) {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  36)             onViewModeChange("editor");
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  38)             const event = new CustomEvent("clearEditor");
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  45)         console.log("[Toolbar] button click ->", mode);
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  49)     return React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  50)         "div",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  51)         { className: "toolbar" },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  52)         React.createElement("h1", null, "LaTeX Editor"),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  53)         React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  54)             "div",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  55)             { className: "toolbar-buttons" },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  56)             React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  57)                 "button",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  58)                 {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  59)                     className: `btn ${viewMode === "editor" ? "btn-primary" : "btn-secondary"}`,
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  60)                     onClick: () => handleViewClick("editor"),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  61)                 },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  62)                 "Editor",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  63)             ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  64)             React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  65)                 "button",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  66)                 {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  67)                     className: `btn ${viewMode === "split" ? "btn-primary" : "btn-secondary"}`,
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  68)                     onClick: () => handleViewClick("split"),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  69)                 },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  70)                 "Split",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  71)             ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  72)             React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  73)                 "button",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  74)                 {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  75)                     className: `btn ${viewMode === "preview" ? "btn-primary" : "btn-secondary"}`,
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  76)                     onClick: () => handleViewClick("preview"),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  77)                 },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  78)                 "Preview",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  79)             ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  80)             React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  81)                 "button",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  82)                 {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  83)                     className: "btn btn-secondary",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  84)                     onClick: handleDownload,
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  85)                 },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  86)                 "Download",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  87)             ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  88)             // add button for compilation
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  89)             React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  90)                 "button",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  91)                 {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  92)                     className: "btn btn-primary",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  93)                     onClick: onCompile,
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  94)                 },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  95)                 "Compile to PDF",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  96)             ),
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  97)             React.createElement(
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  98)                 "button",
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400  99)                 {
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 100)                     className: "btn btn-secondary",
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 101)                     onClick: handleDownloadPDF,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 102)                     // button will start disabled since you don't
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 103)                     // want to download a pdf that doesn't exist
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 104)                     disabled: !pdfUrl,
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 105)                 },
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 106)                 "Download PDF",
+18e3440b editor/src/Toolbar.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 107)             ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 108)             React.createElement(
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 109)                 "button",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 110)                 {
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 111)                     className: "btn btn-secondary",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 112)                     onClick: handleClear,
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 113)                 },
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 114)                 "Clear",
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 115)             ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 116)         ),
+601d4f52 editor/src/Toolbar.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 120) export default Toolbar;
+
+Underbranch/editor/src/App.js:
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  48)     const [viewMode, setViewMode] = useState("split"); // 'editor', 'preview', 'split'
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  49)     const [pdfUrl, setPdfUrl] = useState(null);
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  54)         setLatexCode(value || "");
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  55)     };
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  56)     // handle compilation
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  57)     const handleCompile = async () => {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  58)         try {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  59)             const res = await fetch("/compile/", {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  60)                 method: "POST",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  61)                 headers: { "Content-Type": "application/json" },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  62)                 body: JSON.stringify({ latex: latexCode }),
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  63)             });
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  64)
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  65)             if (!res.ok) {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  66)                 const errText = await res.text();
+a92cc0c9 editor/src/App.js          (Robby Lawrence 2025-10-29 11:24:06 -0400  67)                 alert("Compilation error: server is likely down");
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  68)                 return;
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  69)             }
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  70)
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  71)             const blob = await res.blob();
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  72)             const url = URL.createObjectURL(blob) + `#${Date.now()}`;
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  73)             // clean up old blobs
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  74)             setPdfUrl((prevUrl) => {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  75)                 if (prevUrl) URL.revokeObjectURL(prevUrl);
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  76)                 return url;
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  77)             });
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  78)         } catch (err) {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  79)             alert("Network or server error: " + err.message);
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  80)         }
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  86)         console.log("[App] viewMode changed ->", viewMode);
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400  97)             window.dispatchEvent(new Event("resize"));
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 108)     const editorClass =
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 109)         viewMode === "split"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 110)             ? "split"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 111)             : viewMode === "editor"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 112)               ? "full"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 113)               : "hidden";
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 114)     const previewClass =
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 115)         viewMode === "split"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 116)             ? "split"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 117)             : viewMode === "preview"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 118)               ? "full"
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 119)               : "hidden";
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 120)
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 121)     const editorVisible = viewMode === "split" || viewMode === "editor";
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 122)     const previewVisible = viewMode === "split" || viewMode === "preview";
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 123)
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 124)     return React.createElement(
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 125)         "div",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 126)         { className: "app" },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 130)             latexCode: latexCode,
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 131)             // add compilation handler
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 132)             onCompile: handleCompile,
+18e3440b editor/src/App.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 133)             // i want the user to be able to download the pdf
+18e3440b editor/src/App.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 134)             // - robby
+18e3440b editor/src/App.js          (Robby Lawrence 2025-10-29 23:33:34 -0400 135)             pdfUrl: pdfUrl,
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 138)         React.createElement(
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 139)             "div",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 140)             { className: `editor-container mode-${viewMode}` },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 143)             React.createElement(
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 144)                 "div",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 145)                 {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 146)                     className: `editor-pane ${editorClass}`,
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 147)                 },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 151)                     isVisible: editorVisible,
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 152)                 }),
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 157)             React.createElement(
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 158)                 "div",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 159)                 { className: `preview-pane ${previewClass}` },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 160)                 pdfUrl
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 161)                     ? React.createElement("iframe", {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 162)                           src: pdfUrl,
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 163)                           style: {
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 164)                               width: "100%",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 165)                               height: "100%",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 166)                               border: "none",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 167)                           },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 168)                           title: "PDF Preview",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 169)                       })
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 170)                     : React.createElement(
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 171)                           "div",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 172)                           { className: "loading" },
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 173)                           "No PDF yet",
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 174)                       ),
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 175)             ),
+601d4f52 editor/src/App.js          (Robby Lawrence 2025-10-28 21:19:55 -0400 176)         ),
+
+nginx-conf:
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  1) server {
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  2)     listen 80;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  3)     listen [::]:80;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  4)     server_name underbranch.org www.underbranch.org;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  5)
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  6)     root /var/www/underbranch.org/html/Underbranch;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  7)     index index.html;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  8)
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400  9)     location / {
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 10)         try_files $uri $uri/ =404;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 11)     }
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 12)
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 13)     # proxy requests from /signin
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 14)     location /signin/ {
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 15)         proxy_pass http://127.0.0.1:3001/signin/;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 16)         proxy_http_version 1.1;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 17)         proxy_set_header Upgrade $http_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 18)         proxy_set_header Connection $connection_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 19)         proxy_set_header Host $host;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 20)         proxy_cache_bypass $http_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 21)     }
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 22)     location /compile/ {
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 23) 	proxy_pass http://127.0.0.1:3002/compile/;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 24) 	proxy_http_version 1.1;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 25) 	proxy_set_header Upgrade $http_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 26) 	proxy_set_header Connection $connection_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 27) 	proxy_set_header Host $host;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 28) 	proxy_cache_bypass $http_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 29)     }
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 30)     location /socket.io/ {
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 31)         proxy_pass http://127.0.0.1:3000/socket.io/;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 32)         proxy_http_version 1.1;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 33)         proxy_set_header Upgrade $http_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 34)         proxy_set_header Connection $connection_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 35)         proxy_set_header Host $host;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 36)         proxy_cache_bypass $http_upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 37)     }
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 38) }
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 39)
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 40) map $http_upgrade $connection_upgrade {
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 41)     default upgrade;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 42)     ''      close;
+de779db1 (RobbyLawrence 2025-10-29 15:42:59 -0400 43) }
