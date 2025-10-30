@@ -91,6 +91,11 @@
                 background: #4a5568;
             }
 
+            .btn[disabled] {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
             .editor-container {
                 flex: 1;
                 display: flex;
@@ -152,8 +157,14 @@
         <!-- Socket.IO for real-time collaboration -->
         <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
         <!-- React and ReactDOM from CDN -->
-        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react@18/umd/react.development.js"
+        ></script>
+        <script
+            crossorigin
+            src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+        ></script>
         <!-- Monaco Editor -->
         <script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
 

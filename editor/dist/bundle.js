@@ -135,7 +135,10 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     onViewModeChange: setViewMode,
     latexCode: latexCode,
     // add compilation handler
-    onCompile: handleCompile
+    onCompile: handleCompile,
+    // i want the user to be able to download the pdf
+    // - robby
+    pdfUrl: pdfUrl
   }), React.createElement("div", {
     className: `editor-container mode-${viewMode}`
   },
@@ -1150,7 +1153,8 @@ const Toolbar = ({
   viewMode,
   onViewModeChange,
   latexCode,
-  onCompile
+  onCompile,
+  pdfUrl
 }) => {
   const handleDownload = () => {
     const blob = new Blob([latexCode], {
@@ -1164,6 +1168,19 @@ const Toolbar = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+  // handler for downloading the pdf
+  const handleDownloadPDF = () => {
+    if (!pdfUrl) {
+      alert("No compiled PDF available. Please compile first.");
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = pdfUrl;
+    a.download = "document.pdf";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
   const handleClear = () => {
     if (confirm("Are you sure you want to clear the editor?")) {
@@ -1201,6 +1218,12 @@ const Toolbar = ({
     className: "btn btn-primary",
     onClick: onCompile
   }, "Compile to PDF"), React.createElement("button", {
+    className: "btn btn-secondary",
+    onClick: handleDownloadPDF,
+    // button will start disabled since you don't
+    // want to download a pdf that doesn't exist
+    disabled: !pdfUrl
+  }, "Download PDF"), React.createElement("button", {
     className: "btn btn-secondary",
     onClick: handleClear
   }, "Clear")));
