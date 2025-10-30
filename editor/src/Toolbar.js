@@ -4,6 +4,8 @@ const Toolbar = ({
     latexCode,
     onCompile,
     pdfUrl,
+    theme,
+    onToggleTheme,
 }) => {
     const handleDownload = () => {
         const blob = new Blob([latexCode], { type: "text/plain" });
@@ -112,6 +114,15 @@ const Toolbar = ({
                     onClick: handleClear,
                 },
                 "Clear",
+            ),
+            React.createElement(
+                "button",
+                {
+                    className: `btn ${theme === "dark" ? "btn-primary" : "btn-secondary"}`,
+                    onClick: onToggleTheme,
+                    title: "Toggle light/dark theme",
+                },
+                theme === "dark" ? "Light" : "Dark",
             ),
         ),
     );
