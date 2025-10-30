@@ -57,7 +57,7 @@ class Collaborative {
     }
 
     initSocket() {
-        this.socket = io();
+        this.socket = io('https://underbranch.org');
 
         this.socket.on("connect", () => {
             console.log("Connected to collaboration server");
@@ -250,7 +250,7 @@ class Collaborative {
 
     setupCollaboration() {
         if (!this.editor) {
-            console.error("Monaco editor not found");
+            console.error("            const socket = io('https://underbranch.org');Monaco editor not found");
             return;
         }
 
