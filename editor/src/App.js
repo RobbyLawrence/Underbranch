@@ -47,6 +47,21 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     // - 'split'   -> both are shown side-by-side
     const [viewMode, setViewMode] = useState("split"); // 'editor', 'preview', 'split'
     const [pdfUrl, setPdfUrl] = useState(null);
+    
+    // Theme state: 'light' or 'dark'. Persist to localStorage and prefer
+    // the user's system preference when no saved preference exists.
+    const [theme, setTheme] = useState(() => {
+        try {
+            const saved = localStorage.getItem("ub_theme");
+            if (saved) return saved;
+            const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            return prefersDark ? "dark" : "light";
+        } catch (e) {
+            return "light";
+        }
+    });
+    
+    
     // handleCodeChange is passed to the editor component. It receives the
     // new text value and updates the latexCode state. We guard against
     // undefined/null by falling back to an empty string.
@@ -100,6 +115,18 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
         }
     }, [viewMode]);
 
+    
+    // Apply theme to document root and persist choice
+    useEffect(() => {
+        try {
+            document.documentElement.setAttribute("data-theme", theme);
+            localStorage.setItem("ub_theme", theme);
+        } catch (e) {
+            // ignore when not in browser
+        }
+    }, [theme]);
+
+
     // The UI layout is built with React.createElement calls instead of JSX.
     // To avoid layout glitches when switching modes we render both panes
     // consistently and toggle their visibility/size using explicit CSS
@@ -133,6 +160,8 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
             // i want the user to be able to download the pdf
             // - robby
             pdfUrl: pdfUrl,
+            theme: theme,
+            onToggleTheme: () =>setTheme((t) => (t === "light" ? "dark" : "light")),
         }),
 
         React.createElement(
@@ -149,6 +178,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
                     value: latexCode,
                     onChange: handleCodeChange,
                     isVisible: editorVisible,
+                    theme: theme,
                 }),
             ),
 

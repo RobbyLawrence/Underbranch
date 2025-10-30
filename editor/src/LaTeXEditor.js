@@ -1,6 +1,6 @@
 const { useEffect, useRef } = React;
 
-const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
+const LaTeXEditor = ({ value, onChange, isVisible = true, theme = "light" }) => {
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const layoutTimeout = useRef(null);
@@ -17,8 +17,10 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                     // Configure LaTeX language
                     monaco.languages.register({ id: "latex" });
 
-                    // Define custom theme
-                    monaco.editor.defineTheme("underbranch-theme", {
+                    // Define light and dark themes so the editor responds to
+                    // the app-level theme toggle. We keep token rules similar
+                    // but swap base and color tokens for readability on dark.
+                    monaco.editor.defineTheme("underbranch-light", {
                         base: "vs",
                         inherit: true,
                         rules: [
@@ -38,6 +40,30 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                             "editorCursor.foreground": "#B5632D",
                             "editor.selectionBackground": "#E8D3C7",
                             "editorLineNumber.foreground": "#999999",
+                        },
+                    });
+
+                    monaco.editor.defineTheme("underbranch-dark", {
+                        base: "vs-dark",
+                        inherit: true,
+                        rules: [
+                            { token: "keyword", foreground: "DCA06B" },
+                            { token: "string", foreground: "78C179" },
+                            {
+                                token: "comment",
+                                foreground: "94A3B8",
+                                fontStyle: "italic",
+                            },
+                            { token: "bracket", foreground: "9AA6B2" },
+                        ],
+                        colors: {
+                            // Dark background aligned with page dark vars
+                            "editor.background": "#071122",
+                            "editor.foreground": "#E6EEF8",
+                            "editor.lineHighlightBackground": "#0b2230",
+                            "editorCursor.foreground": "#B5632D",
+                            "editor.selectionBackground": "#163246",
+                            "editorLineNumber.foreground": "#6B7280",
                         },
                     });
 
@@ -318,7 +344,7 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
                         {
                             value: value,
                             language: "latex",
-                            theme: "underbranch-theme",
+                            theme: theme === "dark" ? "underbranch-dark" : "underbranch-light",
                             fontSize: 15,
                             lineNumbers: "on",
                             roundedSelection: true,
@@ -370,6 +396,19 @@ const LaTeXEditor = ({ value, onChange, isVisible = true }) => {
             }
         };
     }, []);
+
+    // If the app-level theme changes, update the Monaco theme in-place.
+    useEffect(() => {
+        try {
+            if (monacoRef.current && window.monaco && window.monaco.editor) {
+                window.monaco.editor.setTheme(
+                    theme === "dark" ? "underbranch-dark" : "underbranch-light",
+                );
+            }
+        } catch (e) {
+            // Ignore: monaco may not be available during SSR or early loads
+        }
+    }, [theme]);
 
     // Update editor value when prop changes
     useEffect(() => {
