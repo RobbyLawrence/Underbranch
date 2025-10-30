@@ -1,0 +1,569 @@
+Underbranch/editor/src/Collaborative.js
+
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   1) // Collaborative features integration for the LaTeX Editor
+a92cc0c9 (Robby Lawrence 2025-10-29 11:24:06 -0400   2) // This module handles real-time collaboration via Socket
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   3) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   4) class Collaborative {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   5)     constructor() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   6)         this.socket = null;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   7)         this.editor = null;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   8)         this.app = null;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   9)         this.users = [];
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  10)         this.currentUser = null;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  11)         this.currentRoom = null;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  12)         this.isUpdatingFromRemote = false;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  13)         this.decorations = [];
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  14) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  15)         this.init();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  16)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  17) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  18)     async init() {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  19)         console.log("Starting collaborative initialization...");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  20) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  21)         // Wait for Socket.IO to be available
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  22)         console.log("Waiting for Socket.IO...");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  23)         await this.waitForSocketIO();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  24)         console.log("Socket.IO ready");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  25) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  26)         // Initialize socket connection
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  27)         console.log("Initializing socket connection...");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  28)         this.initSocket();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  29) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  30)         // Get user info and join
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  31)         console.log("Getting user info...");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  32)         await this.getUserInfo();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  33) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  34)         // Wait for the React app and Monaco editor
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  35)         console.log("Waiting for Monaco editor...");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  36)         await this.waitForEditor();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  37)         console.log("Monaco editor found!");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  38) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  39)         // Setup collaborative features
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  40)         console.log("Setting up collaboration...");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  41)         this.setupCollaboration();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  42) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  43)         console.log("Collaborative features initialized!");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  44)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  45) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  46)     waitForSocketIO() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  47)         return new Promise((resolve) => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  48)             const checkSocketIO = () => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  49)                 if (window.io) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  50)                     resolve();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  51)                 } else {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  52)                     setTimeout(checkSocketIO, 100);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  53)                 }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  54)             };
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  55)             checkSocketIO();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  56)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  57)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  58) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  59)     initSocket() {
+c8618eab (pau1davis      2025-10-30 16:33:23 -0400  60)         this.socket = io('https://underbranch.org');
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  61) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  62)         this.socket.on("connect", () => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  63)             console.log("Connected to collaboration server");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  64)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  65) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  66)         this.socket.on("disconnect", () => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  67)             console.log("Disconnected from collaboration server");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  68)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  69) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  70)         this.socket.on("document-update", (data) => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  71)             console.log("Received document update from", data.userId);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  72)             this.handleRemoteUpdate(data);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  73)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  74) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  75)         this.socket.on("users-update", (users) => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  76)             console.log("Users list updated:", users.length, "users");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  77)             this.users = users;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  78)             this.updateUsersList();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  79)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  80) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  81)         this.socket.on("cursor-update", (data) => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  82)             this.handleCursorUpdate(data);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  83)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  84) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  85)         this.socket.on("room-joined", (data) => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  86)             console.log("Successfully joined room:", data.roomId);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  87)             this.currentRoom = data.roomId;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  88)             this.updateDocumentContent(data.content);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  89)             this.users = data.users;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  90)             this.updateUsersList();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  91) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  92)             // Show success message
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  93)             this.showMessage(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  94)                 `Joined room: ${data.roomId}${data.isPasswordProtected ? " (passwor
+d protected)" : ""}`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  95)                 "success",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  96)             );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  97)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400  98) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400  99)         this.socket.on("room-join-error", (data) => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 100)             console.error("❌ Failed to join room:", data.message);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 101) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 102)             if (data.error === "invalid-password") {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 103)                 alert(`❌ ${data.message}\n\nPlease try again.`);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 104)                 setTimeout(() => this.promptForRoom(), 100);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 105)             } else if (data.error === "room-not-found") {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 106)                 const createRoom = confirm(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 107)                     `❌ Room does not exist.\n\nWould you like to create it?`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 108)                 );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 109)                 if (createRoom) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 110)                     const password = prompt(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 111)                         `Set a password for the new room (or leave empty for no pas
+sword):`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 112)                     );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 113)                     this.joinRoom(this.currentRoom, password, true);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 114)                 } else {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 115)                     setTimeout(() => this.promptForRoom(), 100);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 116)                 }
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 117)             } else if (data.error === "room-already-exists") {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 118)                 alert(`❌ ${data.message}`);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 119)                 setTimeout(() => this.promptForRoom(), 100);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 120)             }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 121)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 122) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 123)         this.socket.on("room-check-result", (data) => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 124)             if (data.exists) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 125)                 if (data.isPasswordProtected) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 126)                     // Room exists and is password protected
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 127)                     const password = prompt(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 128)                         `Room "${data.roomId}" exists and is password protected.\nE
+nter password:`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 129)                     );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 130)                     this.joinRoom(data.roomId, password, false);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 131)                 } else {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 132)                     // Room exists and is public
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 133)                     this.joinRoom(data.roomId, null, false);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 134)                 }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 135)             } else {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 136)                 // Room doesn't exist - ask if they want to create it
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 137)                 const createRoom = confirm(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 138)                     `Room "${data.roomId}" doesn't exist.\nWould you like to create
+ it?`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 139)                 );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 140)                 if (createRoom) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 141)                     const password = prompt(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 142)                         `Set a password for the new room "${data.roomId}" (or leave
+ empty for no password):`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 143)                     );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 144)                     this.joinRoom(data.roomId, password, true);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 145)                 } else {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 146)                     setTimeout(() => this.promptForRoom(), 100);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 147)                 }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 148)             }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 149)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 150)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 151) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 152)     async getUserInfo() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 153)         // Check if user info is stored in localStorage
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 154)         let userName = localStorage.getItem("collaborativeUserName");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 155)         let userColor = localStorage.getItem("collaborativeUserColor");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 156) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 157)         if (!userName) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 158)             userName =
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 159)                 prompt("Enter your name for collaborative editing:") ||
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 160)                 `User ${Date.now()}`;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 161)             localStorage.setItem("collaborativeUserName", userName);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 162)         }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 163) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 164)         if (!userColor) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 165)             userColor = this.getRandomColor();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 166)             localStorage.setItem("collaborativeUserColor", userColor);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 167)         }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 168) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 169)         this.currentUser = {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 170)             name: userName,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 171)             color: userColor,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 172)         };
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 173) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 174)         // Prompt for room
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 175)         await this.promptForRoom();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 176)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 177) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 178)     async promptForRoom() {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 179)         const roomId =
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 180)             prompt('Enter room name to join (or leave empty for "general"):') ||
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 181)             "general";
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 182) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 183)         if (roomId === "general") {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 184)             // General room is always accessible without password
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 185)             this.joinRoom(roomId, null, true); // Always "create" general room to e
+nsure it exists
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 186)             return;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 187)         }
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 188) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 189)         // Check if room exists first
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 190)         this.checkRoomExists(roomId);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 191)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 192) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 193)     checkRoomExists(roomId) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 194)         console.log(`Checking if room "${roomId}" exists...`);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 195)         this.socket.emit("check-room", { roomId });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 196)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 197) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 198)     joinRoom(roomId, password, createRoom) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 199)         this.currentRoom = roomId;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 200) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 201)         this.socket.emit("join-room", {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 202)             roomId: roomId,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 203)             userData: this.currentUser,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 204)             password: password,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 205)             createRoom: createRoom,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 206)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 207)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 208) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 209)     waitForEditor() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 210)         return new Promise((resolve) => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 211)             const checkEditor = () => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 212)                 console.log("Looking for Monaco editor...");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 213) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 214)                 // Look for Monaco editor in multiple ways
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 215)                 const editorElement = document.getElementById("monaco-editor");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 216)                 console.log("Editor element found:", !!editorElement);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 217) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 218)                 if (window.monaco) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 219)                     console.log("Monaco global available");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 220) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 221)                     // Try to get editor from the element
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 222)                     if (editorElement && editorElement._monacoEditor) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 223)                         console.log("Found editor on element._monacoEditor");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 224)                         this.editor = editorElement._monacoEditor;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 225)                         resolve();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 226)                         return;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 227)                     }
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 228) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 229)                     // Try to get all editors from Monaco
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 230)                     const editors = window.monaco.editor.getEditors();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 231)                     if (editors.length > 0) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 232)                         console.log(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 233)                             "Found editor via monaco.editor.getEditors():",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 234)                             editors.length,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 235)                         );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 236)                         this.editor = editors[0];
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 237)                         resolve();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 238)                         return;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 239)                     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 240)                 } else {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 241)                     console.log(" Monaco global not available yet");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 242)                 }
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 243) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 244)                 console.log("Editor not ready yet, retrying...");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 245)                 setTimeout(checkEditor, 500);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 246)             };
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 247)             checkEditor();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 248)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 249)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 250) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 251)     setupCollaboration() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 252)         if (!this.editor) {
+c8618eab (pau1davis      2025-10-30 16:33:23 -0400 253)             console.error("            const socket = io('https://underbranch.org')
+;Monaco editor not found");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 254)             return;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 255)         }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 256) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 257)         // Listen for local changes
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 258)         this.editor.onDidChangeModelContent((e) => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 259)             if (!this.isUpdatingFromRemote) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 260)                 const content = this.editor.getValue();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 261)                 console.log(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 262)                     "Local change detected, broadcasting...",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 263)                     content.length,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 264)                     "characters",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 265)                 );
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 266)                 this.socket.emit("document-change", {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 267)                     content: content,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 268)                     changes: e.changes,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 269)                 });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 270)             } else {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 271)                 console.log("Skipping broadcast - change from remote");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 272)             }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 273)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 274) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 275)         // Listen for cursor position changes
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 276)         this.editor.onDidChangeCursorPosition((e) => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 277)             this.socket.emit("cursor-update", {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 278)                 lineNumber: e.position.lineNumber,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 279)                 column: e.position.column,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 280)             });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 281)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 282) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 283)         console.log("Editor event listeners setup complete");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 284)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 285) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 286)     updateDocumentContent(content) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 287)         if (this.editor && this.editor.getValue() !== content) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 288)             console.log(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 289)                 "Updating editor content from remote...",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 290)                 content.length,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 291)                 "characters",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 292)             );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 293)             this.isUpdatingFromRemote = true;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 294)             const position = this.editor.getPosition();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 295)             this.editor.setValue(content);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 296)             if (position) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 297)                 this.editor.setPosition(position);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 298)             }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 299)             this.isUpdatingFromRemote = false;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 300)             console.log("Editor content updated successfully");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 301)         } else {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 302)             console.log("Content already up to date, skipping update");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 303)         }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 304)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 305) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 306)     handleRemoteUpdate(data) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 307)         console.log("Received remote update from", data.userId);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 308)         this.updateDocumentContent(data.content);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 309)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 310) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 311)     handleCursorUpdate(data) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 312)         if (!this.editor) return;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 313) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 314)         // Remove old decorations for this user
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 315)         const oldDecorations = this.decorations.filter(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 316)             (d) => d.userId === data.userId,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 317)         );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 318)         if (oldDecorations.length > 0) {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 319)             this.editor.deltaDecorations(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 320)                 oldDecorations.map((d) => d.id),
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 321)                 [],
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 322)             );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 323)         }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 324) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 325)         // Add new cursor decoration
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 326)         const decoration = {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 327)             range: new monaco.Range(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 328)                 data.cursor.lineNumber,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 329)                 data.cursor.column,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 330)                 data.cursor.lineNumber,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 331)                 data.cursor.column + 1,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 332)             ),
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 333)             options: {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 334)                 className: "collaborative-cursor",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 335)                 stickiness:
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 336)                     monaco.editor.TrackedRangeStickiness
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 337)                         .NeverGrowsWhenTypingAtEdges,
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 338)                 hoverMessage: { value: `${data.user.name}'s cursor` },
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 339)                 after: {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 340)                     content: `${data.user.name}`,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 341)                     inlineClassName: "collaborative-cursor-label",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 342)                     color: data.user.color,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 343)                 },
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 344)             },
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 345)         };
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 346) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 347)         const decorationIds = this.editor.deltaDecorations([], [decoration]);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 348) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 349)         // Store decoration info
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 350)         this.decorations = this.decorations.filter(
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 351)             (d) => d.userId !== data.userId,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 352)         );
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 353)         this.decorations.push({
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 354)             userId: data.userId,
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 355)             id: decorationIds[0],
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 356)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 357)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 358) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 359)     updateUsersList() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 360)         // Create or update users list UI
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 361)         this.createUsersListUI();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 362)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 363) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 364)     createUsersListUI() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 365)         // Remove existing users list
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 366)         const existingList = document.getElementById("collaborative-users");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 367)         if (existingList) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 368)             existingList.remove();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 369)         }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 370) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 371)         // Create new users list
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 372)         const usersList = document.createElement("div");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 373)         usersList.id = "collaborative-users";
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 374)         usersList.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 375)             position: fixed;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 376)             top: 60px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 377)             right: 20px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 378)             background: white;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 379)             border: 1px solid #ddd;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 380)             border-radius: 8px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 381)             padding: 12px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 382)             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 383)             z-index: 1000;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 384)             max-width: 220px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 385)         `;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 386) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 387)         // Room info
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 388)         const roomInfo = document.createElement("div");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 389)         roomInfo.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 390)             background: #f8f9fa;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 391)             padding: 8px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 392)             border-radius: 4px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 393)             margin-bottom: 12px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 394)             border-left: 3px solid #4834D4;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 395)         `;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 396) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 397)         const roomTitle = document.createElement("div");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 398)         roomTitle.textContent = `Room: ${this.currentRoom || "Not connected"}`;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 399)         roomTitle.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 400)             font-weight: bold;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 401)             color: #333;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 402)             font-size: 13px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 403)             margin-bottom: 4px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 404)         `;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 405) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 406)         const switchButton = document.createElement("button");
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 407)         switchButton.textContent = "Switch Room";
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 408)         switchButton.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 409)             background: #4834D4;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 410)             color: white;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 411)             border: none;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 412)             padding: 4px 8px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 413)             border-radius: 3px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 414)             font-size: 11px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 415)             cursor: pointer;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 416)         `;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 417)         switchButton.onclick = () => this.promptForRoom();
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 418) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 419)         roomInfo.appendChild(roomTitle);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 420)         roomInfo.appendChild(switchButton);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 421)         usersList.appendChild(roomInfo);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 422) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 423)         // Users title
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 424)         const title = document.createElement("div");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 425)         title.textContent = `Online Users (${this.users.length})`;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 426)         title.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 427)             font-weight: bold;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 428)             margin-bottom: 8px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 429)             color: #333;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 430)             font-size: 14px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 431)         `;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 432)         usersList.appendChild(title);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 433) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 434)         // Users list
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 435)         this.users.forEach((user) => {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 436)             const userElement = document.createElement("div");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 437)             userElement.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 438)                 display: flex;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 439)                 align-items: center;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 440)                 margin-bottom: 6px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 441)                 font-size: 13px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 442)             `;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 443) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 444)             const colorDot = document.createElement("div");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 445)             colorDot.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 446)                 width: 12px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 447)                 height: 12px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 448)                 background-color: ${user.color};
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 449)                 border-radius: 50%;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 450)                 margin-right: 8px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 451)             `;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 452) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 453)             const nameElement = document.createElement("span");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 454)             nameElement.textContent = user.name;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 455)             nameElement.style.color = "#555";
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 456) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 457)             userElement.appendChild(colorDot);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 458)             userElement.appendChild(nameElement);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 459)             usersList.appendChild(userElement);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 460)         });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 461) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 462)         document.body.appendChild(usersList);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 463)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 464) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 465)     getRandomColor() {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 466)         const colors = [
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 467)             "#FF6B6B",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 468)             "#4ECDC4",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 469)             "#45B7D1",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 470)             "#96CEB4",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 471)             "#FECA57",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 472)             "#FF9FF3",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 473)             "#54A0FF",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 474)             "#5F27CD",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 475)             "#00D2D3",
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 476)             "#FF9F43",
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 477)         ];
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 478)         return colors[Math.floor(Math.random() * colors.length)];
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 479)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 480) 
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 481)     showMessage(message, type = "info") {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 482)         // Create message element
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 483)         const messageDiv = document.createElement("div");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 484)         messageDiv.textContent = message;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 485)         messageDiv.style.cssText = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 486)             position: fixed;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 487)             top: 20px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 488)             right: 20px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 489)             padding: 12px 20px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 490)             border-radius: 6px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 491)             color: white;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 492)             font-weight: bold;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 493)             z-index: 10000;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 494)             max-width: 300px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 495)             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 496)             background-color: ${type === "success" ? "#10AC84" : type === "error" ?
+ "#EE5A24" : "#4834D4"};
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 497)         `;
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 498) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 499)         document.body.appendChild(messageDiv);
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 500) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 501)         // Remove after 4 seconds
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 502)         setTimeout(() => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 503)             if (messageDiv.parentNode) {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 504)                 messageDiv.parentNode.removeChild(messageDiv);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 505)             }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 506)         }, 4000);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 507)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 508) }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 509) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 510) // CSS for collaborative cursors
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 511) const style = document.createElement("style");
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 512) style.textContent = `
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 513)     .collaborative-cursor {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 514)         border-left: 2px solid !important;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 515)         background-color: rgba(255, 107, 107, 0.2) !important;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 516)     }
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 517) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 518)     .collaborative-cursor-label {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 519)         background-color: #FF6B6B;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 520)         color: white;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 521)         padding: 2px 6px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 522)         border-radius: 3px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 523)         font-size: 11px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 524)         position: relative;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 525)         top: -20px;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 526)         white-space: nowrap;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 527)     }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 528) `;
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 529) document.head.appendChild(style);
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 530) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 531) // Initialize when DOM is ready
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 532) if (document.readyState === "loading") {
+9262cd3c (pau1davis      2025-10-28 21:05:52 -0400 533)     document.addEventListener("DOMContentLoaded", () => {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 534)         window.collaborative = new Collaborative();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 535)     });
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 536) } else {
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 537)     window.collaborative = new Collaborative();
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 538) }
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 539) 
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400 540) // Make Collaborative available globally
+a92cc0c9 (Robby Lawrence 2025-10-29 11:24:06 -0400 541) window.Collaborative = Collaborative;
+
+Underbranch/editor/src/LaTeXEditor.js
+
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400  25)                         inherit: true,
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400  26)                         rules: [
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400  44)                     });
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400  45) 
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400 355)                             lineHeight: 24,
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400 356)                             padding: { top: 16, bottom: 16 },
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400 357)                             renderLineHighlight: "all",
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400 358)                             cursorBlinking: "smooth",
+3e706b4b (pau1davis     2025-10-16 20:59:11 -0400 359)                             cursorWidth: 2,
+
+Underbranch/editor/src/index.js
+
+d1c7121e editor/src/index.js          (pau1davis 2025-10-28 21:05:11 -0400  5) // Import Collaborative features
+12b1526b editor/src/index.js          (pau1davis 2025-10-28 16:00:33 -0400  6) import './Collaborative.js';
+
