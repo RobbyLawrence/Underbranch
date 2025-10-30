@@ -64,6 +64,20 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
   // - 'split'   -> both are shown side-by-side
   const [viewMode, setViewMode] = useState("split"); // 'editor', 'preview', 'split'
   const [pdfUrl, setPdfUrl] = useState(null);
+
+  // Theme state: 'light' or 'dark'. Persist to localStorage and prefer
+  // the user's system preference when no saved preference exists.
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem("ub_theme");
+      if (saved) return saved;
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return prefersDark ? "dark" : "light";
+    } catch (e) {
+      return "light";
+    }
+  });
+
   // handleCodeChange is passed to the editor component. It receives the
   // new text value and updates the latexCode state. We guard against
   // undefined/null by falling back to an empty string.
@@ -84,7 +98,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
       });
       if (!res.ok) {
         const errText = await res.text();
-        alert("Compilation error:\n" + errText);
+        alert("Compilation error: server is likely down");
         return;
       }
       const blob = await res.blob();
@@ -94,7 +108,6 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
         if (prevUrl) URL.revokeObjectURL(prevUrl);
         return url;
       });
-      setViewMode("preview"); // auto-switch to preview
     } catch (err) {
       alert("Network or server error: " + err.message);
     }
@@ -120,6 +133,16 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     }
   }, [viewMode]);
 
+  // Apply theme to document root and persist choice
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("ub_theme", theme);
+    } catch (e) {
+      // ignore when not in browser
+    }
+  }, [theme]);
+
   // The UI layout is built with React.createElement calls instead of JSX.
   // To avoid layout glitches when switching modes we render both panes
   // consistently and toggle their visibility/size using explicit CSS
@@ -136,7 +159,12 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     onViewModeChange: setViewMode,
     latexCode: latexCode,
     // add compilation handler
-    onCompile: handleCompile
+    onCompile: handleCompile,
+    // i want the user to be able to download the pdf
+    // - robby
+    pdfUrl: pdfUrl,
+    theme: theme,
+    onToggleTheme: () => setTheme(t => t === "light" ? "dark" : "light")
   }), React.createElement("div", {
     className: `editor-container mode-${viewMode}`
   },
@@ -147,7 +175,8 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
   }, React.createElement(LaTeXEditor, {
     value: latexCode,
     onChange: handleCodeChange,
-    isVisible: editorVisible
+    isVisible: editorVisible,
+    theme: theme
   })),
   // Preview pane is always present as well; it will be hidden
   // when not in 'preview' or 'split' modes.
@@ -176,7 +205,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
 /***/ (() => {
 
 // Collaborative features integration for the LaTeX Editor
-// This module handles real-time collaboration via Socket.IO
+// This module handles real-time collaboration via Socket
 
 class Collaborative {
   constructor() {
@@ -644,7 +673,8 @@ const {
 const LaTeXEditor = ({
   value,
   onChange,
-  isVisible = true
+  isVisible = true,
+  theme = "light"
 }) => {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
@@ -664,8 +694,10 @@ const LaTeXEditor = ({
             id: "latex"
           });
 
-          // Define custom theme
-          monaco.editor.defineTheme("underbranch-theme", {
+          // Define light and dark themes so the editor responds to
+          // the app-level theme toggle. We keep token rules similar
+          // but swap base and color tokens for readability on dark.
+          monaco.editor.defineTheme("underbranch-light", {
             base: "vs",
             inherit: true,
             rules: [{
@@ -689,6 +721,33 @@ const LaTeXEditor = ({
               "editorCursor.foreground": "#B5632D",
               "editor.selectionBackground": "#E8D3C7",
               "editorLineNumber.foreground": "#999999"
+            }
+          });
+          monaco.editor.defineTheme("underbranch-dark", {
+            base: "vs-dark",
+            inherit: true,
+            rules: [{
+              token: "keyword",
+              foreground: "DCA06B"
+            }, {
+              token: "string",
+              foreground: "78C179"
+            }, {
+              token: "comment",
+              foreground: "94A3B8",
+              fontStyle: "italic"
+            }, {
+              token: "bracket",
+              foreground: "9AA6B2"
+            }],
+            colors: {
+              // Dark background aligned with page dark vars
+              "editor.background": "#071122",
+              "editor.foreground": "#E6EEF8",
+              "editor.lineHighlightBackground": "#0b2230",
+              "editorCursor.foreground": "#B5632D",
+              "editor.selectionBackground": "#163246",
+              "editorLineNumber.foreground": "#6B7280"
             }
           });
 
@@ -898,7 +957,7 @@ const LaTeXEditor = ({
           monacoRef.current = monaco.editor.create(editorRef.current, {
             value: value,
             language: "latex",
-            theme: "underbranch-theme",
+            theme: theme === "dark" ? "underbranch-dark" : "underbranch-light",
             fontSize: 15,
             lineNumbers: "on",
             roundedSelection: true,
@@ -951,6 +1010,17 @@ const LaTeXEditor = ({
       }
     };
   }, []);
+
+  // If the app-level theme changes, update the Monaco theme in-place.
+  useEffect(() => {
+    try {
+      if (monacoRef.current && window.monaco && window.monaco.editor) {
+        window.monaco.editor.setTheme(theme === "dark" ? "underbranch-dark" : "underbranch-light");
+      }
+    } catch (e) {
+      // Ignore: monaco may not be available during SSR or early loads
+    }
+  }, [theme]);
 
   // Update editor value when prop changes
   useEffect(() => {
@@ -1151,7 +1221,10 @@ const Toolbar = ({
   viewMode,
   onViewModeChange,
   latexCode,
-  onCompile
+  onCompile,
+  pdfUrl,
+  theme,
+  onToggleTheme
 }) => {
   const handleDownload = () => {
     const blob = new Blob([latexCode], {
@@ -1165,6 +1238,19 @@ const Toolbar = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+  // handler for downloading the pdf
+  const handleDownloadPDF = () => {
+    if (!pdfUrl) {
+      alert("No compiled PDF available. Please compile first.");
+      return;
+    }
+    const a = document.createElement("a");
+    a.href = pdfUrl;
+    a.download = "document.pdf";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
   const handleClear = () => {
     if (confirm("Are you sure you want to clear the editor?")) {
@@ -1203,8 +1289,18 @@ const Toolbar = ({
     onClick: onCompile
   }, "Compile to PDF"), React.createElement("button", {
     className: "btn btn-secondary",
+    onClick: handleDownloadPDF,
+    // button will start disabled since you don't
+    // want to download a pdf that doesn't exist
+    disabled: !pdfUrl
+  }, "Download PDF"), React.createElement("button", {
+    className: "btn btn-secondary",
     onClick: handleClear
-  }, "Clear")));
+  }, "Clear"), React.createElement("button", {
+    className: `btn ${theme === "dark" ? "btn-primary" : "btn-secondary"}`,
+    onClick: onToggleTheme,
+    title: "Toggle light/dark theme"
+  }, theme === "dark" ? "Light" : "Dark")));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Toolbar);
 
