@@ -102,7 +102,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
         // Also update the document title so the current mode is visible
         // in the browser tab (easy to spot without opening devtools).
         try {
-            document.title = "bruh whats happenign";
+            document.title = "LaTeX Editor";
         } catch (e) {
             // ignore (server side or non-browser env)
         }
