@@ -1,4 +1,4 @@
-# Spring 2 Review
+# Sprint 2 Review
 
 This sprint went moderately well. Most of the work I got done was during through a few massive pushes; although this worked for the past sprint, I didn't enjoy this, and would much prefer an iterative approach.
 
