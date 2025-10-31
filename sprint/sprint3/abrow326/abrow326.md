@@ -19,7 +19,7 @@ Aaron Brown, A-aronCBrown, Overleaf Clone / Underbranch
 - [issue #41](https://github.com/RobbyLawrence/Underbranch/issues/41)
 - [issue #42](https://github.com/RobbyLawrence/Underbranch/issues/42)
 
-Files you worked on
+## Files you worked on
 - Underbranch/editor/dev-server.js
 - Underbranch/editor/src/collaborative.js
 - *** minor changes to other files interacting with the main two ***
