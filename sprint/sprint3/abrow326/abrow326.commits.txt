@@ -1,0 +1,531 @@
+collaborative.js
+
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  20)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  22)         console.log('⏳ Waiting for Socket.IO...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  24)         console.log('✅ Socket.IO ready');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  25)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  27)         console.log('🔌 Initializing socket connection...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  29)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  31)         console.log('👤 Getting user info...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  33)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  35)         console.log('📝 Waiting for Monaco editor...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  37)         console.log('✅ Monaco editor found!');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  38)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  40)         console.log('🎯 Setting up collaboration...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  42)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  43)         console.log('🤝 Collaborative features initialized!');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  61)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  62)         this.socket.on('connect', () => {  
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  63)             console.log('🔌 Connected to collaboration server');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  66)         this.socket.on('disconnect', () => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  67)             console.log('🔌 Disconnected from collaboration server');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  70)         this.socket.on('document-update', (data) => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  71)             console.log('📝 Received document update from', data.userId);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  75)         this.socket.on('users-update', (users) => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  76)             console.log('👥 Users list updated:', users.length, 'users');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  81)         this.socket.on('cursor-update', (data) => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  85)         this.socket.on('room-joined', (data) => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  86)             console.log('🏠 Successfully joined room:', data.roomId);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  91)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  93)             this.showMessage(`✅ Joined room: ${data.roomId}${data.isPasswordProtected ? ' (password protected)' : ''}`, 'success');       
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  96)         this.socket.on('room-join-error', (data) => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  97)             console.error('❌ Failed to join room:', data.message);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  98)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400  99)             if (data.error === 'invalid-password') {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 102)             } else if (data.error === 'room-not-found') {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 103)                 const createRoom = confirm(`❌ Room does not exist.\n\nWould you like to create it?`);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 105)                     const password = prompt(`Set a password for the new room (or leave empty for no password):`);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 110)             } else if (data.error === 'room-already-exists') {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 116)         this.socket.on('room-check-result', (data) => {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 120)                     const password = prompt(`Room "${data.roomId}" exists and is password protected.\nEnter password:`);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 128)                 const createRoom = confirm(`Room "${data.roomId}" doesn't exist.\nWould you like to create it?`);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 130)                     const password = prompt(`Set a password for the new room "${data.roomId}" (or leave empty for no password):`);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 141)         let userName = localStorage.getItem('collaborativeUserName');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 142)         let userColor = localStorage.getItem('collaborativeUserColor');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 145)             userName = prompt('Enter your name for collaborative editing:') || `User ${Date.now()}`;
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 146)             localStorage.setItem('collaborativeUserName', userName);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 151)             localStorage.setItem('collaborativeUserColor', userColor);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 156)             color: userColor
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 164)         const roomId = prompt('Enter room name to join (or leave empty for "general"):') || 'general';
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 165)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 166)         if (roomId === 'general') {        
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 171)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 177)         console.log(`🔍 Checking if room "${roomId}" exists...`);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 178)         this.socket.emit('check-room', { roomId });
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 183)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 184)         this.socket.emit('join-room', {    
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 188)             createRoom: createRoom
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 195)                 console.log('🔍 Looking for Monaco editor...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 196)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 198)                 const editorElement = document.getElementById('monaco-editor');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 199)                 console.log('📍 Editor element found:', !!editorElement);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 200)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 202)                     console.log('✅ Monaco global available');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 203)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 206)                         console.log('✅ Found editor on element._monacoEditor');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 211)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 215)                         console.log('✅ Found editor via monaco.editor.getEditors():', editors.length);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 221)                     console.log('❌ Monaco global not available yet');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 223)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 224)                 console.log('⏳ Editor not ready yet, retrying...');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 233)             console.error('❌ Monaco editor not found');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 241)                 console.log('📝 Local change detected, broadcasting...', content.length, 'characters');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 242)                 this.socket.emit('document-change', {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 244)                     changes: e.changes     
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 247)                 console.log('🔄 Skipping broadcast - change from remote');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 253)             this.socket.emit('cursor-update', {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 255)                 column: e.position.column  
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 259)         console.log('🎯 Editor event listeners setup complete');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 264)             console.log('🔄 Updating editor content from remote...', content.length, 'characters');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 272)             console.log('✅ Editor content updated successfully');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 274)             console.log('⏭️ Content alreadyy up to date, skipping update');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 279)         console.log('📥 Received remote update from', data.userId);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 287)         const oldDecorations = this.decorations.filter(d => d.userId === data.userId);  
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 289)             this.editor.deltaDecorations(oldDecorations.map(d => d.id), []);      
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 295)                 data.cursor.lineNumber,    
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 296)                 data.cursor.column, 
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 297)                 data.cursor.lineNumber,    
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 298)                 data.cursor.column + 1     
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 301)                 className: 'collaborative-cursor',
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 302)                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 306)                     inlineClassName: 'collaborative-cursor-label',
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 307)                     color: data.user.color 
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 308)                 }
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 309)             }
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 313)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 315)         this.decorations = this.decorations.filter(d => d.userId !== data.userId);
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 318)             id: decorationIds[0]    
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 329)         const existingList = document.getElementById('collaborative-users');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 335)         const usersList = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 336)         usersList.id = 'collaborative-users';
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 351)         const roomInfo = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 359)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 360)         const roomTitle = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 361)         roomTitle.textContent = `Room: ${this.currentRoom || 'Not connected'}`;
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 368)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 369)         const switchButton = document.createElement('button');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 370)         switchButton.textContent = 'Switch Room';
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 381)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 387)         const title = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 398)         this.users.forEach(user => {       
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 399)             const userElement = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 407)             const colorDot = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 416)             const nameElement = document.createElement('span');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 418)             nameElement.style.color = '#555';
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 430)             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 431)             '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43'
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 436)     showMessage(message, type = 'info') {  
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 438)         const messageDiv = document.createElement('div');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 451)             background-color: ${type === 'success' ? '#10AC84' : type === 'error' ? '#EE5A24' : '#4834D4'};
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 453)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 455)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 466) const style = document.createElement('style');
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 472)
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 487) if (document.readyState === 'loading') {
+4d4aa368 (Aaron Brown 2025-10-28 18:48:10 -0400 488)     document.addEventListener('DOMContentLoaded', () => {
+
+dev-server.js
+
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   1) #!/usr/bin/env node
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   2) /**
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   3)  * Collaborative LaTeX Editor Server
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   4)  * 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   5)  * Features:
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   6)  * - Real-time collaborative editing with WebSocket support
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   7)  * - Password-protected rooms
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   8)  * - User presence and cursor tracking
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400   9)  * - Automatic room management
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  10)  * 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  11)  * Usage: node dev-server.js
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  12)  * Then open: http://localhost:8080/
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  13)  */
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  14)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  15) const http = require('http');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  16) const fs = require('fs');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  17) const path = require('path');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  18) const { Server } = require('socket.io');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  19) 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  20) const PORT = process.env.PORT || 8080;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  21) const ROOT = path.join(__dirname, '..'); // serve files relative to repo root (go up one directory)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  22)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  23) const mime = {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  24)   '.html': 'text/html',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  25)   '.js': 'application/javascript',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  26)   '.css': 'text/css',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  27)   '.json': 'application/json',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  28)   '.png': 'image/png',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  29)   '.jpg': 'image/jpeg',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  30)   '.svg': 'image/svg+xml',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  31)   '.ico': 'image/x-icon',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  32)   '.wasm': 'application/wasm',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  33)   '.map': 'application/json',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  34)   '.txt': 'text/plain'
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  35) };
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  36) 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  37) function send404(res) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  38)   res.statusCode = 404;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  39)   res.setHeader('Content-Type', 'text/plain; charset=utf-8'); 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  40)   res.end('404 Not Found');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  41) }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  42)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  43) function sendFile(filePath, res) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  44)   fs.readFile(filePath, (err, data) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  45)     if (err) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  46)       send404(res);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  47)       return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  48)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  49)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  50)     const ext = path.extname(filePath).toLowerCase();
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  51)     const type = mime[ext] || 'application/octet-stream';
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  52)     res.statusCode = 200;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  53)     res.setHeader('Content-Type', type + (type.startsWith('text/') ? '; charset=utf-8' : ''));
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  54)     res.end(data);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  55)   });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  56) }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  57)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  58) // === COLLABORATIVE STATE MANAGEMENT ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  59) const rooms = new Map(); // roomId -> { content, users, createdAt, password }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  60) 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  61) // Default LaTeX document template for new rooms
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  62) const defaultContent = `\\documentclass{article}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  63) \\usepackage[utf8]{inputenc}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  64) \\title{My LaTeX Document}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  65) \\author{Author Name}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  66) \\date{\\today}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  67)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  68) \\begin{document}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  69)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  70) \\maketitle
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  71)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  72) \\section{Introduction}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  73) This is a sample LaTeX document. You can edit this text in the editor.
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  74)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  75) \\section{Mathematical Equations}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  76) Here's a mathematical equation:
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  77) \\begin{equation}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  78) E = mc^2
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  79) \\end{equation}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  80)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  81) And an inline equation: $\\alpha + \\beta = \\gamma$
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  82)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  83) \\subsection{More Examples}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  84) \\begin{itemize}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  85) \\item First item
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  86) \\item Second item
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  87) \\item Third item
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  88) \\end{itemize}
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  89)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  90) \\end{document}`;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  91)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  92) // === ROOM MANAGEMENT FUNCTIONS ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  93)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  94) /**
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  95)  * Gets an existing room or creates a new one
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  96)  * @param {string} roomId - The room identifier
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  97)  * @param {string|null} password - Optional password for the room
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  98)  * @returns {Object} Room object
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400  99)  */
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 100) function getOrCreateRoom(roomId, password = null) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 101)   if (!rooms.has(roomId)) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 102)     rooms.set(roomId, {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 103)       content: defaultContent,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 104)       users: new Map(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 105)       createdAt: new Date(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 106)       password: password
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 107)     });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 108)     console.log(`🏠 Created new room: ${roomId}${password ? ' (password protected)' : ' (public)'}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 109)   }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 110)   return rooms.get(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 111) }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 112)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 113) /**
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 114)  * Verifies if provided password matches room password        
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 115)  * @param {string} roomId - The room identifier
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 116)  * @param {string} providedPassword - Password to verify
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 117)  * @returns {boolean} True if password is correct or no password required
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 118)  */
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 119) function verifyRoomPassword(roomId, providedPassword) {       
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 120)   const room = rooms.get(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 121)   if (!room) return false;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 122)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 123)   // No password required for this room
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 124)   if (room.password === null) return true;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 125)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 126)   // Password required and matches
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 127)   return room.password === providedPassword;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 128) }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 129)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 130) /**
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 131)  * Generates random colors for user identification
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 132)  * @returns {string} Hex color code
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 133)  */
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 134) function getRandomColor() {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 135)   const colors = [
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 136)     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',    
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 137)     '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',    
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 138)     '#10AC84', '#EE5A24', '#0080FF', '#01A3A4', '#FEA47F'     
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 139)   ];
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 140)   return colors[Math.floor(Math.random() * colors.length)];   
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 141) }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 142)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 143) const server = http.createServer((req, res) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 144)   try {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 145)     // Decode URL and prevent directory traversal
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 146)     const decoded = decodeURIComponent(req.url.split('?')[0]);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 147)     let safePath = decoded.replace(/^\/+/, ''); // remove leading /
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 148)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 149)     // If accessing root, redirect to the editor
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 150)     if (!safePath || safePath === '') {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 151)       res.statusCode = 302;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 152)       res.setHeader('Location', '/editor/index.html');        
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 153)       res.end();
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 154)       return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 155)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 156)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 157)     // Default to editor if no specific path
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 158)     if (!safePath) safePath = 'editor/index.html';
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 159) 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 160)     const filePath = path.join(ROOT, safePath);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 161)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 162)     // If the path maps to a directory, try to serve index.html inside it
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 163)     if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 164)       const indexPath = path.join(filePath, 'index.html');    
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 165)       if (fs.existsSync(indexPath)) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 166)         sendFile(indexPath, res);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 167)         return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 168)       }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 169)       send404(res);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 170)       return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 171)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 172)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 173)     if (fs.existsSync(filePath)) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 174)       sendFile(filePath, res);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 175)       return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 176)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 177)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 178)     // If not found, fallback to root index for convenience   
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 179)     const fallback = path.join(ROOT, 'editor', 'index.html');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 180)     if (fs.existsSync(fallback)) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 181)       sendFile(fallback, res);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 182)       return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 183)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 184)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 185)     send404(res);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 186)   } catch (err) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 187)     console.error('Server error', err);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 188)     res.statusCode = 500;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 189)     res.end('Internal Server Error');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 190)   }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 191) });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 192)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 193) // === WEBSOCKET SETUP ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 194) const io = new Server(server, {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 195)   cors: {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 196)     origin: "*",
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 197)     methods: ["GET", "POST"]
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 198)   }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 199) });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 200)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 201) // === SOCKET CONNECTION HANDLERS ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 202) io.on('connection', (socket) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 203)   console.log(`🔌 User connected: ${socket.id}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 204)   let currentRoom = null;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 205)   let currentUser = null;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 206)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 207)   // === ROOM JOINING LOGIC ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 208)   socket.on('join-room', (data) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 209)     const { roomId, userData, password, createRoom } = data;  
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 210)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 211)     // Leave current room if any
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 212)     if (currentRoom) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 213)       socket.leave(currentRoom);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 214)       const oldRoom = rooms.get(currentRoom);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 215)       if (oldRoom) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 216)         oldRoom.users.delete(socket.id);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 217)         socket.to(currentRoom).emit('users-update', Array.from(oldRoom.users.values()));
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 218)       }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 219)       console.log(`👋 User left room: ${currentRoom}`);       
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 220)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 221)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 222)     // Special handling for general room - ensure it exists and is password-free
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 223)     if (roomId === 'general' && !rooms.has('general')) {      
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 224)       rooms.set('general', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 225)         content: defaultContent,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 226)         users: new Map(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 227)         createdAt: new Date(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 228)         password: null // General room never has a password   
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 229)       });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 230)       console.log(`🏠 Auto-created general room (password-free)`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 231)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 232)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 233)     // Check if room exists
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 234)     const roomExists = rooms.has(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 235)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 236)     if (roomExists) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 237)       // Room already exists
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 238)       if (createRoom && roomId !== 'general') {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 239)         // User is trying to "create" a room that already exists - deny access
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 240)         // Exception: general room can always be "created" (it's always accessible)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 241)         socket.emit('room-join-error', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 242)           error: 'room-already-exists',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 243)           message: `Room "${roomId}" already exists. Use "Join existing room" option instead.`
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 244)         });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 245)         console.log(`🚫 User ${userData.name} tried to create existing room: ${roomId}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 246)         return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 247)       } else {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 248)         // Room exists - verify password for joining (except general room)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 249)         if (roomId !== 'general' && !verifyRoomPassword(roomId, password)) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 250)           socket.emit('room-join-error', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 251)             error: 'invalid-password',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 252)             message: 'Incorrect password for this room'       
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 253)           });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 254)           console.log(`🚫 User ${userData.name} denied access to room ${roomId} - wrong password`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 255)           return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 256)         }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 257)       }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 258)     } else {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 259)       // Room doesn't exist
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 260)       if (createRoom) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 261)         // Creating new room - set password if provided (but never for general)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 262)         const roomPassword = roomId === 'general' ? null : password;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 263)         getOrCreateRoom(roomId, roomPassword);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 264)         console.log(`🏠 User ${userData.name} created room: ${roomId}${roomPassword ? ' (password protected)' : ' (public)'}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 265)       } else {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 266)         // Room doesn't exist and not creating
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 267)         socket.emit('room-join-error', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 268)           error: 'room-not-found',
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 269)           message: 'Room does not exist'
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 270)         });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 271)         console.log(`🚫 User ${userData.name} tried to join non-existent room: ${roomId}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 272)         return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 273)       }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 274)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 275)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 276)     // Join new room
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 277)     currentRoom = roomId;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 278)     socket.join(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 279)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 280)     const room = getOrCreateRoom(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 281)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 282)     // Create user object
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 283)     currentUser = {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 284)       id: socket.id,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 285)       name: userData.name || `User ${socket.id.slice(0, 6)}`, 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 286)       color: userData.color || getRandomColor(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 287)       cursor: null,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 288)       roomId: roomId
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 289)     };
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 290)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 291)     room.users.set(socket.id, currentUser);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 292)     console.log(`🏠 User ${currentUser.name} joined room: ${roomId} (${socket.id})`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 293)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 294)     // Send current room state to the user
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 295)     socket.emit('room-joined', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 296)       roomId: roomId,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 297)       content: room.content,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 298)       users: Array.from(room.users.values()),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 299)       isPasswordProtected: room.password !== null
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 300)     });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 301)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 302)     // Broadcast updated user list to room
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 303)     socket.to(roomId).emit('users-update', Array.from(room.users.values()));
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 304)   });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 305)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 306)   // === ROOM VERIFICATION ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 307)   socket.on('check-room', (data) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 308)     const { roomId } = data;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 309)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 310)     // Special handling for general room - ensure it exists and is password-free
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 311)     if (roomId === 'general' && !rooms.has('general')) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 312)       rooms.set('general', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 313)         content: defaultContent,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 314)         users: new Map(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 315)         createdAt: new Date(),
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 316)         password: null // General room never has a password   
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 317)       });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 318)       console.log(`🏠 Auto-created general room (password-free)`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 319)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 320)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 321)     const roomExists = rooms.has(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 322)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 323)     let isPasswordProtected = false;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 324)     if (roomExists) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 325)       const room = rooms.get(roomId);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 326)       isPasswordProtected = room.password !== null;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 327)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 328)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 329)     socket.emit('room-check-result', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 330)       roomId: roomId,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 331)       exists: roomExists,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 332)       isPasswordProtected: isPasswordProtected
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 333)     });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 334)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 335)     console.log(`🔍 Room check for "${roomId}": exists=${roomExists}, protected=${isPasswordProtected}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 336)   });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 337)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 338)   // === DOCUMENT COLLABORATION ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 339)   socket.on('document-change', (data) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 340)     if (!currentRoom) return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 341)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 342)     const room = getOrCreateRoom(currentRoom);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 343)     // Update room document state
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 344)     room.content = data.content;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 345)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 346)     // Broadcast change to other clients in the same room     
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 347)     socket.to(currentRoom).emit('document-update', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 348)       content: data.content,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 349)       userId: socket.id,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 350)       timestamp: Date.now()
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 351)     });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 352)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 353)     console.log(`📝 Document updated in room ${currentRoom} by ${currentUser?.name || socket.id}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 354)   });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 355)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 356)   // === CURSOR TRACKING ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 357)   socket.on('cursor-update', (position) => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 358)     if (!currentRoom || !currentUser) return;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 359)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 360)     const room = getOrCreateRoom(currentRoom);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 361)     const user = room.users.get(socket.id);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 362)     if (user) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 363)       user.cursor = position;
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 364)       // Broadcast cursor position to other clients in the same room
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 365)       socket.to(currentRoom).emit('cursor-update', {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 366)         userId: socket.id,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 367)         cursor: position,
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 368)         user: user
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 369)       });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 370)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 371)   });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 372)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 373)   // === DISCONNECT HANDLING ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 374)   socket.on('disconnect', () => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 375)     if (currentRoom && currentUser) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 376)       const room = getOrCreateRoom(currentRoom);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 377)       room.users.delete(socket.id);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 378)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 379)       console.log(`🔌 User ${currentUser.name} disconnected from room ${currentRoom}`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 380)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 381)       // Broadcast updated user list to room
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 382)       socket.to(currentRoom).emit('users-update', Array.from(room.users.values()));
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 383)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 384)       // Clean up empty rooms (optional)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 385)       if (room.users.size === 0) {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 386)         rooms.delete(currentRoom);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 387)         console.log(`🗑️ Deleted empty room: ${currentRoom}`); 
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 388)       }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 389)     }
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 390)   });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 391) });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 392)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 393) // === SERVER STARTUP ===
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 394) server.listen(PORT, () => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 395)   console.log(`🚀 Collaborative LaTeX Editor Server running at http://localhost:${PORT}/`);
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 396)   console.log('📝 Open /editor/index.html to start collaborating!');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 397)   console.log('🔌 WebSocket support enabled for real-time collaboration');
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 398) });
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 399)
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 400) process.on('SIGINT', () => {
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 401)   console.log('🛑 Shutting down collaborative server');       
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 402)   server.close(() => process.exit(0));
+6669d71c (Aaron Brown 2025-10-28 18:39:43 -0400 403) });
