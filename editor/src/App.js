@@ -95,7 +95,19 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
             alert("Network or server error: " + err.message);
         }
     };
-
+//add ctrl+s and command+s to compile
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                handleCompile();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [latexCode]);
     // Debug: log viewMode transitions so we can trace state changes while
     // reproducing the issue in the browser console.
     useEffect(() => {

@@ -1,6 +1,6 @@
 Underbranch/editor/src/Collaborative.js
 
-12b1526b (pau1davis      2025-10-28 16:00:33 -0400   1) // Collaborative features integration for the LaTeX Editor
+12b1526b (pau1davis      2025-10-28 16:00:33 -0400   1) // Collaborative features integration for the LaTeX Editord
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   3) 
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   4) class Collaborative {
 12b1526b (pau1davis      2025-10-28 16:00:33 -0400   5)     constructor() {
