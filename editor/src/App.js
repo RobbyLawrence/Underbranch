@@ -47,21 +47,22 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
     // - 'split'   -> both are shown side-by-side
     const [viewMode, setViewMode] = useState("split"); // 'editor', 'preview', 'split'
     const [pdfUrl, setPdfUrl] = useState(null);
-    
+
     // Theme state: 'light' or 'dark'. Persist to localStorage and prefer
     // the user's system preference when no saved preference exists.
     const [theme, setTheme] = useState(() => {
         try {
             const saved = localStorage.getItem("ub_theme");
             if (saved) return saved;
-            const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const prefersDark =
+                window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches;
             return prefersDark ? "dark" : "light";
         } catch (e) {
             return "light";
         }
     });
-    
-    
+
     // handleCodeChange is passed to the editor component. It receives the
     // new text value and updates the latexCode state. We guard against
     // undefined/null by falling back to an empty string.
@@ -79,7 +80,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
 
             if (!res.ok) {
                 const errText = await res.text();
-                alert("Compilation error: server is likely down");
+                alert(`Compilation error: ${errText}`);
                 return;
             }
 
@@ -115,7 +116,6 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
         }
     }, [viewMode]);
 
-    
     // Apply theme to document root and persist choice
     useEffect(() => {
         try {
@@ -125,7 +125,6 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
             // ignore when not in browser
         }
     }, [theme]);
-
 
     // The UI layout is built with React.createElement calls instead of JSX.
     // To avoid layout glitches when switching modes we render both panes
@@ -161,7 +160,8 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
             // - robby
             pdfUrl: pdfUrl,
             theme: theme,
-            onToggleTheme: () =>setTheme((t) => (t === "light" ? "dark" : "light")),
+            onToggleTheme: () =>
+                setTheme((t) => (t === "light" ? "dark" : "light")),
         }),
 
         React.createElement(
