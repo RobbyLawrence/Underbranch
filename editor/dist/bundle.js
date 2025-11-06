@@ -1292,7 +1292,10 @@ const Toolbar = ({
   }, "Split"), React.createElement("button", {
     className: `btn ${viewMode === "preview" ? "btn-primary" : "btn-secondary"}`,
     onClick: () => handleViewClick("preview")
-  }, "Preview"),
+  }, "Preview"), React.createElement("button", {
+    className: "btn btn-secondary",
+    onClick: handleDownload
+  }, "Download .tex File"),
   // add button for compilation
   React.createElement("button", {
     className: "btn btn-primary",

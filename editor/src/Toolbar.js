@@ -80,6 +80,14 @@ const Toolbar = ({
                 "Preview",
             ),
             
+            React.createElement(
+                "button",
+                {
+                    className: "btn btn-secondary",
+                    onClick: handleDownload,
+                },
+                "Download .tex File",
+            ),
             // add button for compilation
             React.createElement(
                 "button",
