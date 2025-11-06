@@ -157,7 +157,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
               : "hidden";
 
     const editorVisible = viewMode === "split" || viewMode === "editor";
-    const previewVisible = viewMode === "split" || viewMode === "preview";
+  
 
     return React.createElement(
         "div",
