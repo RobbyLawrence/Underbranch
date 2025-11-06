@@ -112,7 +112,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
       alert("Network or server error: " + err.message);
     }
   };
-  //add ctrl+s to compile
+  //add ctrl+s and command+s to compile
   useEffect(() => {
     const handleKeyDown = e => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -163,7 +163,6 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
   const editorClass = viewMode === "split" ? "split" : viewMode === "editor" ? "full" : "hidden";
   const previewClass = viewMode === "split" ? "split" : viewMode === "preview" ? "full" : "hidden";
   const editorVisible = viewMode === "split" || viewMode === "editor";
-  const previewVisible = viewMode === "split" || viewMode === "preview";
   return React.createElement("div", {
     className: "app"
   }, React.createElement(Toolbar, {
@@ -1293,10 +1292,7 @@ const Toolbar = ({
   }, "Split"), React.createElement("button", {
     className: `btn ${viewMode === "preview" ? "btn-primary" : "btn-secondary"}`,
     onClick: () => handleViewClick("preview")
-  }, "Preview"), React.createElement("button", {
-    className: "btn btn-secondary",
-    onClick: handleDownload
-  }, "Download"),
+  }, "Preview"),
   // add button for compilation
   React.createElement("button", {
     className: "btn btn-primary",
