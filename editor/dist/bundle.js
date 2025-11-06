@@ -98,7 +98,7 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
       });
       if (!res.ok) {
         const errText = await res.text();
-        alert("Compilation error: server is likely down");
+        alert(`Compilation error: ${errText}`);
         return;
       }
       const blob = await res.blob();
@@ -112,7 +112,19 @@ And an inline equation: $\\alpha + \\beta = \\gamma$
       alert("Network or server error: " + err.message);
     }
   };
-
+  //add ctrl+s to compile
+  useEffect(() => {
+    const handleKeyDown = e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleCompile();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [latexCode]);
   // Debug: log viewMode transitions so we can trace state changes while
   // reproducing the issue in the browser console.
   useEffect(() => {
@@ -258,7 +270,7 @@ class Collaborative {
     });
   }
   initSocket() {
-    this.socket = io();
+    this.socket = io('https://underbranch.org');
     this.socket.on("connect", () => {
       console.log("Connected to collaboration server");
     });
@@ -411,7 +423,7 @@ class Collaborative {
   }
   setupCollaboration() {
     if (!this.editor) {
-      console.error("Monaco editor not found");
+      console.error("            const socket = io('https://underbranch.org');Monaco editor not found");
       return;
     }
 
@@ -837,14 +849,14 @@ const LaTeXEditor = ({
                 const suggestions = latexCommands.filter(cmd => cmd.command.startsWith(partialCommand)).map(cmd => {
                   // Check if cursor is inside braces and there's a closing brace
                   const hasOpenBrace = textBeforeCursor.match(/\{[^}]*$/);
-                  const hasClosingBrace = hasOpenBrace && textAfterCursor.startsWith('}');
+                  const hasClosingBrace = hasOpenBrace && textAfterCursor.startsWith("}");
 
                   // If we're inside braces with a closing brace, don't include it in insertText
                   let insertText = cmd.insertText;
                   let endColumn = position.column;
-                  if (hasClosingBrace && insertText.includes('{')) {
+                  if (hasClosingBrace && insertText.includes("{")) {
                     // Remove the closing brace from commands like "textbf{$0}"
-                    insertText = insertText.replace(/\{([^}]*)\}/, '{$1');
+                    insertText = insertText.replace(/\{([^}]*)\}/, "{$1");
                     endColumn = position.column + 1; // Include the closing brace in replacement
                   }
                   return {
@@ -873,7 +885,7 @@ const LaTeXEditor = ({
                 const textAfterCursor = lineContent.substring(position.column - 1);
 
                 // Check if there's already a closing brace after the cursor
-                const hasClosingBrace = textAfterCursor.startsWith('}');
+                const hasClosingBrace = textAfterCursor.startsWith("}");
                 const suggestions = latexEnvironments.filter(env => env.startsWith(partialEnv)).map(env => {
                   // If there's already a closing brace, we need to handle it carefully
                   let insertText, endColumn;
@@ -1010,6 +1022,7 @@ const LaTeXEditor = ({
       }
     };
   }, []);
+  //could you add a useEffect that listens for Ctrl+S or Command+S and calls a compileLatex function passed in as a prop?
 
   // If the app-level theme changes, update the Monaco theme in-place.
   useEffect(() => {
@@ -1030,6 +1043,7 @@ const LaTeXEditor = ({
   }, [value]);
 
   // Recalculate layout when editor becomes visible
+
   useEffect(() => {
     if (!monacoRef.current) return;
     if (isVisible) {
