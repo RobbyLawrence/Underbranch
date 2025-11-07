@@ -1,10 +1,20 @@
 Copyright (c) 2025 Underbranch. All rights reserved.
 
-This software and its source code are proprietary and confidential.
-Unauthorized copying, modification, distribution, or use of this
-software, in whole or in part, is strictly prohibited.
+This software and its source code are proprietary to Underbranch and are
+protected by copyright and other intellectual property laws.
 
-For inquiries regarding licensing or permission to use this software,
-please contact:
+No license or rights are granted to any person or entity to use, copy,
+modify, merge, publish, distribute, sublicense, or sell copies of this
+software without prior written permission from Underbranch.
+
+To request permission or inquire about licensing, please contact:
 
     admin@underbranch.org
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
