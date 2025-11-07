@@ -10,6 +10,14 @@ const LaTeXEditor = ({
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
   const layoutTimeout = useRef(null);
+    value,
+    onChange,
+    isVisible = true,
+    theme = "light",
+}) => {
+    const editorRef = useRef(null);
+    const monacoRef = useRef(null);
+    const layoutTimeout = useRef(null);
 
   useEffect(() => {
     // Initialize Monaco Editor
