@@ -2,6 +2,7 @@ const { useEffect, useRef } = React;
 import { latexCommands, latexEnvironments } from "./latexCommands.js";
 
 const LaTeXEditor = ({
+<<<<<<< HEAD
   value,
   onChange,
   isVisible = true,
@@ -10,6 +11,7 @@ const LaTeXEditor = ({
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
   const layoutTimeout = useRef(null);
+=======
     value,
     onChange,
     isVisible = true,
@@ -18,6 +20,7 @@ const LaTeXEditor = ({
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const layoutTimeout = useRef(null);
+>>>>>>> 09e6713 (Major changes to editor. The autocomplete system has moved from manual to using latex-utensils library for parsing and autocomplete and environments to better understand what user is actually typing. Better and more robust autocomplete from manual inplementation into latexCommands.js, and environment logic in latexParser.js. Environments are basically 'classes' so we know what tag belongs with what. autocomplete will also work for custom tags)
 
   useEffect(() => {
     // Initialize Monaco Editor
@@ -98,6 +101,7 @@ const LaTeXEditor = ({
             },
           });
 
+<<<<<<< HEAD
           // LaTeX command definitions
           const latexCommands = [
             {
@@ -188,7 +192,9 @@ const LaTeXEditor = ({
             "center",
             "abstract",
           ];
+=======
                     // LaTeX commands and environments are now imported from latexCommands.js
+>>>>>>> 09e6713 (Major changes to editor. The autocomplete system has moved from manual to using latex-utensils library for parsing and autocomplete and environments to better understand what user is actually typing. Better and more robust autocomplete from manual inplementation into latexCommands.js, and environment logic in latexParser.js. Environments are basically 'classes' so we know what tag belongs with what. autocomplete will also work for custom tags)
 
           // Register completion provider for LaTeX commands
           monaco.languages.registerCompletionItemProvider("latex", {
@@ -200,12 +206,14 @@ const LaTeXEditor = ({
                 position.column - 1
               );
 
+<<<<<<< HEAD
               // Command completions (after \)
               const commandMatch = textBeforeCursor.match(/\\([a-zA-Z]*)$/);
               if (commandMatch) {
                 const partialCommand = commandMatch[1];
                 const textAfterCursor = lineContent.substring(
                   position.column - 1
+=======
                             // Command completions (after \)
                             const commandMatch =
                                 textBeforeCursor.match(/\\([a-zA-Z]*)$/);
@@ -464,6 +472,7 @@ const LaTeXEditor = ({
             if (monacoRef.current && window.monaco && window.monaco.editor) {
                 window.monaco.editor.setTheme(
                     theme === "dark" ? "underbranch-dark" : "underbranch-light",
+>>>>>>> 09e6713 (Major changes to editor. The autocomplete system has moved from manual to using latex-utensils library for parsing and autocomplete and environments to better understand what user is actually typing. Better and more robust autocomplete from manual inplementation into latexCommands.js, and environment logic in latexParser.js. Environments are basically 'classes' so we know what tag belongs with what. autocomplete will also work for custom tags)
                 );
 
                 const suggestions = latexCommands
