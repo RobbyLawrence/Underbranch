@@ -369,13 +369,6 @@ const LaTeXEditor = ({
               onChange(currentValue);
             }
           });
-          // Expose the Monaco editor instance on the DOM node so other
-          // scripts (e.g. Collaborative.waitForEditor) can find it quickly.
-          try {
-            if (editorRef.current) editorRef.current._monacoEditor = monacoRef.current;
-          } catch (e) {
-            // ignore
-          }
         }
       });
     }
