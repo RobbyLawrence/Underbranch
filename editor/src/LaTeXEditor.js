@@ -2,6 +2,16 @@ const { useEffect, useRef } = React;
 import { latexCommands, latexEnvironments } from "./latexCommands.js";
 
 const LaTeXEditor = ({
+<<<<<<< HEAD
+  value,
+  onChange,
+  isVisible = true,
+  theme = "light",
+}) => {
+  const editorRef = useRef(null);
+  const monacoRef = useRef(null);
+  const layoutTimeout = useRef(null);
+=======
     value,
     onChange,
     isVisible = true,
@@ -10,97 +20,202 @@ const LaTeXEditor = ({
     const editorRef = useRef(null);
     const monacoRef = useRef(null);
     const layoutTimeout = useRef(null);
+>>>>>>> 59db947 (resolved merge conflicts for autocomplete)
 
-  useEffect(() => {
-    // Initialize Monaco Editor
-    if (window.require && !monacoRef.current) {
-      window.require.config({
-        paths: { vs: "https://unpkg.com/monaco-editor@0.44.0/min/vs" },
-      });
+    useEffect(() => {
+        // Initialize Monaco Editor
+        if (window.require && !monacoRef.current) {
+            window.require.config({
+                paths: { vs: "https://unpkg.com/monaco-editor@0.44.0/min/vs" },
+            });
 
-      window.require(["vs/editor/editor.main"], () => {
-        if (editorRef.current && !monacoRef.current) {
-          // Configure LaTeX language
-          monaco.languages.register({ id: "latex" });
+            window.require(["vs/editor/editor.main"], () => {
+                if (editorRef.current && !monacoRef.current) {
+                    // Configure LaTeX language
+                    monaco.languages.register({ id: "latex" });
 
-          // Define light and dark themes so the editor responds to
-          // the app-level theme toggle. We keep token rules similar
-          // but swap base and color tokens for readability on dark.
-          monaco.editor.defineTheme("underbranch-light", {
-            base: "vs",
-            inherit: true,
-            rules: [
-              { token: "keyword", foreground: "B5632D" },
-              { token: "string", foreground: "218721" },
-              {
-                token: "comment",
-                foreground: "737373",
-                fontStyle: "italic",
-              },
-              { token: "bracket", foreground: "505050" },
-            ],
-            colors: {
-              "editor.background": "#FFFFFF",
-              "editor.foreground": "#333333",
-              "editor.lineHighlightBackground": "#F5F5F5",
-              "editorCursor.foreground": "#B5632D",
-              "editor.selectionBackground": "#E8D3C7",
-              "editorLineNumber.foreground": "#999999",
+                    // Define light and dark themes so the editor responds to
+                    // the app-level theme toggle. We keep token rules similar
+                    // but swap base and color tokens for readability on dark.
+                    monaco.editor.defineTheme("underbranch-light", {
+                        base: "vs",
+                        inherit: true,
+                        rules: [
+                            { token: "keyword", foreground: "B5632D" },
+                            { token: "string", foreground: "218721" },
+                            {
+                                token: "comment",
+                                foreground: "737373",
+                                fontStyle: "italic",
+                            },
+                            { token: "bracket", foreground: "505050" },
+                        ],
+                        colors: {
+                            "editor.background": "#FFFFFF",
+                            "editor.foreground": "#333333",
+                            "editor.lineHighlightBackground": "#F5F5F5",
+                            "editorCursor.foreground": "#B5632D",
+                            "editor.selectionBackground": "#E8D3C7",
+                            "editorLineNumber.foreground": "#999999",
+                        },
+                    });
+
+                    monaco.editor.defineTheme("underbranch-dark", {
+                        base: "vs-dark",
+                        inherit: true,
+                        rules: [
+                            { token: "keyword", foreground: "DCA06B" },
+                            { token: "string", foreground: "78C179" },
+                            {
+                                token: "comment",
+                                foreground: "94A3B8",
+                                fontStyle: "italic",
+                            },
+                            { token: "bracket", foreground: "9AA6B2" },
+                        ],
+                        colors: {
+                            // Dark background aligned with page dark vars
+                            "editor.background": "#071122",
+                            "editor.foreground": "#E6EEF8",
+                            "editor.lineHighlightBackground": "#0b2230",
+                            "editorCursor.foreground": "#B5632D",
+                            "editor.selectionBackground": "#163246",
+                            "editorLineNumber.foreground": "#6B7280",
+                        },
+                    });
+
+                    // Syntax highlighting
+                    monaco.languages.setMonarchTokensProvider("latex", {
+                        tokenizer: {
+                            root: [
+                                [/\\[a-zA-Z@]+/, "keyword"],
+                                [/\\begin\{[^}]+\}/, "keyword"],
+                                [/\\end\{[^}]+\}/, "keyword"],
+                                [/\$.*?\$/, "string"],
+                                [/\\\(.*?\\\)/, "string"],
+                                [/\\\[.*?\\\]/, "string"],
+                                [/%.*$/, "comment"],
+                                [/\{/, "bracket"],
+                                [/\}/, "bracket"],
+                            ],
+                        },
+                    });
+
+<<<<<<< HEAD
+          // LaTeX command definitions
+          const latexCommands = [
+            {
+              command: "begin",
+              insertText: "begin{$0}",
+              documentation: "Begin environment",
             },
-          });
-
-          monaco.editor.defineTheme("underbranch-dark", {
-            base: "vs-dark",
-            inherit: true,
-            rules: [
-              { token: "keyword", foreground: "DCA06B" },
-              { token: "string", foreground: "78C179" },
-              {
-                token: "comment",
-                foreground: "94A3B8",
-                fontStyle: "italic",
-              },
-              { token: "bracket", foreground: "9AA6B2" },
-            ],
-            colors: {
-              // Dark background aligned with page dark vars
-              "editor.background": "#071122",
-              "editor.foreground": "#E6EEF8",
-              "editor.lineHighlightBackground": "#0b2230",
-              "editorCursor.foreground": "#B5632D",
-              "editor.selectionBackground": "#163246",
-              "editorLineNumber.foreground": "#6B7280",
+            {
+              command: "end",
+              insertText: "end{$0}",
+              documentation: "End environment",
             },
-          });
-
-          // Syntax highlighting
-          monaco.languages.setMonarchTokensProvider("latex", {
-            tokenizer: {
-              root: [
-                [/\\[a-zA-Z@]+/, "keyword"],
-                [/\\begin\{[^}]+\}/, "keyword"],
-                [/\\end\{[^}]+\}/, "keyword"],
-                [/\$.*?\$/, "string"],
-                [/\\\(.*?\\\)/, "string"],
-                [/\\\[.*?\\\]/, "string"],
-                [/%.*$/, "comment"],
-                [/\{/, "bracket"],
-                [/\}/, "bracket"],
-              ],
+            {
+              command: "textbf",
+              insertText: "textbf{$0}",
+              documentation: "Bold text",
             },
-          });
+            {
+              command: "textit",
+              insertText: "textit{$0}",
+              documentation: "Italic text",
+            },
+            {
+              command: "underline",
+              insertText: "underline{$0}",
+              documentation: "Underline text",
+            },
+            {
+              command: "section",
+              insertText: "section{$0}",
+              documentation: "Section",
+            },
+            {
+              command: "subsection",
+              insertText: "subsection{$0}",
+              documentation: "Subsection",
+            },
+            {
+              command: "subsubsection",
+              insertText: "subsubsection{$0}",
+              documentation: "Subsubsection",
+            },
+            {
+              command: "chapter",
+              insertText: "chapter{$0}",
+              documentation: "Chapter",
+            },
+            {
+              command: "title",
+              insertText: "title{$0}",
+              documentation: "Document title",
+            },
+            {
+              command: "author",
+              insertText: "author{$0}",
+              documentation: "Document author",
+            },
+            {
+              command: "date",
+              insertText: "date{$0}",
+              documentation: "Document date",
+            },
+            {
+              command: "emph",
+              insertText: "emph{$0}",
+              documentation: "Emphasize text",
+            },
+            {
+              command: "frac",
+              insertText: "frac{$1}{$2}",
+              documentation: "Fraction",
+            },
+            {
+              command: "sqrt",
+              insertText: "sqrt{$0}",
+              documentation: "Square root",
+            },
+          ];
 
+          const latexEnvironments = [
+            "document",
+            "equation",
+            "align",
+            "itemize",
+            "enumerate",
+            "figure",
+            "table",
+            "center",
+            "abstract",
+          ];
+=======
                     // LaTeX commands and environments are now imported from latexCommands.js
+>>>>>>> 59db947 (resolved merge conflicts for autocomplete)
 
-          // Register completion provider for LaTeX commands
-          monaco.languages.registerCompletionItemProvider("latex", {
-            triggerCharacters: ["\\", "{"],
-            provideCompletionItems: (model, position) => {
-              const lineContent = model.getLineContent(position.lineNumber);
-              const textBeforeCursor = lineContent.substring(
-                0,
-                position.column - 1
-              );
+                    // Register completion provider for LaTeX commands
+                    monaco.languages.registerCompletionItemProvider("latex", {
+                        triggerCharacters: ["\\", "{"],
+                        provideCompletionItems: (model, position) => {
+                            const lineContent = model.getLineContent(
+                                position.lineNumber,
+                            );
+                            const textBeforeCursor = lineContent.substring(
+                                0,
+                                position.column - 1,
+                            );
+
+<<<<<<< HEAD
+              // Command completions (after \)
+              const commandMatch = textBeforeCursor.match(/\\([a-zA-Z]*)$/);
+              if (commandMatch) {
+                const partialCommand = commandMatch[1];
+                const textAfterCursor = lineContent.substring(
+                  position.column - 1
+=======
                             // Command completions (after \)
                             const commandMatch =
                                 textBeforeCursor.match(/\\([a-zA-Z]*)$/);
@@ -354,6 +469,47 @@ const LaTeXEditor = ({
     }, []);
 
     // If the app-level theme changes, update the Monaco theme in-place.
+    useEffect(() => {
+        try {
+            if (monacoRef.current && window.monaco && window.monaco.editor) {
+                window.monaco.editor.setTheme(
+                    theme === "dark" ? "underbranch-dark" : "underbranch-light",
+>>>>>>> 59db947 (resolved merge conflicts for autocomplete)
+                );
+            }
+<<<<<<< HEAD
+          });
+          // Expose the Monaco editor instance on the DOM node so other
+          // scripts (e.g. Collaborative.waitForEditor) can find it quickly.
+          try {
+            if (editorRef.current) editorRef.current._monacoEditor = monacoRef.current;
+          } catch (e) {
+            // ignore
+          }
+        }
+      });
+    }
+
+    // Listen for clear editor event
+    const handleClearEditor = () => {
+      if (monacoRef.current) {
+        monacoRef.current.setValue("");
+      }
+    };
+
+    window.addEventListener("clearEditor", handleClearEditor);
+
+    return () => {
+      window.removeEventListener("clearEditor", handleClearEditor);
+      if (monacoRef.current) {
+        monacoRef.current.dispose();
+        monacoRef.current = null;
+      }
+    };
+  }, []);
+  //could you add a useEffect that listens for Ctrl+S or Command+S and calls a compileLatex function passed in as a prop?
+
+  // If the app-level theme changes, update the Monaco theme in-place.
   useEffect(() => {
     try {
       if (monacoRef.current && window.monaco && window.monaco.editor) {
@@ -383,24 +539,48 @@ const LaTeXEditor = ({
       layoutTimeout.current = setTimeout(() => {
         try {
           monacoRef.current.layout();
+=======
+>>>>>>> 59db947 (resolved merge conflicts for autocomplete)
         } catch (e) {
-          console.warn("monaco.layout failed", e);
+            // Ignore: monaco may not be available during SSR or early loads
         }
-      }, 50);
-    }
+    }, [theme]);
 
-    return () => {
-      if (layoutTimeout.current) {
-        clearTimeout(layoutTimeout.current);
-        layoutTimeout.current = null;
-      }
-    };
-  }, [isVisible]);
+    // Update editor value when prop changes
+    useEffect(() => {
+        if (monacoRef.current && monacoRef.current.getValue() !== value) {
+            monacoRef.current.setValue(value);
+        }
+    }, [value]);
 
-  return React.createElement("div", {
-    ref: editorRef,
-    id: "monaco-editor",
-  });
+    // Recalculate layout when editor becomes visible
+
+    useEffect(() => {
+        if (!monacoRef.current) return;
+
+        if (isVisible) {
+            if (layoutTimeout.current) clearTimeout(layoutTimeout.current);
+            layoutTimeout.current = setTimeout(() => {
+                try {
+                    monacoRef.current.layout();
+                } catch (e) {
+                    console.warn("monaco.layout failed", e);
+                }
+            }, 50);
+        }
+
+        return () => {
+            if (layoutTimeout.current) {
+                clearTimeout(layoutTimeout.current);
+                layoutTimeout.current = null;
+            }
+        };
+    }, [isVisible]);
+
+    return React.createElement("div", {
+        ref: editorRef,
+        id: "monaco-editor",
+    });
 };
 
 export default LaTeXEditor;
