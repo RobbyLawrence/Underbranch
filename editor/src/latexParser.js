@@ -1,22 +1,21 @@
-// Optional: Advanced LaTeX parsing utilities using latex-utensils
-// This can be used for advanced features like:
+// LaTeX parsing utilities using latex-utensils
 // - Extracting custom commands from the document
 // - Validating LaTeX syntax
 // - Finding all \label definitions for autocomplete
 
-import { latexParser } from 'latex-utensils';
+import { latexParser } from "latex-utensils";
 
 /**
- * Parse LaTeX document and return the AST
+ * Parse LaTeX document and return the list of command from latex-utensils
  * @param {string} texString - The LaTeX source code
- * @returns {object|null} - The parsed AST or null if parsing fails
+ * @returns {object|null} - The parsed latex-utensils or null if parsing fails
  */
 export function parseLatex(texString) {
     try {
         const ast = latexParser.parse(texString);
         return ast;
     } catch (error) {
-        console.error('LaTeX parsing error:', error);
+        console.error("LaTeX parsing error:", error);
         return null;
     }
 }
@@ -37,13 +36,13 @@ export function extractLabels(texString) {
         if (!node) return;
 
         // Check if this is a \label command
-        if (node.kind === 'command' && node.name === 'label') {
+        if (node.kind === "command" && node.name === "label") {
             if (node.args && node.args.length > 0) {
                 const labelArg = node.args[0];
                 if (labelArg.content && labelArg.content.length > 0) {
                     const labelText = labelArg.content
-                        .map(c => c.content || c.name || '')
-                        .join('');
+                        .map((c) => c.content || c.name || "")
+                        .join("");
                     if (labelText) {
                         labels.push(labelText);
                     }
@@ -56,7 +55,7 @@ export function extractLabels(texString) {
             node.content.forEach(traverse);
         }
         if (node.args && Array.isArray(node.args)) {
-            node.args.forEach(arg => {
+            node.args.forEach((arg) => {
                 if (arg.content) {
                     arg.content.forEach(traverse);
                 }
@@ -87,17 +86,19 @@ export function extractCustomCommands(texString) {
         if (!node) return;
 
         // Check if this is a \newcommand
-        if (node.kind === 'command' &&
-            (node.name === 'newcommand' || node.name === 'renewcommand')) {
+        if (
+            node.kind === "command" &&
+            (node.name === "newcommand" || node.name === "renewcommand")
+        ) {
             if (node.args && node.args.length >= 2) {
                 const cmdName = node.args[0];
                 const cmdDef = node.args[1];
 
                 // Extract command name
-                let name = '';
+                let name = "";
                 if (cmdName.content && cmdName.content.length > 0) {
                     const firstContent = cmdName.content[0];
-                    if (firstContent.kind === 'command') {
+                    if (firstContent.kind === "command") {
                         name = firstContent.name;
                     }
                 }
@@ -117,7 +118,7 @@ export function extractCustomCommands(texString) {
             node.content.forEach(traverse);
         }
         if (node.args && Array.isArray(node.args)) {
-            node.args.forEach(arg => {
+            node.args.forEach((arg) => {
                 if (arg.content) {
                     arg.content.forEach(traverse);
                 }
