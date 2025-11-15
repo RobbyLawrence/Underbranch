@@ -1,15 +1,14 @@
 const { useEffect, useRef } = React;
-import { latexCommands, latexEnvironments } from "./latexCommands.js";
 
 const LaTeXEditor = ({
-    value,
-    onChange,
-    isVisible = true,
-    theme = "light",
+  value,
+  onChange,
+  isVisible = true,
+  theme = "light",
 }) => {
-    const editorRef = useRef(null);
-    const monacoRef = useRef(null);
-    const layoutTimeout = useRef(null);
+  const editorRef = useRef(null);
+  const monacoRef = useRef(null);
+  const layoutTimeout = useRef(null);
 
   useEffect(() => {
     // Initialize Monaco Editor
@@ -90,7 +89,96 @@ const LaTeXEditor = ({
             },
           });
 
-                    // LaTeX commands and environments are now imported from latexCommands.js
+          // LaTeX command definitions
+          const latexCommands = [
+            {
+              command: "begin",
+              insertText: "begin{$0}",
+              documentation: "Begin environment",
+            },
+            {
+              command: "end",
+              insertText: "end{$0}",
+              documentation: "End environment",
+            },
+            {
+              command: "textbf",
+              insertText: "textbf{$0}",
+              documentation: "Bold text",
+            },
+            {
+              command: "textit",
+              insertText: "textit{$0}",
+              documentation: "Italic text",
+            },
+            {
+              command: "underline",
+              insertText: "underline{$0}",
+              documentation: "Underline text",
+            },
+            {
+              command: "section",
+              insertText: "section{$0}",
+              documentation: "Section",
+            },
+            {
+              command: "subsection",
+              insertText: "subsection{$0}",
+              documentation: "Subsection",
+            },
+            {
+              command: "subsubsection",
+              insertText: "subsubsection{$0}",
+              documentation: "Subsubsection",
+            },
+            {
+              command: "chapter",
+              insertText: "chapter{$0}",
+              documentation: "Chapter",
+            },
+            {
+              command: "title",
+              insertText: "title{$0}",
+              documentation: "Document title",
+            },
+            {
+              command: "author",
+              insertText: "author{$0}",
+              documentation: "Document author",
+            },
+            {
+              command: "date",
+              insertText: "date{$0}",
+              documentation: "Document date",
+            },
+            {
+              command: "emph",
+              insertText: "emph{$0}",
+              documentation: "Emphasize text",
+            },
+            {
+              command: "frac",
+              insertText: "frac{$1}{$2}",
+              documentation: "Fraction",
+            },
+            {
+              command: "sqrt",
+              insertText: "sqrt{$0}",
+              documentation: "Square root",
+            },
+          ];
+
+          const latexEnvironments = [
+            "document",
+            "equation",
+            "align",
+            "itemize",
+            "enumerate",
+            "figure",
+            "table",
+            "center",
+            "abstract",
+          ];
 
           // Register completion provider for LaTeX commands
           monaco.languages.registerCompletionItemProvider("latex", {
@@ -101,259 +189,209 @@ const LaTeXEditor = ({
                 0,
                 position.column - 1
               );
-                            // Command completions (after \)
-                            const commandMatch =
-                                textBeforeCursor.match(/\\([a-zA-Z]*)$/);
-                            if (commandMatch) {
-                                const partialCommand = commandMatch[1];
-                                const textAfterCursor = lineContent.substring(
-                                    position.column - 1,
-                                );
 
-                                const suggestions = latexCommands
-                                    .filter((cmd) =>
-                                        cmd.command.startsWith(partialCommand),
-                                    )
-                                    .map((cmd) => {
-                                        // Check if cursor is inside braces and there's a closing brace
-                                        const hasOpenBrace =
-                                            textBeforeCursor.match(/\{[^}]*$/);
-                                        const hasClosingBrace =
-                                            hasOpenBrace &&
-                                            textAfterCursor.startsWith("}");
+              // Command completions (after \)
+              const commandMatch = textBeforeCursor.match(/\\([a-zA-Z]*)$/);
+              if (commandMatch) {
+                const partialCommand = commandMatch[1];
+                const textAfterCursor = lineContent.substring(
+                  position.column - 1
+                );
 
-                                        // If we're inside braces with a closing brace, don't include it in insertText
-                                        let insertText = cmd.insertText;
-                                        let endColumn = position.column;
+                const suggestions = latexCommands
+                  .filter((cmd) => cmd.command.startsWith(partialCommand))
+                  .map((cmd) => {
+                    // Check if cursor is inside braces and there's a closing brace
+                    const hasOpenBrace = textBeforeCursor.match(/\{[^}]*$/);
+                    const hasClosingBrace =
+                      hasOpenBrace && textAfterCursor.startsWith("}");
 
-                                        if (
-                                            hasClosingBrace &&
-                                            insertText.includes("{")
-                                        ) {
-                                            // Remove the closing brace from commands like "textbf{$0}"
-                                            insertText = insertText.replace(
-                                                /\{([^}]*)\}/,
-                                                "{$1",
-                                            );
-                                            endColumn = position.column + 1; // Include the closing brace in replacement
-                                        }
+                    // If we're inside braces with a closing brace, don't include it in insertText
+                    let insertText = cmd.insertText;
+                    let endColumn = position.column;
 
-                                        return {
-                                            label: cmd.command,
-                                            kind: monaco.languages
-                                                .CompletionItemKind.Function,
-                                            insertText: insertText,
-                                            insertTextRules:
-                                                monaco.languages
-                                                    .CompletionItemInsertTextRule
-                                                    .InsertAsSnippet,
-                                            documentation: cmd.documentation,
-                                            range: {
-                                                startLineNumber:
-                                                    position.lineNumber,
-                                                startColumn:
-                                                    position.column -
-                                                    partialCommand.length,
-                                                endLineNumber:
-                                                    position.lineNumber,
-                                                endColumn: endColumn,
-                                            },
-                                        };
-                                    });
-                                return { suggestions };
-                            }
+                    if (hasClosingBrace && insertText.includes("{")) {
+                      // Remove the closing brace from commands like "textbf{$0}"
+                      insertText = insertText.replace(/\{([^}]*)\}/, "{$1");
+                      endColumn = position.column + 1; // Include the closing brace in replacement
+                    }
 
-                            // Environment completions (after \begin{)
-                            const beginMatch =
-                                textBeforeCursor.match(/\\begin\{([^}]*)$/);
-                            if (beginMatch) {
-                                const partialEnv = beginMatch[1];
-                                const textAfterCursor = lineContent.substring(
-                                    position.column - 1,
-                                );
+                    return {
+                      label: cmd.command,
+                      kind: monaco.languages.CompletionItemKind.Function,
+                      insertText: insertText,
+                      insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule
+                          .InsertAsSnippet,
+                      documentation: cmd.documentation,
+                      range: {
+                        startLineNumber: position.lineNumber,
+                        startColumn: position.column - partialCommand.length,
+                        endLineNumber: position.lineNumber,
+                        endColumn: endColumn,
+                      },
+                    };
+                  });
+                return { suggestions };
+              }
 
-                                // Check if there's already a closing brace after the cursor
-                                const hasClosingBrace =
-                                    textAfterCursor.startsWith("}");
+              // Environment completions (after \begin{)
+              const beginMatch = textBeforeCursor.match(/\\begin\{([^}]*)$/);
+              if (beginMatch) {
+                const partialEnv = beginMatch[1];
+                const textAfterCursor = lineContent.substring(
+                  position.column - 1
+                );
 
-                                const suggestions = latexEnvironments
-                                    .filter((env) => env.startsWith(partialEnv))
-                                    .map((env) => {
-                                        // If there's already a closing brace, we need to handle it carefully
-                                        let insertText, endColumn;
-                                        if (hasClosingBrace) {
-                                            // Include the environment content but skip past the existing closing brace
-                                            insertText = `${env}}\n\t$0\n\\end{${env}}`;
-                                            endColumn = position.column + 1; // Replace up to and including the }
-                                        } else {
-                                            // No closing brace, add everything including the brace
-                                            insertText = `${env}}\n\t$0\n\\end{${env}}`;
-                                            endColumn = position.column;
-                                        }
+                // Check if there's already a closing brace after the cursor
+                const hasClosingBrace = textAfterCursor.startsWith("}");
 
-                                        return {
-                                            label: env,
-                                            kind: monaco.languages
-                                                .CompletionItemKind.Keyword,
-                                            insertText: insertText,
-                                            insertTextRules:
-                                                monaco.languages
-                                                    .CompletionItemInsertTextRule
-                                                    .InsertAsSnippet,
-                                            documentation: `Insert ${env} environment`,
-                                            range: {
-                                                startLineNumber:
-                                                    position.lineNumber,
-                                                startColumn:
-                                                    position.column -
-                                                    partialEnv.length,
-                                                endLineNumber:
-                                                    position.lineNumber,
-                                                endColumn: endColumn,
-                                            },
-                                        };
-                                    });
-                                return { suggestions };
-                            }
+                const suggestions = latexEnvironments
+                  .filter((env) => env.startsWith(partialEnv))
+                  .map((env) => {
+                    // If there's already a closing brace, we need to handle it carefully
+                    let insertText, endColumn;
+                    if (hasClosingBrace) {
+                      // Include the environment content but skip past the existing closing brace
+                      insertText = `${env}}\n\t$0\n\\end{${env}}`;
+                      endColumn = position.column + 1; // Replace up to and including the }
+                    } else {
+                      // No closing brace, add everything including the brace
+                      insertText = `${env}}\n\t$0\n\\end{${env}}`;
+                      endColumn = position.column;
+                    }
 
-                            return { suggestions: [] };
-                        },
-                    });
+                    return {
+                      label: env,
+                      kind: monaco.languages.CompletionItemKind.Keyword,
+                      insertText: insertText,
+                      insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule
+                          .InsertAsSnippet,
+                      documentation: `Insert ${env} environment`,
+                      range: {
+                        startLineNumber: position.lineNumber,
+                        startColumn: position.column - partialEnv.length,
+                        endLineNumber: position.lineNumber,
+                        endColumn: endColumn,
+                      },
+                    };
+                  });
+                return { suggestions };
+              }
 
-                    // Auto-close \begin{} with \end{} (with local scope checking)
-                    monaco.languages.registerCompletionItemProvider("latex", {
-                        triggerCharacters: ["}"],
-                        provideCompletionItems: (model, position) => {
-                            const lineContent = model.getLineContent(
-                                position.lineNumber,
-                            );
-                            const textBeforeCursor = lineContent.substring(
-                                0,
-                                position.column - 1,
-                            );
+              return { suggestions: [] };
+            },
+          });
 
-                            const beginMatch =
-                                textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
+          // Auto-close \begin{} with \end{}
+          monaco.languages.registerCompletionItemProvider("latex", {
+            triggerCharacters: ["}"],
+            provideCompletionItems: (model, position) => {
+              const lineContent = model.getLineContent(position.lineNumber);
+              const textBeforeCursor = lineContent.substring(
+                0,
+                position.column - 1
+              );
+              const textAfterCursor = lineContent.substring(
+                position.column - 1
+              );
+              const beginMatch = textBeforeCursor.match(/\\begin\{([^}]+)\}$/);
 
-                            if (!beginMatch) {
-                                return { suggestions: [] };
-                            }
+              // Only suggest auto-close if there's not already an \end{} on the same line
+              // or if we haven't already inserted the environment completion
+              if (beginMatch && !textAfterCursor.match(/^\s*\n\s*\\end\{/)) {
+                const environmentName = beginMatch[1];
 
-                            const environmentName = beginMatch[1];
-
-                            // Skip known environments
-                            if (latexEnvironments.includes(environmentName)) {
-                                return { suggestions: [] };
-                            }
-
-                            // Check next 50 lines for matching \end{}
-                            const totalLines = model.getLineCount();
-                            const searchLimit = Math.min(
-                                position.lineNumber + 50,
-                                totalLines,
-                            );
-                            const endPattern = `\\end{${environmentName}}`;
-
-                            for (
-                                let i = position.lineNumber;
-                                i <= searchLimit;
-                                i++
-                            ) {
-                                const line = model.getLineContent(i);
-                                if (line.includes(endPattern)) {
-                                    return { suggestions: [] }; // Found matching \end{}, don't suggest
-                                }
-                            }
-
-                            return {
-                                suggestions: [
-                                    {
-                                        label: `Auto-close \\end{${environmentName}}`,
-                                        kind: monaco.languages
-                                            .CompletionItemKind.Snippet,
-                                        insertText: `\n\t$0\n\\end{${environmentName}}`,
-                                        insertTextRules:
-                                            monaco.languages
-                                                .CompletionItemInsertTextRule
-                                                .InsertAsSnippet,
-                                        documentation: `Automatically close the ${environmentName} environment`,
-                                        range: {
-                                            startLineNumber:
-                                                position.lineNumber,
-                                            startColumn: position.column,
-                                            endLineNumber: position.lineNumber,
-                                            endColumn: position.column,
-                                        },
-                                        sortText: "zzz_autoclose",
-                                    },
-                                ],
-                            };
-                        },
-                    });
-
-                    // Create the editor
-                    monacoRef.current = monaco.editor.create(
-                        editorRef.current,
-                        {
-                            value: value,
-                            language: "latex",
-                            theme:
-                                theme === "dark"
-                                    ? "underbranch-dark"
-                                    : "underbranch-light",
-                            fontSize: 15,
-                            lineNumbers: "on",
-                            roundedSelection: true,
-                            scrollBeyondLastLine: false,
-                            automaticLayout: true,
-                            minimap: { enabled: false },
-                            wordWrap: "on",
-                            lineHeight: 24,
-                            padding: { top: 16, bottom: 16 },
-                            renderLineHighlight: "all",
-                            cursorBlinking: "smooth",
-                            cursorWidth: 2,
-                            fontFamily:
-                                "'Fira Code', 'SF Mono', Consolas, 'Courier New', monospace",
-                            fontLigatures: true,
-                            smoothScrolling: true,
-                            guides: {
-                                indentation: true,
-                                bracketPairs: true,
-                            },
-                        },
-                    );
-
-                    // Listen for content changes
-                    monacoRef.current.onDidChangeModelContent(() => {
-                        const currentValue = monacoRef.current.getValue();
-                        if (onChange) {
-                            onChange(currentValue);
-                        }
-                    });
+                // Check if this is one of our predefined environments
+                // If so, don't auto-close as it was already handled by the environment completion
+                if (latexEnvironments.includes(environmentName)) {
+                  return { suggestions: [] };
                 }
-            });
+
+                return {
+                  suggestions: [
+                    {
+                      label: `Auto-close \\end{${environmentName}}`,
+                      kind: monaco.languages.CompletionItemKind.Snippet,
+                      insertText: `\n\t$0\n\\end{${environmentName}}`,
+                      insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule
+                          .InsertAsSnippet,
+                      documentation: `Auto-close with \\end{${environmentName}}`,
+                      range: {
+                        startLineNumber: position.lineNumber,
+                        startColumn: position.column,
+                        endLineNumber: position.lineNumber,
+                        endColumn: position.column,
+                      },
+                    },
+                  ],
+                };
+              }
+
+              return { suggestions: [] };
+            },
+          });
+
+          // Create the editor
+          monacoRef.current = monaco.editor.create(editorRef.current, {
+            value: value,
+            language: "latex",
+            theme: theme === "dark" ? "underbranch-dark" : "underbranch-light",
+            fontSize: 15,
+            lineNumbers: "on",
+            roundedSelection: true,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            minimap: { enabled: false },
+            wordWrap: "on",
+            lineHeight: 24,
+            padding: { top: 16, bottom: 16 },
+            renderLineHighlight: "all",
+            cursorBlinking: "smooth",
+            cursorWidth: 2,
+            fontFamily:
+              "'Fira Code', 'SF Mono', Consolas, 'Courier New', monospace",
+            fontLigatures: true,
+            smoothScrolling: true,
+            guides: {
+              indentation: true,
+              bracketPairs: true,
+            },
+          });
+
+          // Listen for content changes
+          monacoRef.current.onDidChangeModelContent(() => {
+            const currentValue = monacoRef.current.getValue();
+            if (onChange) {
+              onChange(currentValue);
+            }
+          });
         }
+      });
+    }
 
-        // Listen for clear editor event
-        const handleClearEditor = () => {
-            if (monacoRef.current) {
-                monacoRef.current.setValue("");
-            }
-        };
+    // Listen for clear editor event
+    const handleClearEditor = () => {
+      if (monacoRef.current) {
+        monacoRef.current.setValue("");
+      }
+    };
 
-        window.addEventListener("clearEditor", handleClearEditor);
+    window.addEventListener("clearEditor", handleClearEditor);
 
-        return () => {
-            window.removeEventListener("clearEditor", handleClearEditor);
-            if (monacoRef.current) {
-                monacoRef.current.dispose();
-                monacoRef.current = null;
-            }
-        };
-    }, []);
+    return () => {
+      window.removeEventListener("clearEditor", handleClearEditor);
+      if (monacoRef.current) {
+        monacoRef.current.dispose();
+        monacoRef.current = null;
+      }
+    };
+  }, []);
+  //could you add a useEffect that listens for Ctrl+S or Command+S and calls a compileLatex function passed in as a prop?
 
-    // If the app-level theme changes, update the Monaco theme in-place.
+  // If the app-level theme changes, update the Monaco theme in-place.
   useEffect(() => {
     try {
       if (monacoRef.current && window.monaco && window.monaco.editor) {
@@ -388,7 +426,7 @@ const LaTeXEditor = ({
         }
       }, 50);
     }
-
+    
     return () => {
       if (layoutTimeout.current) {
         clearTimeout(layoutTimeout.current);
