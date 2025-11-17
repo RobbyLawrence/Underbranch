@@ -38,11 +38,11 @@ Moving to `npm`, you'll need to go into the following directories and run `npm i
 - `Underbranch/signin`
 
 Finally, we have `pm2`. We run several Node servers with `pm2`. Run the following commands from the root of the project directory to finish getting `pm2` up and running:
-- pm2 start compile/server.js --name compile
-- pm2 start signin/server.js --name signin
-- pm2 start editor/server.js --name collab
-- pm2 startup
-- pm2 save
+- `pm2 start compile/server.js --name compile`
+- `pm2 start signin/server.js --name signin`
+- `pm2 start editor/server.js --name collab`
+- `pm2 startup`
+- `pm2 save`
 This initializes all Node servers necessary for the project and ensures that they gracefully restart upon reboot.
 
 ## License Information
