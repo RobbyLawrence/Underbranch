@@ -13,14 +13,14 @@ A free-to-use web-based collaborative LaTeX editor and compiler.
 
 ## How to Run/Description
 
-LaTeX editor is fully online at www.underbranch.org/editor. Users can download either a .tex or .pdf file of the file they have edited in Underbranch. Users can compile their LaTeX document directly in the editor. Underbranch also allows for collaborative editing, meaning that users can join up in a room and write/edit the same document. Of course, users still have access to the download and compile options in a collaborative room.
+LaTeX editor is fully online at www.underbranch.org/editor. Users can download either a `.tex` or `.pdf` file of the file they have edited in Underbranch. Users can compile their LaTeX document directly in the editor. Underbranch also allows for collaborative editing, meaning that users can join up in a room and write/edit the same document. Of course, users still have access to the download and compile options in a collaborative room.
 
 ## Self-Hosting
 Hosting your own instance of Underbranch, while unnecessary, is still technically feasible. The instructions below will walk you through setting up a self-hosted instance of Underbranch.
 
 # Server
 We recommend any computer with at least 16 GB of RAM. This will ensure that the Node servers that `pm2` manages are able to handle requests without issues.You'll also want at least 100 GB of storage so that the compiled documents won't cause out-of-storage issues. While most Linux distros will do fine, we recommend Ubuntu Server. After imaging, run `sudo apt update`. You'll need the following packages from `apt`:
-- nginx (be sure to start and enable the service as well with `sudo systemctl start nginx`, `sudo systemctl enable nginx`)
+- `nginx` (be sure to start and enable the service as well with `sudo systemctl start nginx`, `sudo systemctl enable nginx`)
 - `pm2`
 - `texlive-full`
 - `mysql-server` (make sure you set up a root user with a password; the programs that interact with the database should initialize all tables if they aren't already initialized)
@@ -43,6 +43,7 @@ Finally, we have `pm2`. We run several Node servers with `pm2`. Run the followin
 - `pm2 start editor/server.js --name collab`
 - `pm2 startup`
 - `pm2 save`
+
 This initializes all Node servers necessary for the project and ensures that they gracefully restart upon reboot.
 
 ## License Information
