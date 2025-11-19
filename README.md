@@ -58,4 +58,4 @@ View License here - [Underbranch License](LICENSE.txt)
 - **`nginx-reload.sh`** - Server reload utility script
 
 ## Questions?
-Please reach out with any quesions to admin@underbranch.org.
+Please reach out with any questions to admin@underbranch.org.
