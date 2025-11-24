@@ -280,13 +280,21 @@ class Collaborative {
       console.log("Disconnected from collaboration server");
     });
 
-    // CHANGED: Now handles delta updates
+    // use delta syncing instead of fully updating the document each time
     this.socket.on("document-update", data => {
       console.log("Received document update from", data.userId);
       this.handleRemoteUpdate(data);
     });
     this.socket.on("users-update", users => {
       console.log("Users list updated:", users.length, "users");
+
+      //
+      const leftUserIds = this.users.map(u => u.userId).filter(userId => !users.find(u => u.userId === userId));
+
+      // remove cursors for each person that left
+      leftUserIds.forEach(userId => {
+        this.removeUserCursor(userId);
+      });
       this.users = users;
       this.updateUsersList();
     });
@@ -422,7 +430,7 @@ class Collaborative {
       return;
     }
 
-    // broadcasts changes instead of full content now
+    // use delta syncing instead of broadcasting entire document
     this.editor.onDidChangeModelContent(e => {
       if (!this.isUpdatingFromRemote && e.changes.length > 0) {
         console.log("Local change detected, broadcasting deltas...");
@@ -447,7 +455,7 @@ class Collaborative {
       }
     });
 
-    // listen for cursor position changes
+    // listen for when the cursor changes position
     this.editor.onDidChangeCursorPosition(e => {
       this.socket.emit("cursor-update", {
         lineNumber: e.position.lineNumber,
@@ -457,7 +465,7 @@ class Collaborative {
     console.log("Editor event listeners setup complete");
   }
 
-  // apply the delta changes instead of replacing the entire document
+  // changed so that we use delta syncing instead of full document updates
   handleRemoteUpdate(data) {
     if (!this.editor || !data.changes || data.changes.length === 0) {
       return;
@@ -479,13 +487,12 @@ class Collaborative {
       }));
 
       // apply all edits in a single operation
-      model.pushEditOperations([currentSelection], edits,
-      // if the user has something selected, try to keep it selected
-      () => [currentSelection]);
+      model.pushEditOperations([currentSelection], edits, () => [currentSelection] // try to keep the users' selection
+      );
       console.log("Remote changes applied successfully");
     } catch (error) {
       console.error("Error applying remote changes:", error);
-      // if we can't do delta changes, request full sync
+      // request full sync if we get an error with the delta changes
       this.socket.emit("request-full-sync", {
         roomId: this.currentRoom
       });
@@ -497,10 +504,7 @@ class Collaborative {
     if (!this.editor || !data.lineNumber || !data.column) return;
 
     // Remove old decorations for this user
-    const oldDecorations = this.decorations.filter(d => d.userId === data.userId);
-    if (oldDecorations.length > 0) {
-      this.editor.deltaDecorations(oldDecorations.map(d => d.id), []);
-    }
+    this.removeUserCursor(data.userId);
 
     // Add new cursor decoration
     const decoration = {
@@ -508,25 +512,32 @@ class Collaborative {
       options: {
         className: "collaborative-cursor",
         stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-        beforeContentClassName: "collaborative-cursor-marker",
-        glyphMarginClassName: "collaborative-cursor-glyph",
-        afterContentClassName: "collaborative-cursor-label",
-        after: {
-          content: ` ${data.user.name} `,
+        before: {
+          content: data.user.name,
           inlineClassName: "collaborative-cursor-label",
-          inlineClassNameAffectsLetterSpacing: true
-        }
+          inlineClassNameAffectsLetterSpacing: false
+        },
+        beforeContentClassName: "collaborative-cursor-marker"
       }
     };
     const decorationIds = this.editor.deltaDecorations([], [decoration]);
 
-    // Store decoration info
-    this.decorations = this.decorations.filter(d => d.userId !== data.userId);
+    // store decoration info
     this.decorations.push({
       userId: data.userId,
       id: decorationIds[0],
-      color: data.user.color
+      color: data.user.color,
+      name: data.user.name
     });
+  }
+  removeUserCursor(userId) {
+    if (!this.editor) return;
+    const userDecorations = this.decorations.filter(d => d.userId === userId);
+    if (userDecorations.length > 0) {
+      this.editor.deltaDecorations(userDecorations.map(d => d.id), []);
+      this.decorations = this.decorations.filter(d => d.userId !== userId);
+      console.log(`Removed cursor for user: ${userId}`);
+    }
   }
   updateUsersList() {
     this.createUsersListUI();
@@ -662,12 +673,15 @@ style.textContent = `
     .collaborative-cursor-label {
         background-color: rgba(255, 107, 107, 0.9);
         color: white;
-        padding: 1px 4px;
-        border-radius: 2px;
-        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
         font-weight: bold;
         white-space: nowrap;
-        margin-left: 2px;
+        position: relative;
+        top: -18px;
+        display: inline-block;
+        pointer-events: none;
     }
 `;
 document.head.appendChild(style);
