@@ -11,6 +11,9 @@ class Collaborative {
         this.currentRoom = null;
         this.isUpdatingFromRemote = false;
         this.decorations = [];
+        this.pendingChanges = [];
+        this.localVersion = 0;
+        this.remoteVersion = 0;
 
         this.init();
     }
@@ -57,7 +60,7 @@ class Collaborative {
     }
 
     initSocket() {
-        this.socket = io('https://underbranch.org');
+        this.socket = io("https://underbranch.org");
 
         this.socket.on("connect", () => {
             console.log("Connected to collaboration server");
@@ -67,6 +70,7 @@ class Collaborative {
             console.log("Disconnected from collaboration server");
         });
 
+        // CHANGED: Now handles delta updates
         this.socket.on("document-update", (data) => {
             console.log("Received document update from", data.userId);
             this.handleRemoteUpdate(data);
@@ -85,7 +89,14 @@ class Collaborative {
         this.socket.on("room-joined", (data) => {
             console.log("Successfully joined room:", data.roomId);
             this.currentRoom = data.roomId;
-            this.updateDocumentContent(data.content);
+
+            // Only do full content update when first joining
+            this.isUpdatingFromRemote = true;
+            if (this.editor) {
+                this.editor.setValue(data.content);
+            }
+            this.isUpdatingFromRemote = false;
+
             this.users = data.users;
             this.updateUsersList();
 
@@ -123,17 +134,14 @@ class Collaborative {
         this.socket.on("room-check-result", (data) => {
             if (data.exists) {
                 if (data.isPasswordProtected) {
-                    // Room exists and is password protected
                     const password = prompt(
                         `Room "${data.roomId}" exists and is password protected.\nEnter password:`,
                     );
                     this.joinRoom(data.roomId, password, false);
                 } else {
-                    // Room exists and is public
                     this.joinRoom(data.roomId, null, false);
                 }
             } else {
-                // Room doesn't exist - ask if they want to create it
                 const createRoom = confirm(
                     `Room "${data.roomId}" doesn't exist.\nWould you like to create it?`,
                 );
@@ -150,7 +158,6 @@ class Collaborative {
     }
 
     async getUserInfo() {
-        // Check if user info is stored in localStorage
         let userName = localStorage.getItem("collaborativeUserName");
         let userColor = localStorage.getItem("collaborativeUserColor");
 
@@ -171,7 +178,6 @@ class Collaborative {
             color: userColor,
         };
 
-        // Prompt for room
         await this.promptForRoom();
     }
 
@@ -181,12 +187,10 @@ class Collaborative {
             "general";
 
         if (roomId === "general") {
-            // General room is always accessible without password
-            this.joinRoom(roomId, null, true); // Always "create" general room to ensure it exists
+            this.joinRoom(roomId, null, true);
             return;
         }
 
-        // Check if room exists first
         this.checkRoomExists(roomId);
     }
 
@@ -211,14 +215,12 @@ class Collaborative {
             const checkEditor = () => {
                 console.log("Looking for Monaco editor...");
 
-                // Look for Monaco editor in multiple ways
                 const editorElement = document.getElementById("monaco-editor");
                 console.log("Editor element found:", !!editorElement);
 
                 if (window.monaco) {
                     console.log("Monaco global available");
 
-                    // Try to get editor from the element
                     if (editorElement && editorElement._monacoEditor) {
                         console.log("Found editor on element._monacoEditor");
                         this.editor = editorElement._monacoEditor;
@@ -226,7 +228,6 @@ class Collaborative {
                         return;
                     }
 
-                    // Try to get all editors from Monaco
                     const editors = window.monaco.editor.getEditors();
                     if (editors.length > 0) {
                         console.log(
@@ -238,7 +239,7 @@ class Collaborative {
                         return;
                     }
                 } else {
-                    console.log(" Monaco global not available yet");
+                    console.log("Monaco global not available yet");
                 }
 
                 console.log("Editor not ready yet, retrying...");
@@ -250,29 +251,37 @@ class Collaborative {
 
     setupCollaboration() {
         if (!this.editor) {
-            console.error("            const socket = io('https://underbranch.org');Monaco editor not found");
+            console.error("Monaco editor not found");
             return;
         }
 
-        // Listen for local changes
+        // broadcasts changes instead of full content now
         this.editor.onDidChangeModelContent((e) => {
-            if (!this.isUpdatingFromRemote) {
-                const content = this.editor.getValue();
-                console.log(
-                    "Local change detected, broadcasting...",
-                    content.length,
-                    "characters",
-                );
+            if (!this.isUpdatingFromRemote && e.changes.length > 0) {
+                console.log("Local change detected, broadcasting deltas...");
+
+                // Convert Monaco changes to a serializable format
+                const changes = e.changes.map((change) => ({
+                    range: {
+                        startLineNumber: change.range.startLineNumber,
+                        startColumn: change.range.startColumn,
+                        endLineNumber: change.range.endLineNumber,
+                        endColumn: change.range.endColumn,
+                    },
+                    rangeLength: change.rangeLength,
+                    text: change.text,
+                }));
+
                 this.socket.emit("document-change", {
-                    content: content,
-                    changes: e.changes,
+                    changes: changes,
+                    timestamp: Date.now(),
                 });
-            } else {
+            } else if (this.isUpdatingFromRemote) {
                 console.log("Skipping broadcast - change from remote");
             }
         });
 
-        // Listen for cursor position changes
+        // listen for cursor position changes
         this.editor.onDidChangeCursorPosition((e) => {
             this.socket.emit("cursor-update", {
                 lineNumber: e.position.lineNumber,
@@ -283,33 +292,55 @@ class Collaborative {
         console.log("Editor event listeners setup complete");
     }
 
-    updateDocumentContent(content) {
-        if (this.editor && this.editor.getValue() !== content) {
-            console.log(
-                "Updating editor content from remote...",
-                content.length,
-                "characters",
+    // apply the delta changes instead of replacing the entire document
+    handleRemoteUpdate(data) {
+        if (!this.editor || !data.changes || data.changes.length === 0) {
+            return;
+        }
+
+        console.log("Applying remote changes:", data.changes.length, "edits");
+
+        this.isUpdatingFromRemote = true;
+
+        try {
+            const model = this.editor.getModel();
+
+            // save cursor position
+            const currentPosition = this.editor.getPosition();
+            const currentSelection = this.editor.getSelection();
+
+            // apply changes as edit operations
+            const edits = data.changes.map((change) => ({
+                range: new monaco.Range(
+                    change.range.startLineNumber,
+                    change.range.startColumn,
+                    change.range.endLineNumber,
+                    change.range.endColumn,
+                ),
+                text: change.text,
+                forceMoveMarkers: true,
+            }));
+
+            // apply all edits in a single operation
+            model.pushEditOperations(
+                [currentSelection],
+                edits,
+                // if the user has something selected, try to keep it selected
+                () => [currentSelection],
             );
-            this.isUpdatingFromRemote = true;
-            const position = this.editor.getPosition();
-            this.editor.setValue(content);
-            if (position) {
-                this.editor.setPosition(position);
-            }
+
+            console.log("Remote changes applied successfully");
+        } catch (error) {
+            console.error("Error applying remote changes:", error);
+            // if we can't do delta changes, request full sync
+            this.socket.emit("request-full-sync", { roomId: this.currentRoom });
+        } finally {
             this.isUpdatingFromRemote = false;
-            console.log("Editor content updated successfully");
-        } else {
-            console.log("Content already up to date, skipping update");
         }
     }
 
-    handleRemoteUpdate(data) {
-        console.log("Received remote update from", data.userId);
-        this.updateDocumentContent(data.content);
-    }
-
     handleCursorUpdate(data) {
-        if (!this.editor) return;
+        if (!this.editor || !data.lineNumber || !data.column) return;
 
         // Remove old decorations for this user
         const oldDecorations = this.decorations.filter(
@@ -325,21 +356,23 @@ class Collaborative {
         // Add new cursor decoration
         const decoration = {
             range: new monaco.Range(
-                data.cursor.lineNumber,
-                data.cursor.column,
-                data.cursor.lineNumber,
-                data.cursor.column + 1,
+                data.lineNumber,
+                data.column,
+                data.lineNumber,
+                data.column,
             ),
             options: {
                 className: "collaborative-cursor",
                 stickiness:
                     monaco.editor.TrackedRangeStickiness
                         .NeverGrowsWhenTypingAtEdges,
-                hoverMessage: { value: `${data.user.name}'s cursor` },
+                beforeContentClassName: "collaborative-cursor-marker",
+                glyphMarginClassName: "collaborative-cursor-glyph",
+                afterContentClassName: "collaborative-cursor-label",
                 after: {
-                    content: `${data.user.name}`,
+                    content: ` ${data.user.name} `,
                     inlineClassName: "collaborative-cursor-label",
-                    color: data.user.color,
+                    inlineClassNameAffectsLetterSpacing: true,
                 },
             },
         };
@@ -353,22 +386,20 @@ class Collaborative {
         this.decorations.push({
             userId: data.userId,
             id: decorationIds[0],
+            color: data.user.color,
         });
     }
 
     updateUsersList() {
-        // Create or update users list UI
         this.createUsersListUI();
     }
 
     createUsersListUI() {
-        // Remove existing users list
         const existingList = document.getElementById("collaborative-users");
         if (existingList) {
             existingList.remove();
         }
 
-        // Create new users list
         const usersList = document.createElement("div");
         usersList.id = "collaborative-users";
         usersList.style.cssText = `
@@ -384,7 +415,6 @@ class Collaborative {
             max-width: 220px;
         `;
 
-        // Room info
         const roomInfo = document.createElement("div");
         roomInfo.style.cssText = `
             background: #f8f9fa;
@@ -420,7 +450,6 @@ class Collaborative {
         roomInfo.appendChild(switchButton);
         usersList.appendChild(roomInfo);
 
-        // Users title
         const title = document.createElement("div");
         title.textContent = `Online Users (${this.users.length})`;
         title.style.cssText = `
@@ -431,7 +460,6 @@ class Collaborative {
         `;
         usersList.appendChild(title);
 
-        // Users list
         this.users.forEach((user) => {
             const userElement = document.createElement("div");
             userElement.style.cssText = `
@@ -479,7 +507,6 @@ class Collaborative {
     }
 
     showMessage(message, type = "info") {
-        // Create message element
         const messageDiv = document.createElement("div");
         messageDiv.textContent = message;
         messageDiv.style.cssText = `
@@ -498,7 +525,6 @@ class Collaborative {
 
         document.body.appendChild(messageDiv);
 
-        // Remove after 4 seconds
         setTimeout(() => {
             if (messageDiv.parentNode) {
                 messageDiv.parentNode.removeChild(messageDiv);
@@ -511,19 +537,26 @@ class Collaborative {
 const style = document.createElement("style");
 style.textContent = `
     .collaborative-cursor {
-        border-left: 2px solid !important;
-        background-color: rgba(255, 107, 107, 0.2) !important;
+        border-left: 2px solid rgba(255, 107, 107, 0.8) !important;
+    }
+
+    .collaborative-cursor-marker::before {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 1.2em;
+        background-color: rgba(255, 107, 107, 0.8);
     }
 
     .collaborative-cursor-label {
-        background-color: #FF6B6B;
+        background-color: rgba(255, 107, 107, 0.9);
         color: white;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-size: 11px;
-        position: relative;
-        top: -20px;
+        padding: 1px 4px;
+        border-radius: 2px;
+        font-size: 10px;
+        font-weight: bold;
         white-space: nowrap;
+        margin-left: 2px;
     }
 `;
 document.head.appendChild(style);
@@ -537,5 +570,4 @@ if (document.readyState === "loading") {
     window.collaborative = new Collaborative();
 }
 
-// Make Collaborative available globally
 window.Collaborative = Collaborative;
