@@ -1,7 +1,34 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\begin{document}
-Hello, world!
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\title{My LaTeX Document}
+\author{Author Name}
+\date{\today}
 
-% Try editing and click "Compile to PDF"
-\end{document} 
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This is a sample LaTeX document. You can edit this text in the editor.
+
+\section{Mathematical Equations}
+Here's a mathematical equation:
+\begin{equation}
+E = mc^2
+\end{equation}
+
+And an inline equation: $\alpha + \beta = \gamma$
+
+$P=NP$
+\subsection{More Examples}
+\begin{itemize}
+\item First item
+\item Second item
+\item Third item
+\end{itemize}
+
+Let $\epsilon > 0$. There exists $q\in \mathbb{Q}$ such that $0< q < \epsilon$. Then $q=\frac{u}{i}$ for some $u,i\in\mathbb{N}$. Then $0 < \frac{u}{i} < \epsilon$, so $i \ \epsilon> u$.
+
+\end{document}
