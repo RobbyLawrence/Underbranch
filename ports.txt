@@ -6,9 +6,6 @@ Each entry should list the port and use.
 80, 443 - nginx
 3306 - mysql
 3001 - node server for sign-in
-<<<<<<< HEAD
 3002 - compile/server.js
-=======
 3000 - editor testing server
->>>>>>> 2804e9c2d33d35a9bb45320759b0e598856867ed
 3004 - Collaboration
