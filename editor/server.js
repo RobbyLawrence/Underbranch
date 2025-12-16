@@ -7,8 +7,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin: [
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:8080",
+            "https://underbranch.org",
+            "http://underbranch.org",
+        ],
         methods: ["GET", "POST"],
+        credentials: true,
     },
 });
 const PORT = process.env.PORT || 3000;

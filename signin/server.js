@@ -10,6 +10,7 @@ const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -84,6 +85,39 @@ app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use("/signin", express.static(path.join(__dirname)));
+
+// Rate limiting configurations
+const strictAuthLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 requests per window
+    message: {
+        error: "Too many attempts. Please try again in 15 minutes.",
+    },
+    standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
+    legacyHeaders: false, // Disable `X-RateLimit-*` headers
+    // Skip rate limiting for successful requests (optional - comment out to limit all requests)
+    skipSuccessfulRequests: false,
+});
+
+const moderateAuthLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // 10 requests per window
+    message: {
+        error: "Too many requests. Please try again in 15 minutes.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 requests per window
+    message: {
+        error: "Too many requests. Please slow down.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // Database initialization
 async function initializeDatabase() {
@@ -285,7 +319,7 @@ app.get("/signin/api/health", (req, res) => {
 });
 
 // Google authentication endpoint
-app.post("/signin/api/auth/google", async (req, res) => {
+app.post("/signin/api/auth/google", moderateAuthLimiter, async (req, res) => {
     try {
         const { credential } = req.body;
         if (!credential)
@@ -309,7 +343,7 @@ app.post("/signin/api/auth/google", async (req, res) => {
 });
 
 // Sign up (local)
-app.post("/signin/api/auth/signup", async (req, res) => {
+app.post("/signin/api/auth/signup", strictAuthLimiter, async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!email || !password)
@@ -338,7 +372,7 @@ app.post("/signin/api/auth/signup", async (req, res) => {
 });
 
 // Login (local)
-app.post("/signin/api/auth/login", async (req, res) => {
+app.post("/signin/api/auth/login", strictAuthLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password)
@@ -391,7 +425,7 @@ app.post("/signin/api/auth/logout", (req, res) => {
 });
 
 // Auth status - used by frontend on page load
-app.get("/signin/api/auth/status", async (req, res) => {
+app.get("/signin/api/auth/status", generalLimiter, async (req, res) => {
     try {
         if (!req.session?.userId) return res.json({ authenticated: false });
         const user = await getUserById(req.session.userId);
@@ -400,23 +434,6 @@ app.get("/signin/api/auth/status", async (req, res) => {
     } catch (err) {
         console.error("Status error:", err);
         res.status(500).json({ authenticated: false });
-    }
-});
-
-// Get all users (for testing purposes)
-//
-// I need to remove this soon
-app.get("/signin/api/users", async (req, res) => {
-    try {
-        const conn = await pool.getConnection();
-        const [users] = await conn.execute(
-            "SELECT id, google_id, email, name, first_login, last_login, login_count FROM users ORDER BY created_at DESC",
-        );
-        conn.release();
-        res.json({ users });
-    } catch (err) {
-        console.error("Get users error:", err);
-        res.status(500).json({ error: "Failed to fetch users" });
     }
 });
 
@@ -441,7 +458,7 @@ app.get("/signin/api/users/:id", async (req, res) => {
     }
 });
 
-app.post("/signin/api/auth/forgot", async (req, res) => {
+app.post("/signin/api/auth/forgot", strictAuthLimiter, async (req, res) => {
     const { email } = req.body;
 
     try {
@@ -506,7 +523,7 @@ app.post("/signin/api/auth/forgot", async (req, res) => {
 });
 
 // Reset password
-app.post("/signin/api/auth/reset", async (req, res) => {
+app.post("/signin/api/auth/reset", strictAuthLimiter, async (req, res) => {
     const { token, password } = req.body;
     try {
         const [rows] = await pool.query(
@@ -570,7 +587,6 @@ async function startServer() {
             console.log(
                 `API Health: http://localhost:${PORT}/signin/api/health`,
             );
-            console.log(`API Users: http://localhost:${PORT}/signin/api/users`);
         });
     } catch (err) {
         console.error("Failed to start server:", err);
