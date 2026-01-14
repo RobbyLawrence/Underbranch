@@ -2,9 +2,32 @@ const express = require("express");
 const path = require("path");
 const http = require("http");
 const { Server } = require("socket.io");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
+
+// Session configuration (must match signin server)
+const SESSION_SECRET = process.env.SESSION_SECRET || "default";
+
+app.use(cookieParser());
+app.use(
+    session({
+        name: "underbranch.sid",
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        },
+    }),
+);
+
 const io = new Server(server, {
     cors: {
         origin: [
@@ -22,6 +45,34 @@ const PORT = process.env.PORT || 3000;
 
 // this is where we store the rooms
 const rooms = {};
+
+// Socket.io authentication middleware
+io.use((socket, next) => {
+    const sessionMiddleware = session({
+        name: "underbranch.sid",
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        },
+    });
+
+    // Wrap the session middleware for socket.io
+    sessionMiddleware(socket.request, {}, () => {
+        if (socket.request.session && socket.request.session.userId) {
+            // User is authenticated
+            socket.userId = socket.request.session.userId;
+            next();
+        } else {
+            // User is not authenticated
+            next(new Error("Authentication required. Please sign in first."));
+        }
+    });
+});
 
 // request logger
 app.use((req, res, next) => {
@@ -87,6 +138,10 @@ io.on("connection", (socket) => {
     let currentRoom = null;
     let currentUser = null;
 
+    console.log(
+        `User ${socket.userId} connected to editor (socket: ${socket.id})`,
+    );
+
     // check if a room exists
     socket.on("check-room", ({ roomId }) => {
         const exists = !!rooms[roomId];
@@ -134,12 +189,16 @@ io.on("connection", (socket) => {
         }
         // Add user to room
         currentRoom = roomId;
-        currentUser = { ...userData, userId: socket.id };
+        currentUser = {
+            ...userData,
+            socketId: socket.id,
+            userId: socket.userId, // Authenticated user ID from session
+        };
         socket.join(roomId);
-        // Remove user from any previous room
+        // Remove user from any previous room (by socketId)
         Object.keys(rooms).forEach((rid) => {
             rooms[rid].users = rooms[rid].users.filter(
-                (u) => u.userId !== socket.id,
+                (u) => u.socketId !== socket.id,
             );
         });
         rooms[roomId].users.push(currentUser);
@@ -221,7 +280,7 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         if (currentRoom && rooms[currentRoom]) {
             rooms[currentRoom].users = rooms[currentRoom].users.filter(
-                (u) => u.userId !== socket.id,
+                (u) => u.socketId !== socket.id,
             );
             console.log(
                 `${currentUser?.name || socket.id} left room: ${currentRoom} (${rooms[currentRoom].users.length} users remaining)`,

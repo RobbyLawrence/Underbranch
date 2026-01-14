@@ -11,9 +11,38 @@ const session = require("express-session");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const { body, validationResult } = require("express-validator");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Security headers with Helmet
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: [
+                    "'self'",
+                    "https://accounts.google.com",
+                    "https://apis.google.com",
+                    "'unsafe-inline'", // Needed for inline scripts, consider removing in production
+                ],
+                styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+                fontSrc: ["'self'", "https://fonts.gstatic.com"],
+                imgSrc: ["'self'", "data:", "https:", "*.googleusercontent.com"],
+                connectSrc: ["'self'", "https://accounts.google.com"],
+                frameSrc: ["https://accounts.google.com"],
+            },
+        },
+        hsts: {
+            maxAge: 31536000, // 1 year
+            includeSubDomains: true,
+            preload: true,
+        },
+    }),
+);
 
 // Configuration
 const GOOGLE_CLIENT_ID =
@@ -118,6 +147,60 @@ const generalLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
 });
+
+// Input validation middleware
+const validateSignup = [
+    body("email")
+        .trim()
+        .isEmail()
+        .normalizeEmail()
+        .withMessage("Valid email is required"),
+    body("password")
+        .isLength({ min: 8, max: 128 })
+        .withMessage("Password must be 8-128 characters"),
+    body("name")
+        .optional()
+        .trim()
+        .isLength({ max: 255 })
+        .withMessage("Name must be less than 255 characters"),
+];
+
+const validateLogin = [
+    body("email").trim().isEmail().normalizeEmail().withMessage("Valid email is required"),
+    body("password")
+        .isLength({ min: 1, max: 128 })
+        .withMessage("Password is required"),
+];
+
+const validateForgotPassword = [
+    body("email").trim().isEmail().normalizeEmail().withMessage("Valid email is required"),
+];
+
+const validateResetPassword = [
+    body("token").trim().isLength({ min: 1 }).withMessage("Token is required"),
+    body("password")
+        .isLength({ min: 8, max: 128 })
+        .withMessage("Password must be 8-128 characters"),
+];
+
+const validateGoogleAuth = [
+    body("credential")
+        .trim()
+        .isLength({ min: 1 })
+        .withMessage("Google credential is required"),
+];
+
+// Validation result handler
+function handleValidationErrors(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            error: "Validation failed",
+            details: errors.array().map((err) => err.msg),
+        });
+    }
+    next();
+}
 
 // Database initialization
 async function initializeDatabase() {
@@ -319,7 +402,12 @@ app.get("/signin/api/health", (req, res) => {
 });
 
 // Google authentication endpoint
-app.post("/signin/api/auth/google", moderateAuthLimiter, async (req, res) => {
+app.post(
+    "/signin/api/auth/google",
+    moderateAuthLimiter,
+    validateGoogleAuth,
+    handleValidationErrors,
+    async (req, res) => {
     try {
         const { credential } = req.body;
         if (!credential)
@@ -340,10 +428,16 @@ app.post("/signin/api/auth/google", moderateAuthLimiter, async (req, res) => {
         console.error("Authentication error:", err);
         res.status(401).json({ error: err.message || "Authentication failed" });
     }
-});
+    },
+);
 
 // Sign up (local)
-app.post("/signin/api/auth/signup", strictAuthLimiter, async (req, res) => {
+app.post(
+    "/signin/api/auth/signup",
+    strictAuthLimiter,
+    validateSignup,
+    handleValidationErrors,
+    async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!email || !password)
@@ -369,10 +463,16 @@ app.post("/signin/api/auth/signup", strictAuthLimiter, async (req, res) => {
         console.error("Signup error:", err);
         res.status(500).json({ error: "Signup failed" });
     }
-});
+    },
+);
 
 // Login (local)
-app.post("/signin/api/auth/login", strictAuthLimiter, async (req, res) => {
+app.post(
+    "/signin/api/auth/login",
+    strictAuthLimiter,
+    validateLogin,
+    handleValidationErrors,
+    async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password)
@@ -404,7 +504,8 @@ app.post("/signin/api/auth/login", strictAuthLimiter, async (req, res) => {
         console.error("Login error:", err);
         res.status(500).json({ error: "Login failed" });
     }
-});
+    },
+);
 
 // Logout
 app.post("/signin/api/auth/logout", (req, res) => {
@@ -458,7 +559,12 @@ app.get("/signin/api/users/:id", async (req, res) => {
     }
 });
 
-app.post("/signin/api/auth/forgot", strictAuthLimiter, async (req, res) => {
+app.post(
+    "/signin/api/auth/forgot",
+    strictAuthLimiter,
+    validateForgotPassword,
+    handleValidationErrors,
+    async (req, res) => {
     const { email } = req.body;
 
     try {
@@ -520,10 +626,16 @@ app.post("/signin/api/auth/forgot", strictAuthLimiter, async (req, res) => {
             .status(500)
             .json({ error: "Failed to process reset request" });
     }
-});
+    },
+);
 
 // Reset password
-app.post("/signin/api/auth/reset", strictAuthLimiter, async (req, res) => {
+app.post(
+    "/signin/api/auth/reset",
+    strictAuthLimiter,
+    validateResetPassword,
+    handleValidationErrors,
+    async (req, res) => {
     const { token, password } = req.body;
     try {
         const [rows] = await pool.query(
@@ -551,7 +663,8 @@ app.post("/signin/api/auth/reset", strictAuthLimiter, async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: "Failed to reset password" });
     }
-});
+    },
+);
 
 // 404 handler
 app.use((req, res) => {
