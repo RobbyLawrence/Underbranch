@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>About Us - Underbranch</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --primary-color: rgb(181, 94, 43);
+                --primary-dark: rgb(150, 78, 36);
+                --primary-light: rgb(200, 120, 70);
+                --primary-bg: rgba(181, 94, 43, 0.1);
+                --text-dark: #333;
+                --text-light: #666;
+                --border-color: #e0e0e0;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    "Helvetica Neue", Arial, sans-serif;
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                padding: 20px;
+            }
+
+            .container {
+                background: white;
+                padding: 2.5rem;
+                border-radius: 20px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+                width: 100%;
+                max-width: 1200px;
+            }
+
+            .team-grid {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1.5rem;
+                margin-top: 2rem;
+            }
+
+            .team-member {
+                flex: 0 0 calc(20% - 1.5rem);
+                min-width: 150px;
+                text-align: center;
+            }
+
+            .team-member img {
+                width: 100%;
+                max-width: 150px;
+                height: 150px;
+                object-fit: cover;
+                border-radius: 12px;
+                border: 3px solid var(--border-color);
+            }
+
+            .team-member .name {
+                margin-top: 0.75rem;
+                font-weight: 600;
+                color: var(--text-dark);
+                font-size: 1rem;
+            }
+
+            .team-member .info {
+                margin-top: 0.5rem;
+                font-size: 0.85rem;
+                color: var(--text-light);
+            }
+
+            .team-member .info a {
+                color: var(--primary-color);
+                text-decoration: none;
+            }
+
+            .team-member .info a:hover {
+                text-decoration: underline;
+            }
+
+            @media (max-width: 900px) {
+                .team-member {
+                    flex: 0 0 calc(33.33% - 1.5rem);
+                }
+            }
+
+            @media (max-width: 600px) {
+                .team-member {
+                    flex: 0 0 calc(50% - 1.5rem);
+                }
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            h1 {
+                color: var(--primary-color);
+                margin-bottom: 0.5rem;
+                font-size: 2.5rem;
+                font-weight: 700;
+            }
+
+            .subtitle {
+                color: var(--text-light);
+                font-size: 1rem;
+            }
+
+            .content {
+                color: var(--text-dark);
+                line-height: 1.8;
+            }
+
+            .content h2 {
+                color: var(--primary-color);
+                margin-top: 2rem;
+                margin-bottom: 1rem;
+                font-size: 1.5rem;
+            }
+
+            .content p {
+                margin-bottom: 1rem;
+                color: var(--text-light);
+            }
+
+            .content a {
+                color: var(--primary-color);
+                text-decoration: none;
+            }
+
+            .content a:hover {
+                text-decoration: underline;
+            }
+
+            .back-link {
+                display: inline-block;
+                margin-top: 2rem;
+                padding: 12px 24px;
+                background: var(--primary-color);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                text-decoration: none;
+                transition:
+                    background-color 0.3s,
+                    transform 0.2s;
+            }
+
+            .back-link:hover {
+                background: var(--primary-dark);
+                transform: translateY(-1px);
+                text-decoration: none;
+            }
+
+            @media (max-width: 480px) {
+                .container {
+                    padding: 2rem 1.5rem;
+                }
+
+                h1 {
+                    font-size: 2rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>About Us</h1>
+                <p class="subtitle">Learn more about Underbranch</p>
+            </div>
+
+            <div class="content">
+                <!-- Add your content here -->
+                <p>
+                    Our mission is to make LaTeX documents accessible to
+                    everyone. We believe that technology should be a tool for
+                    growth and not a barrier to success.
+                </p>
+                <p>
+                    Underbranch online web compiler: This is a online web based
+                    compiler for the LaTeX language. This is an open-source
+                    version of Overleaf created by our team of 5 students at the
+                    University Of Tennessee-Knoxville Electrical Engineering and
+                    Computer Science department for a semester long Junior year
+                    project. This allows students to utilize the benefits and
+                    most features of the paid subscription from Overleaf for
+                    free on Underbranch. Can be found at Underbranch.org.
+                </p>
+                <h3>Meet the Team!</h3>
+                <div class="team-grid">
+                    <div class="team-member">
+                        <img src="mf.JPG" alt="Matthew Ferrari" />
+                        <div class="name">Matthew Ferrari</div>
+                        <div class="info">
+                            <a href="https://mmferrari.com" target="_blank" rel="noopener noreferrer">Personal Website</a>
+                            <a href="https://github.com/ferrari334" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img
+                            src="https://avatars.githubusercontent.com/u/46226451?v=4"
+                            alt="Robby Lawrence"
+                        />
+                        <div class="name">Robby Lawrence</div>
+                        <div class="info">
+                            <a href="https://github.com/RobbyLawrence" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img
+                            src="https://media.licdn.com/dms/image/v2/D4E03AQHThcI1B_HONg/profile-displayphoto-shrink_400_400/B4EZZf0bETHkAg-/0/1745364300438?e=1770854400&v=beta&t=YEJ3irjYr2iZ0O9tob31XnuWJg7p_pIUsIfWTK2Kf2I"
+                            alt="Paul Davis"
+                        />
+                        <div class="name">Paul Davis</div>
+                        <div class="info">
+                            <a href="https://github.com/pau1davis" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img
+                            src="https://media.licdn.com/dms/image/v2/D4E03AQFuUZsowJYfjA/profile-displayphoto-scale_400_400/B4EZhUPV17HEAg-/0/1753759965058?e=1770854400&v=beta&t=ND75rBHuMKTWeOM4ljtIQeFX1YFzc19cOP1j8t_vaeU"
+                            alt="Brett Dowling"
+                        />
+                        <div class="name">Brett Dowling</div>
+                        <div class="info">
+                            <a href="https://github.com/Brett-Dowling" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        </div>
+                    </div>
+                    <div class="team-member">
+                        <img
+                            src="https://example.com/aaron.jpg"
+                            alt="Aaron Brown"
+                        />
+                        <div class="name">Aaron Brown</div>
+                        <div class="info">
+                            <a href="https://github.com/A-aronCBrown" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/signin/index.html" class="back-link">Back to Home</a>
+        </div>
+    </body>
+</html>
