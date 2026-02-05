@@ -17,13 +17,20 @@ const mimeTypes = {
 };
 
 const server = http.createServer((req, res) => {
-    let filePath = req.url === '/' ? '/about.html' : req.url;
-    filePath = path.join(__dirname, filePath);
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    let filePath = url.pathname === '/' ? '/about.html' : url.pathname;
+    const resolvedPath = path.resolve(__dirname, '.' + filePath);
 
-    const ext = path.extname(filePath).toLowerCase();
+    if (!resolvedPath.startsWith(__dirname + path.sep) && resolvedPath !== __dirname) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('403 Forbidden');
+        return;
+    }
+
+    const ext = path.extname(resolvedPath).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
 
-    fs.readFile(filePath, (err, data) => {
+    fs.readFile(resolvedPath, (err, data) => {
         if (err) {
             res.writeHead(404, { 'Content-Type': 'text/plain' });
             res.end('404 Not Found');
